@@ -21,7 +21,7 @@ import java.util.List;
 
 import opennlp.tools.namefind.NameFinderME;
 import opennlp.tools.util.Span;
-import eus.ixa.ixa.pipe.ml.nerc.lexer.NumericNameLexer;
+import eus.ixa.ixa.pipe.ml.lexer.NumericNameLexer;
 import eus.ixa.ixa.pipe.ml.sequence.Sequence;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;

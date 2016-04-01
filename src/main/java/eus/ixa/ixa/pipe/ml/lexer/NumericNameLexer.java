@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.nerc.lexer;
+package eus.ixa.ixa.pipe.ml.lexer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class NumericNameLexer {
    * Construct a new NumericNameLexer.
    * @param breader Reader
    * @param nameFactory The NameFactory that will be invoked to convert
-   *        each string extracted by the @link NumericLexer into a @Name object
+   *        each string extracted by the @link NumericLexer into a @Sequence object
    */
   public NumericNameLexer(final BufferedReader breader, final SequenceFactory nameFactory) {
     jlexer = new NumericLexer(breader, nameFactory);

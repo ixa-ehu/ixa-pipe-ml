@@ -27,8 +27,6 @@ import opennlp.tools.util.SequenceCodec;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
-import eus.ixa.ixa.pipe.ml.nerc.train.AbstractTrainer;
-import eus.ixa.ixa.pipe.ml.nerc.train.DefaultTrainer;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceEvaluationErrorListener;
@@ -38,6 +36,8 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceSampleTypeFilter;
+import eus.ixa.ixa.pipe.ml.train.AbstractTrainer;
+import eus.ixa.ixa.pipe.ml.train.DefaultTrainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 /**

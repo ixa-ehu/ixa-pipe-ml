@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.nerc.train;
+package eus.ixa.ixa.pipe.ml.train;
 
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import opennlp.tools.util.TrainingParameters;

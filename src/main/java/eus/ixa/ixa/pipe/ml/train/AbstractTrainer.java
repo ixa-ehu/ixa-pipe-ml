@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.nerc.train;
+package eus.ixa.ixa.pipe.ml.train;
 
 import java.io.IOException;
 

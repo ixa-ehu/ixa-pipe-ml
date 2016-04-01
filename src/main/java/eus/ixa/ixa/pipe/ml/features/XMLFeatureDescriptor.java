@@ -1,6 +1,5 @@
-package eus.ixa.ixa.pipe.ml.features;
 /*
- * Copyright 2015 Rodrigo Agerri
+ * Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,7 +13,7 @@ package eus.ixa.ixa.pipe.ml.features;
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-
+package eus.ixa.ixa.pipe.ml.features;
 
 import java.io.File;
 import java.io.IOException;

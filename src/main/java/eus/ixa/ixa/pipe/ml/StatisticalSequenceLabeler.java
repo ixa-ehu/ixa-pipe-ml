@@ -1,5 +1,5 @@
 /*
- *Copyright 2014 Rodrigo Agerri
+ *Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -19,26 +19,23 @@ package eus.ixa.ixa.pipe.ml;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import opennlp.tools.util.Span;
 import eus.ixa.ixa.pipe.ml.sequence.Sequence;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
-
-import opennlp.tools.namefind.NameFinderME;
-import opennlp.tools.namefind.TokenNameFinder;
-import opennlp.tools.namefind.TokenNameFinderModel;
-import opennlp.tools.util.Span;
 
 /**
  * Statistical Sequence Labeling based on Apache OpenNLP Machine Learning API.
  *
  * @author ragerri
- * @version 2015-09-17
+ * @version 2016-04-01
  *
  */
 
@@ -48,43 +45,42 @@ public class StatisticalSequenceLabeler {
    * The models to use for every language. The keys of the hash are the
    * language codes, the values the models.
    */
-  private static ConcurrentHashMap<String, TokenNameFinderModel> nercModels =
-      new ConcurrentHashMap<String, TokenNameFinderModel>();
+  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels =
+      new ConcurrentHashMap<String, SequenceLabelerModel>();
   /**
-   * The name finder.
+   * The sequence labeler.
    */
-  private NameFinderME nameFinder;
+  private SequenceLabelerME sequenceLabeler;
   /**
-   * The name factory.
+   * The Sequence factory.
    */
-  private SequenceFactory nameFactory;
+  private SequenceFactory sequenceFactory;
 
   /**
-   * Construct a probabilistic name finder specifying lang, model and beamsize.
+   * Construct a probabilistic sequence labeler.
    * @param props the properties to be loaded
    */
   public StatisticalSequenceLabeler(final Properties props) {
     String lang = props.getProperty("language");
     String model = props.getProperty("model");
-    TokenNameFinderModel nerModel = loadModel(lang, model);
-    nameFinder = new NameFinderME(nerModel);
+    SequenceLabelerModel seqModel = loadModel(lang, model);
+    sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
   /**
-   * Construct a StatisticalNameFinder specifying the language,
-   * a name factory, the model, the features and the beam size for
-   * decoding.
+   * Construct a StatisticalSequenceLabeler specifying the factory to
+   * be used.
    *
    * @param props the properties
-   * @param aNameFactory the name factory to construct Name objects
+   * @param aSeqFactory the name factory to construct Name objects
    */
-  public StatisticalSequenceLabeler(final Properties props, final SequenceFactory aNameFactory) {
+  public StatisticalSequenceLabeler(final Properties props, final SequenceFactory aSeqFactory) {
 
     String lang = props.getProperty("language");
     String model = props.getProperty("model");
-    this.nameFactory = aNameFactory;
-    TokenNameFinderModel nerModel = loadModel(lang, model);
-    nameFinder = new NameFinderME(nerModel);
+    this.sequenceFactory = aSeqFactory;
+    SequenceLabelerModel seqModel = loadModel(lang, model);
+    sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
   
@@ -92,57 +88,37 @@ public class StatisticalSequenceLabeler {
    * Method to produce a list of the {@link Sequence} objects classified by the
    * probabilistic model.
    *
-   * Takes an array of tokens, calls nercToSpans function for probabilistic NERC
-   * and returns a List of {@link Sequence} objects containing the nameString, the
-   * type and the {@link Span}
+   * Takes an array of tokens, calls seqToSpans function for probabilistic Sequence
+   * Labeling and returns a List of {@link Sequence} objects containing the string, the
+   * type and the {@link Span}.
    *
    * @param tokens
    *          an array of tokenized text
-   * @return a List of names
+   * @return a List of sequences
    */
-  public final List<Sequence> getNames(final String[] tokens) {
-    Span[] origSpans = nercToSpans(tokens);
-    Span[] neSpans = NameFinderME.dropOverlappingSpans(origSpans);
-    List<Sequence> names = getNamesFromSpans(neSpans, tokens);
-    return names;
-  }
-
-  /**
-   * This method receives as input an array of tokenized text and calls the
-   * NameFinderME.find(tokens) to recognize and classify Named Entities. It
-   * outputs the spans of the detected and classified Named Entities.
-   *
-   * From Apache OpenNLP documentation: "After every document clearAdaptiveData
-   * must be called to clear the adaptive data in the feature generators. Not
-   * calling clearAdaptiveData can lead to a sharp drop in the detection rate
-   * after a few documents."
-   *
-   * @param tokens
-   *          an array of tokenized text
-   * @return an list of {@link Span}s of Named Entities
-   */
-  public final Span[] nercToSpans(final String[] tokens) {
-    Span[] annotatedText = nameFinder.find(tokens);
-    List<Span> probSpans = new ArrayList<Span>(Arrays.asList(annotatedText));
-    return probSpans.toArray(new Span[probSpans.size()]);
+  public final List<Sequence> getSequences(final String[] tokens) {
+    Span[] origSpans = sequenceLabeler.find(tokens);
+    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    List<Sequence> sequences = getSequencesFromSpans(seqSpans, tokens);
+    return sequences;
   }
 
   /**
    * Creates a list of {@link Sequence} objects from spans and tokens.
    *
-   * @param neSpans the named entity spans of a sentence
+   * @param seqSpans the sequence spans of a sentence
    * @param tokens the tokens in the sentence
    * @return a list of {@link Sequence} objects
    */
-  public final List<Sequence> getNamesFromSpans(final Span[] neSpans, final String[] tokens) {
-    List<Sequence> names = new ArrayList<Sequence>();
-    for (Span neSpan : neSpans) {
-      String nameString = StringUtils.getStringFromSpan(neSpan, tokens);
-      String neType = neSpan.getType();
-      Sequence name = nameFactory.createSequence(nameString, neType, neSpan);
-      names.add(name);
+  public final List<Sequence> getSequencesFromSpans(final Span[] seqSpans, final String[] tokens) {
+    List<Sequence> sequences = new ArrayList<Sequence>();
+    for (Span seqSpan : seqSpans) {
+      String seqString = StringUtils.getStringFromSpan(seqSpan, tokens);
+      String seqType = seqSpan.getType();
+      Sequence sequence = sequenceFactory.createSequence(seqString, seqType, seqSpan);
+      sequences.add(sequence);
     }
-    return names;
+    return sequences;
   }
 
   /**
@@ -156,7 +132,7 @@ public class StatisticalSequenceLabeler {
    * after a few documents."
    */
   public final void clearAdaptiveData() {
-    nameFinder.clearAdaptiveData();
+    sequenceLabeler.clearAdaptiveData();
   }
 
   /**
@@ -165,14 +141,14 @@ public class StatisticalSequenceLabeler {
    *
    * @param lang the language
    * @param model the model to be loaded
-   * @return the model as a {@link TokenNameFinder} object
+   * @return the model as a {@link SequenceLabelerModel} object
    */
-  private final TokenNameFinderModel loadModel(final String lang, final String model) {
+  private final SequenceLabelerModel loadModel(final String lang, final String model) {
     long lStartTime = new Date().getTime();
     try {
-      synchronized (nercModels) {
-        if (!nercModels.containsKey(lang)) {
-          nercModels.put(lang, new TokenNameFinderModel(new FileInputStream(model)));
+      synchronized (seqModels) {
+        if (!seqModels.containsKey(lang)) {
+          seqModels.put(lang, new SequenceLabelerModel(new FileInputStream(model)));
         }
       }
     } catch (IOException e) {
@@ -180,8 +156,8 @@ public class StatisticalSequenceLabeler {
     }
     long lEndTime = new Date().getTime();
     long difference = lEndTime - lStartTime;
-    System.err.println("ixa-pipe-nerc model loaded in: " + difference
+    System.err.println("ixa-pipe-sequence model loaded in: " + difference
         + " miliseconds ... [DONE]");
-    return nercModels.get(lang);
+    return seqModels.get(lang);
   }
 }

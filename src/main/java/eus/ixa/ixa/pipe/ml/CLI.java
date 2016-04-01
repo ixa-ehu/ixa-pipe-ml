@@ -33,9 +33,9 @@ import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.Evaluate;
-import eus.ixa.ixa.pipe.ml.nerc.train.DefaultTrainer;
-import eus.ixa.ixa.pipe.ml.nerc.train.Trainer;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
+import eus.ixa.ixa.pipe.ml.train.DefaultTrainer;
+import eus.ixa.ixa.pipe.ml.train.Trainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.InputOutputUtils;
 

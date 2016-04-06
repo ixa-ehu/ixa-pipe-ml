@@ -69,7 +69,7 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
  * containing a token.
  * <li>Word2VecClusterFeatures: use the word2vec clustering class of a token as
  * a feature.
- * <li>MorphoFeatures: use pos tags, pos tag class and lemma as features.
+ * <li>POSTagFeatures: use pos tags, pos tag class as features.
  * <li>MFSFeatures: Most Frequent sense feature.
  * <li>SuperSenseFeatures: Ciaramita and Altun (2006) features for super sense tagging.
  * </ol>
@@ -164,21 +164,11 @@ public class DefaultTrainer extends AbstractTrainer {
         loadResource(serializerId, artifactSerializers, dictionaryPath, featureGenDescriptor, resources);
       }
     }
-    if (Flags.isPOSTagFeatures(params)) {
-      String morphoResourcesPath = Flags.getPOSTagFeatures(params);
+    if (Flags.isPOSTagModelFeatures(params)) {
+      String morphoResourcesPath = Flags.getPOSTagModelFeatures(params);
       String posSerializerId = "postagserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
       loadResource(posSerializerId, artifactSerializers, morphoResourcesPath, featureGenDescriptor, resources);
-    }
-    if (Flags.isMorphoFeatures(params)) {
-      String morphoResourcesPath = Flags.getMorphoFeatures(params);
-      String[] morphoResources = Flags.getMorphoResources(morphoResourcesPath);
-      String posSerializerId = "postagserializer";
-      String lemmaSerializerId = "lemmaserializer";
-      artifactSerializers.put(posSerializerId, new POSModelResource.POSModelResourceSerializer());
-      loadResource(posSerializerId, artifactSerializers, morphoResources[0], featureGenDescriptor, resources);
-      artifactSerializers.put(lemmaSerializerId, new LemmaResource.LemmaResourceSerializer());
-      loadResource(lemmaSerializerId, artifactSerializers, morphoResources[1], featureGenDescriptor, resources);
     }
     if (Flags.isSuperSenseFeatures(params)) {
       String mfsResourcesPath = Flags.getSuperSenseFeatures(params);

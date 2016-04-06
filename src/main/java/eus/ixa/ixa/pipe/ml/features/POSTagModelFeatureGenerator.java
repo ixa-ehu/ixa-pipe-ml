@@ -12,19 +12,22 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 /**
  * This feature generator can also be placed in a sliding window.
  * @author ragerri
  * @version 2015-03-12
  */
-public class POSTagFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
+public class POSTagModelFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
   
   private SequenceModelResource posModelResource;
   private String[] currentSentence;
   private Span[] currentTags;
+  private boolean isPos;
+  private boolean isPosClass;
   
-  public POSTagFeatureGenerator() {
+  public POSTagModelFeatureGenerator() {
   }
   
   public void createFeatures(List<String> features, String[] tokens, int index,
@@ -36,7 +39,13 @@ public class POSTagFeatureGenerator extends CustomFeatureGenerator implements Ar
       currentTags = posModelResource.posTag(tokens);
     }
     String posTag = currentTags[index].getType();
-    features.add("posTag=" + posTag);
+    if (isPos) {
+      features.add("posTag=" + posTag);
+    }
+    if (isPosClass) {
+      String posTagClass = posTag.substring(0, 1);
+      features.add("posTagClass=" + posTagClass);
+    }
   }
   
   @Override
@@ -58,7 +67,24 @@ public class POSTagFeatureGenerator extends CustomFeatureGenerator implements Ar
       throw new InvalidFormatException("Not a SequenceModelResource for key: " + properties.get("model"));
     }
     this.posModelResource = (SequenceModelResource) posResource;
+    processRangeOptions(properties);
   }
+  
+  /**
+   * Process the options of which kind of features are to be generated.
+   * @param properties the properties map
+   */
+  private void processRangeOptions(Map<String, String> properties) {
+    String featuresRange = properties.get("range");
+    String[] rangeArray = Flags.processPOSTagModelFeaturesRange(featuresRange);
+    if (rangeArray[0].equalsIgnoreCase("pos")) {
+      isPos = true;
+    }
+    if (rangeArray[1].equalsIgnoreCase("posclass")) {
+      isPosClass = true;
+    }
+  }
+  
   
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {

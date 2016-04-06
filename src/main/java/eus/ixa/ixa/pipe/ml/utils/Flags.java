@@ -28,7 +28,7 @@ public class Flags {
   public static final String DEFAULT_FEATURE_FLAG = "no";
   public static final String CHAR_NGRAM_RANGE = "2:5";
   public static final String DEFAULT_WINDOW = "2:2";
-  public static final String DEFAULT_MORPHO_RANGE = "pos,posclass,lemma";
+  public static final String DEFAULT_POSTAG_RANGE = "pos,posclass";
   public static final String DEFAULT_MFS_RANGE = "pos,posclass,lemma,mfs,no";
   public static final String DEFAULT_SUPERSENSE_RANGE = "mfs,monosemic";
 
@@ -356,33 +356,14 @@ public class Flags {
     return brownFlag;
   }
   
-  public static String getPOSTagFeatures(TrainingParameters params) {
+  public static String getPOSTagModelFeatures(TrainingParameters params) {
     String morphoFlag = null;
-    if (params.getSettings().get("POSTagFeatures") != null) {
-      morphoFlag = params.getSettings().get("POSTagFeatures");
+    if (params.getSettings().get("POSTagModelFeatures") != null) {
+      morphoFlag = params.getSettings().get("POSTagModelFeatures");
     } else {
       morphoFlag = Flags.DEFAULT_FEATURE_FLAG;
     }
     return morphoFlag;
-  }
-
-  public static String getMorphoFeatures(TrainingParameters params) {
-    String morphoFlag = null;
-    if (params.getSettings().get("MorphoFeatures") != null) {
-      morphoFlag = params.getSettings().get("MorphoFeatures");
-    } else {
-      morphoFlag = Flags.DEFAULT_FEATURE_FLAG;
-    }
-    return morphoFlag;
-  }
-  
-  public static String[] getMorphoResources(String morphoFlag) {
-    String[] morphoFlagArray = morphoFlag.split(",");
-    if (morphoFlagArray.length != 2) {
-      System.err.println("MorphoFeatures resources requires two fields but only got " + morphoFlagArray.length);
-      System.exit(1);
-    }
-    return morphoFlagArray;
   }
   
   /**
@@ -392,20 +373,20 @@ public class Flags {
    *          the training parameters
    * @return a list containing the options
    */
-  public static String getMorphoFeaturesRange(TrainingParameters params) {
+  public static String getPOSTagModelFeaturesRange(TrainingParameters params) {
     String lemmaRangeFlag = null;
-    if (params.getSettings().get("MorphoFeaturesRange") != null) {
-      lemmaRangeFlag = params.getSettings().get("MorphoFeaturesRange");
+    if (params.getSettings().get("POSTagModelFeaturesRange") != null) {
+      lemmaRangeFlag = params.getSettings().get("POSTagModelFeaturesRange");
     } else {
-      lemmaRangeFlag = Flags.DEFAULT_MORPHO_RANGE;
+      lemmaRangeFlag = Flags.DEFAULT_POSTAG_RANGE;
     }
     return lemmaRangeFlag;
   }
   
-  public static String[] processMorphoFeaturesRange(String mfsFlag) {
+  public static String[] processPOSTagModelFeaturesRange(String mfsFlag) {
     String[] mfsFlagArray = mfsFlag.split(",");
-    if (mfsFlagArray.length != 3) {
-      System.err.println("MorphoFeaturesRange requires three fields but only got " + mfsFlagArray.length);
+    if (mfsFlagArray.length != 2) {
+      System.err.println("POSTagFeaturesRange requires two fields but got " + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
@@ -507,69 +488,6 @@ public class Flags {
 
   }
   
-  public static void componentException() {
-    System.err
-        .println("Please provide a component name in the Component field in the parameters file!");
-    System.exit(1);
-  }
-
-  public static void devSetException() {
-    System.err
-        .println("UseDevSet options in the parameters file if CrossEval is activated!");
-    System.exit(1);
-  }
-
-  public static void modelException() {
-    System.err
-        .println("Please provide a model in the OutputModel field in the parameters file!");
-    System.exit(1);
-  }
-
-  public static void langException() {
-    System.err
-        .println("Please fill in the Language field in the parameters file!");
-    System.exit(1);
-  }
-
-  public static void datasetException() {
-    System.err
-        .println("Please specify your training/testing sets in the TrainSet and TestSet fields in the parameters file!");
-    System.exit(1);
-  }
-
-  public static void corpusFormatException() {
-    System.err
-        .println("Please fill in CorpusFormat field in the parameters file!");
-    System.exit(1);
-  }
-
-  public static void dictionaryException() {
-    System.err
-        .println("You need to set the --dictPath option to the dictionaries directory to use the dictTag option!");
-    System.exit(1);
-  }
-
-  public static void dictionaryFeaturesException() {
-    System.err
-        .println("You need to specify the DictionaryFeatures in the parameters file to use the DictionaryPath!");
-    System.exit(1);
-  }
-  
-  public static boolean isPOSTagFeatures(TrainingParameters params) {
-    String morphoFeatures = getPOSTagFeatures(params);
-    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
-  }
-  
-  /**
-   * Check if morphological features are active.
-   * @param params the parameters
-   * @return whether the morphological features are activated or not
-   */
-  public static boolean isMorphoFeatures(TrainingParameters params) {
-    String morphoFeatures = getMorphoFeatures(params);
-    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
-  }
-  
   /**
    * Check if supersense tagger features are active.
    * @param params the parameters
@@ -588,6 +506,11 @@ public class Flags {
   public static boolean isMFSFeatures(TrainingParameters params) {
     String mfsFeatures = getMFSFeatures(params);
     return !mfsFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isPOSTagModelFeatures(TrainingParameters params) {
+    String morphoFeatures = getPOSTagModelFeatures(params);
+    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
   public static boolean isWord2VecClusterFeatures(TrainingParameters params) {
@@ -675,6 +598,55 @@ public class Flags {
   public static boolean isTokenFeature(TrainingParameters params) {
     String tokenParam = getTokenFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  
+  public static void componentException() {
+    System.err
+        .println("Please provide a component name in the Component field in the parameters file!");
+    System.exit(1);
+  }
+
+  public static void devSetException() {
+    System.err
+        .println("UseDevSet options in the parameters file if CrossEval is activated!");
+    System.exit(1);
+  }
+
+  public static void modelException() {
+    System.err
+        .println("Please provide a model in the OutputModel field in the parameters file!");
+    System.exit(1);
+  }
+
+  public static void langException() {
+    System.err
+        .println("Please fill in the Language field in the parameters file!");
+    System.exit(1);
+  }
+
+  public static void datasetException() {
+    System.err
+        .println("Please specify your training/testing sets in the TrainSet and TestSet fields in the parameters file!");
+    System.exit(1);
+  }
+
+  public static void corpusFormatException() {
+    System.err
+        .println("Please fill in CorpusFormat field in the parameters file!");
+    System.exit(1);
+  }
+
+  public static void dictionaryException() {
+    System.err
+        .println("You need to set the --dictPath option to the dictionaries directory to use the dictTag option!");
+    System.exit(1);
+  }
+
+  public static void dictionaryFeaturesException() {
+    System.err
+        .println("You need to specify the DictionaryFeatures in the parameters file to use the DictionaryPath!");
+    System.exit(1);
   }
 
 }

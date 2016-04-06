@@ -1,4 +1,4 @@
-package es.ehu.si.ixa.pipe.nerc;
+package eus.ixa.ixa.pipe.ml.nerc;
 
 import static org.junit.Assert.assertEquals;
 
@@ -6,13 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 
-import opennlp.tools.util.Span;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import eus.ixa.ixa.pipe.ml.nerc.DictionariesNameFinder;
 import eus.ixa.ixa.pipe.ml.resources.Dictionaries;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 public class DictionariesNameFinderTest {
 

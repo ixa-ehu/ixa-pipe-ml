@@ -20,12 +20,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import opennlp.tools.namefind.NameFinderME;
-import opennlp.tools.util.Span;
 import eus.ixa.ixa.pipe.ml.StatisticalSequenceLabeler;
 import eus.ixa.ixa.pipe.ml.resources.Dictionaries;
 import eus.ixa.ixa.pipe.ml.sequence.Sequence;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 /**
@@ -98,7 +98,7 @@ public class DictionariesNameFinder {
   public final List<Sequence> getNames(final String[] tokens) {
 
     Span[] origSpans = nercToSpans(tokens);
-    Span[] neSpans = NameFinderME.dropOverlappingSpans(origSpans);
+    Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
     List<Sequence> names = getNamesFromSpans(neSpans, tokens);
     return names;
   }
@@ -175,7 +175,7 @@ public class DictionariesNameFinder {
       final String[] tokens) {
     List<Sequence> names = new ArrayList<Sequence>();
     for (Span neSpan : neSpans) {
-      String nameString = StringUtils.getStringFromSpan(neSpan, tokens);
+      String nameString = neSpan.getCoveredText(tokens);
       String neType = neSpan.getType();
       Sequence name = nameFactory.createSequence(nameString, neType, neSpan);
       names.add(name);

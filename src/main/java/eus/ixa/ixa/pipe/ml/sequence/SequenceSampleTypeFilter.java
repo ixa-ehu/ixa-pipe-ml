@@ -8,9 +8,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import eus.ixa.ixa.pipe.ml.utils.Span;
+
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.Span;
 
 /**
  * A stream which removes Name Samples which do not have a certain type.

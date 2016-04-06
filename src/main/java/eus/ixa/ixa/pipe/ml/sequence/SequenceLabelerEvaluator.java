@@ -16,7 +16,7 @@
  */
 
 package eus.ixa.ixa.pipe.ml.sequence;
-import opennlp.tools.util.Span;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 import opennlp.tools.util.eval.Evaluator;
 import opennlp.tools.util.eval.FMeasure;
 import opennlp.tools.util.eval.Mean;
@@ -73,7 +73,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceSample> {
       sequenceLabeler.clearAdaptiveData();
     }
 
-    Span[] predictedNames = sequenceLabeler.find(reference.getTokens());
+    Span[] predictedNames = sequenceLabeler.tag(reference.getTokens());
     Span[] references = reference.getSequences();
     /*String[] predictedTags = StringUtils.getTagsFromSpan(predictedNames, reference.getTokens());
     String[] referenceTags = StringUtils.getTagsFromSpan(references, reference.getTokens());

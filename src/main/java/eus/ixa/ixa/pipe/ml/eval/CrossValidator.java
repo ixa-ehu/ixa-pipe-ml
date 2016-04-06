@@ -23,12 +23,12 @@ import java.util.List;
 import java.util.Map;
 
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.SequenceCodec;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceEvaluationErrorListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCrossValidator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;

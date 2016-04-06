@@ -5,8 +5,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import opennlp.tools.util.SequenceCodec;
-import opennlp.tools.util.Span;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 public class BioCodec implements SequenceCodec<String> {
 

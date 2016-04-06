@@ -26,10 +26,11 @@ import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.LemmaResource;
+import eus.ixa.ixa.pipe.ml.resources.LemmaDictionary;
 import eus.ixa.ixa.pipe.ml.resources.MFSResource;
-import eus.ixa.ixa.pipe.ml.resources.POSModelResource;
+import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * Generate pos tag, pos tag class, lemma and most frequent sense as feature of
@@ -42,11 +43,11 @@ import eus.ixa.ixa.pipe.ml.utils.Flags;
 public class MFSFeatureGenerator extends CustomFeatureGenerator implements
     ArtifactToSerializerMapper {
 
-  private POSModelResource posModelResource;
-  private LemmaResource lemmaDictResource;
+  private SequenceModelResource posModelResource;
+  private LemmaDictionary lemmaDictResource;
   private MFSResource mfsDictResource;
   private String[] currentSentence;
-  private String[] currentTags;
+  private Span[] currentTags;
   private List<String> currentLemmas;
   private List<String> currentMFSList;
   private boolean isPos;
@@ -65,7 +66,7 @@ public class MFSFeatureGenerator extends CustomFeatureGenerator implements
     // cache annotation results for each sentence
     if (currentSentence != tokens) {
       currentSentence = tokens;
-      currentTags = posModelResource.posTag(tokens);
+      currentTags = posModelResource.seqToSpans(tokens);
       currentLemmas = lemmaDictResource.lookUpLemmaArray(tokens, currentTags);
       if (isBio) {
         currentMFSList = mfsDictResource.getFirstSenseBio(currentLemmas, currentTags);
@@ -73,7 +74,7 @@ public class MFSFeatureGenerator extends CustomFeatureGenerator implements
         currentMFSList = mfsDictResource.getFirstSenseBilou(currentLemmas, currentTags);
       }
     }
-    String posTag = currentTags[index];
+    String posTag = currentTags[index].getType();
 
     if (isPos) {
       features.add("posTag=" + posTag);
@@ -113,17 +114,17 @@ public class MFSFeatureGenerator extends CustomFeatureGenerator implements
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     Object posResource = resourceProvider.getResource(properties.get("model"));
-    if (!(posResource instanceof POSModelResource)) {
+    if (!(posResource instanceof SequenceModelResource)) {
       throw new InvalidFormatException("Not a POSModelResource for key: "
           + properties.get("model"));
     }
-    this.posModelResource = (POSModelResource) posResource;
+    this.posModelResource = (SequenceModelResource) posResource;
     Object lemmaResource = resourceProvider.getResource(properties.get("dict"));
-    if (!(lemmaResource instanceof LemmaResource)) {
+    if (!(lemmaResource instanceof LemmaDictionary)) {
       throw new InvalidFormatException("Not a LemmaResource for key: "
           + properties.get("dict"));
     }
-    this.lemmaDictResource = (LemmaResource) lemmaResource;
+    this.lemmaDictResource = (LemmaDictionary) lemmaResource;
     Object mfsResource = resourceProvider.getResource(properties.get("mfs"));
     if (!(mfsResource instanceof MFSResource)) {
       throw new InvalidFormatException("Not a MFSResource for key: "
@@ -169,9 +170,9 @@ public class MFSFeatureGenerator extends CustomFeatureGenerator implements
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
     mapping.put("posmodelserializer",
-        new POSModelResource.POSModelResourceSerializer());
+        new SequenceModelResource.SequenceModelResourceSerializer());
     mapping.put("lemmadictserializer",
-        new LemmaResource.LemmaResourceSerializer());
+        new LemmaDictionary.LemmaDictionarySerializer());
     mapping.put("mfsdictserializer", new MFSResource.MFSResourceSerializer());
     return Collections.unmodifiableMap(mapping);
   }

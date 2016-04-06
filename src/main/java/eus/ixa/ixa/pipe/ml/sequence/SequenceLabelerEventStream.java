@@ -5,10 +5,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.utils.Span;
+
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.SequenceCodec;
-import opennlp.tools.util.Span;
 import opennlp.tools.util.featuregen.AdditionalContextFeatureGenerator;
 import opennlp.tools.util.featuregen.WindowFeatureGenerator;
 

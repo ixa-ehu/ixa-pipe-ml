@@ -8,7 +8,6 @@ import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.Sequence;
 import opennlp.tools.ml.model.SequenceStream;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.SequenceCodec;
 import opennlp.tools.util.featuregen.AdaptiveFeatureGenerator;
 
 public class SequenceLabelerSequenceStream implements SequenceStream {
@@ -56,7 +55,7 @@ public class SequenceLabelerSequenceStream implements SequenceStream {
     Sequence<SequenceSample> pss = sequence;
     SequenceLabeler tagger = new SequenceLabelerME(new SequenceLabelerModel("x-unspecified", model, Collections.<String, Object>emptyMap(), null));
     String[] sentence = pss.getSource().getTokens();
-    String[] tags = seqCodec.encode(tagger.find(sentence), sentence.length);
+    String[] tags = seqCodec.encode(tagger.tag(sentence), sentence.length);
     Event[] events = new Event[sentence.length];
 
     SequenceLabelerEventStream.generateEvents(sentence,tags,pcg).toArray(events);

@@ -16,7 +16,7 @@
 
 package eus.ixa.ixa.pipe.ml.sequence;
 
-import opennlp.tools.util.Span;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * A <code>Sequence</code> object contains a single String, a {@link Span}, a

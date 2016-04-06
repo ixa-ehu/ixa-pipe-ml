@@ -9,9 +9,9 @@ import java.util.List;
 import opennlp.tools.util.InputStreamFactory;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
-import opennlp.tools.util.Span;
 import opennlp.tools.util.StringUtil;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * 2 fields in tabulated format: word\tabclass\n. In this format every row is a

@@ -10,6 +10,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eus.ixa.ixa.pipe.ml.utils.Span;
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
+
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventModelSequenceTrainer;
 import opennlp.tools.ml.EventTrainer;
@@ -21,9 +24,7 @@ import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
-import opennlp.tools.util.SequenceCodec;
 import opennlp.tools.util.SequenceValidator;
-import opennlp.tools.util.Span;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.featuregen.AdaptiveFeatureGenerator;
 import opennlp.tools.util.featuregen.AdditionalContextFeatureGenerator;
@@ -91,10 +92,10 @@ public class SequenceLabelerME implements SequenceLabeler {
             });
   }
 
-  public Span[] find(String[] tokens) {
-    return find(tokens, EMPTY);
+  public Span[] tag(String[] tokens) {
+    return tag(tokens, EMPTY);
   }
-
+  
   /**
    * Generates name tags for the given sequence, typically a sentence, returning
    * token spans for any identified names.
@@ -106,18 +107,50 @@ public class SequenceLabelerME implements SequenceLabeler {
    *
    * @return an array of spans for each of the names identified.
    */
-  public Span[] find(String[] tokens, String[][] additionalContext) {
-
+  public Span[] tag(String[] tokens, String[][] additionalContext) {
     additionalContextFeatureGenerator.setCurrentContext(additionalContext);
-
     bestSequence = model.bestSequence(tokens, additionalContext, contextGenerator, sequenceValidator);
-
     List<String> c = bestSequence.getOutcomes();
-
     contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
     Span[] spans = seqCodec.decode(c);
     spans = setProbs(spans);
     return spans;
+  }
+
+  /**
+   * Decodes the lemma from the word and the induced lemma class.
+   * @param toks the array of tokens
+   * @param preds the predicted lemma classes
+   * @return the array of decoded lemmas
+   */
+  public String[] decodeLemmas(String[] tokens, Span[] preds) {
+    List<String> lemmas = new ArrayList<>();
+    for (Span span : preds) {
+      String lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
+      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
+      if (lemma.length() == 0) {
+        lemma = "_";
+      }
+      lemmas.add(lemma);
+    }
+    return lemmas.toArray(new String[lemmas.size()]);
+  }
+  
+  /**
+   * Decodes the lemma from the word and the induced lemma class.
+   * @param toks the array of tokens
+   * @param preds the predicted lemma classes
+   * @return the array of decoded lemmas
+   */
+  public void decodeLemmasToSpans(String[] tokens, Span[] preds) {
+    for (Span span : preds) {
+      String lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
+      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
+      if (lemma.length() == 0) {
+        lemma = "_";
+      }
+      span.setType(lemma);
+    }
   }
 
   /**

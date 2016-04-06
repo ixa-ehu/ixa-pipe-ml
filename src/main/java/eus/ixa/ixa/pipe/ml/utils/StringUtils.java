@@ -22,8 +22,6 @@ import java.util.List;
 
 import com.google.common.io.Files;
 
-import opennlp.tools.util.Span;
-
 /**
  * Pattern matching and other utility string functions.
  *
@@ -122,44 +120,6 @@ public final class StringUtils {
     }
     return neChars;
   }
-
-  
-  /**
-   * Get an array of Spans and their associated tokens and obtains
-   * an array of Strings containing the type for each Span.
-   * @param spans the array of Spans
-   * @param tokens the array of tokens
-   * @return an array of string with the types
-   */
-  public static String[] getTagsFromSpan(final Span[] spans,
-      final String[] tokens) {
-    List<String> tagsList = new ArrayList<String>();
-    for (Span span : spans) {
-      tagsList.add(span.getType());
-    }
-    return tagsList.toArray(new String[tagsList.size()]);
-  }
-  
-  /**
-  *
-  * It takes a NE span indexes and the tokens in a sentence and produces the
-  * string to which the NE span corresponds to. This function is used to get
-  * the Named Entity or Name textual representation from a {@link Span}
-  *
-  * @param reducedSpan
-  *          a {@link Span}
-  * @param tokens
-  *          an array of tokens
-  * @return named entity string
-  */
- public static String getStringFromSpan(final Span reducedSpan,
-     final String[] tokens) {
-   StringBuilder sb = new StringBuilder();
-   for (int si = reducedSpan.getStart(); si < reducedSpan.getEnd(); si++) {
-     sb.append(tokens[si]).append(" ");
-   }
-   return sb.toString().trim();
- }
 
   /**
    * Gets the String joined by a space of an array of tokens.

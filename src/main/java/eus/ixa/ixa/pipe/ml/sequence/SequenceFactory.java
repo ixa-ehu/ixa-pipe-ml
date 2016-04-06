@@ -16,7 +16,7 @@
 
 package eus.ixa.ixa.pipe.ml.sequence;
 
-import opennlp.tools.util.Span;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * This class provides the functionality to create {@link Sequence} objects.

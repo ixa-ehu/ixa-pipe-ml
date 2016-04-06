@@ -30,8 +30,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.regex.Pattern;
 
-import opennlp.tools.namefind.BilouCodec;
-import opennlp.tools.namefind.BioCodec;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
@@ -41,6 +39,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
+
+import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
+import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * Reads wordnet lexicons formated as house#n\t1092#noun.artifact
@@ -99,7 +101,7 @@ public class MFSResource implements SerializableArtifact {
    * @param posTags the postags of the sentence
    * @return the most frequent senses for the sentence
    */
-  public List<String> getFirstSenseBio(List<String> lemmas, String[] posTags) {
+  public List<String> getFirstSenseBio(List<String> lemmas, Span[] posTags) {
 
     List<String> mostFrequentSenseList = new ArrayList<String>();
 
@@ -109,13 +111,13 @@ public class MFSResource implements SerializableArtifact {
     // iterative over lemmas from the beginning
     for (int i = 0; i < lemmas.size(); i++) {
       mostFrequentSense = null;
-      String pos = posTags[i];
+      String pos = posTags[i].getType();
       int j;
       // iterate over lemmas from the end
       for (j = lemmas.size() - 1; j >= i; j--) {
         // create span for search in multimap; the first search takes as span
         // the whole sentence
-        String endPos = posTags[j];
+        String endPos = posTags[j].getType();
         searchSpan = createSpan(lemmas, i, j);
         String firstSpan = (searchSpan + "#" + pos.substring(0, 1))
             .toLowerCase();
@@ -160,7 +162,7 @@ public class MFSResource implements SerializableArtifact {
    * @param posTags posTags in the sentence
    * @return the most frequent senses for the sentence
    */
-  public List<String> getFirstSenseBilou(List<String> lemmas, String[] posTags) {
+  public List<String> getFirstSenseBilou(List<String> lemmas, Span[] posTags) {
 
     List<String> mostFrequentSenseList = new ArrayList<String>();
 
@@ -170,13 +172,13 @@ public class MFSResource implements SerializableArtifact {
     // iterative over lemmas from the beginning
     for (int i = 0; i < lemmas.size(); i++) {
       mostFrequentSense = null;
-      String pos = posTags[i];
+      String pos = posTags[i].getType();
       int j;
       // iterate over lemmas from the end
       for (j = lemmas.size() - 1; j >= i; j--) {
         // create span for search in multimap; the first search takes as span
         // the whole sentence
-        String endPos = posTags[j];
+        String endPos = posTags[j].getType();
         searchSpan = createSpan(lemmas, i, j);
         String firstSpan = (searchSpan + "#" + pos.substring(0, 1))
             .toLowerCase();

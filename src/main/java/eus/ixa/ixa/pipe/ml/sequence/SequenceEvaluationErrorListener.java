@@ -2,7 +2,6 @@ package eus.ixa.ixa.pipe.ml.sequence;
 
 import java.io.OutputStream;
 
-import opennlp.tools.cmdline.EvaluationErrorPrinter;
 import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**

@@ -25,12 +25,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import opennlp.tools.util.Span;
 import eus.ixa.ixa.pipe.ml.sequence.Sequence;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.utils.StringUtils;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * Statistical Sequence Labeling based on Apache OpenNLP Machine Learning API.
@@ -90,13 +89,19 @@ public class StatisticalSequenceLabeler {
    * @return the array of Sequence Spans
    */
   public final Span[] seqToSpans(final String[] tokens) {
-    Span[] annotatedText = sequenceLabeler.find(tokens);
+    Span[] annotatedText = sequenceLabeler.tag(tokens);
     List<Span> probSpans = new ArrayList<Span>(Arrays.asList(annotatedText));
     return probSpans.toArray(new Span[probSpans.size()]);
   }
   
+  public final Span[] lemmatizeToSpans(final String[] tokens) {
+    Span[] seqSpans = sequenceLabeler.tag(tokens);
+    sequenceLabeler.decodeLemmasToSpans(tokens, seqSpans);
+    return seqSpans;
+  }
+
   /**
-   * Method to produce a list of the {@link Sequence} objects classified by the
+   * Produce a list of the {@link Sequence} objects classified by the
    * probabilistic model.
    *
    * Takes an array of tokens, calls seqToSpans function for probabilistic Sequence
@@ -108,12 +113,18 @@ public class StatisticalSequenceLabeler {
    * @return a List of sequences
    */
   public final List<Sequence> getSequences(final String[] tokens) {
-    Span[] origSpans = sequenceLabeler.find(tokens);
+    Span[] origSpans = sequenceLabeler.tag(tokens);
     Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<Sequence> sequences = getSequencesFromSpans(seqSpans, tokens);
+    List<Sequence> sequences = getSequencesFromSpans(tokens, seqSpans);
     return sequences;
   }
-
+  
+  public final List<Sequence> getLemmaSequences(final String[] tokens) {
+    Span[] origSpans = sequenceLabeler.tag(tokens);
+    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    List<Sequence> sequences = getLemmaSequencesFromSpans(tokens, seqSpans);
+  }
+  
   /**
    * Creates a list of {@link Sequence} objects from spans and tokens.
    *
@@ -121,17 +132,27 @@ public class StatisticalSequenceLabeler {
    * @param tokens the tokens in the sentence
    * @return a list of {@link Sequence} objects
    */
-  public final List<Sequence> getSequencesFromSpans(final Span[] seqSpans, final String[] tokens) {
+  public final List<Sequence> getSequencesFromSpans(final String[] tokens, final Span[] seqSpans) {
     List<Sequence> sequences = new ArrayList<Sequence>();
     for (Span seqSpan : seqSpans) {
-      String seqString = StringUtils.getStringFromSpan(seqSpan, tokens);
+      String seqString = seqSpan.getCoveredText(tokens);
       String seqType = seqSpan.getType();
       Sequence sequence = sequenceFactory.createSequence(seqString, seqType, seqSpan);
       sequences.add(sequence);
     }
     return sequences;
   }
-
+  
+  public final List<Sequence> getLemmaSequencesFromSpans(final String[] tokens, Span[] seqSpans) {
+    List<Sequence> sequences = new ArrayList<>();
+    for (Span seqSpan : seqSpans) {
+      String seqString = seqSpan.getCoveredText(tokens);
+      sequenceLabeler.decodeLemmasToSpans(tokens, seqSpans);
+      String seqType = seqSpan
+      
+    }
+  }
+  
   /**
    * Forgets all adaptive data which was collected during previous calls to one
    * of the find methods. This method is typically called at the end of a

@@ -26,9 +26,9 @@ import opennlp.tools.util.InputStreamFactory;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
-import opennlp.tools.util.Span;
 import opennlp.tools.util.StringUtil;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * 2 fields CoNLL 2002 tabulated format: word\tabclass\n B- start chunk I-

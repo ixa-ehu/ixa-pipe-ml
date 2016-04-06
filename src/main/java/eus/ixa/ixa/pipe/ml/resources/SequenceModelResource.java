@@ -9,9 +9,9 @@ import java.io.Writer;
 
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.Span;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
@@ -20,7 +20,7 @@ import opennlp.tools.util.model.SerializableArtifact;
 /**
  * This class loads the pos tagger model required for
  * the POS FeatureGenerators. It also provides the serializer
- * required to add it as a resource to the ixa-pipe-nerc
+ * required to add it as a resource to the final target model
  * model.
  * @author ragerri
  * @version 2015-10-03
@@ -65,8 +65,8 @@ public class SequenceModelResource implements SerializableArtifact {
    * @param tokens the current sentence
    * @return the array containing the pos tags
    */
-  public Span[] posTag(String[] tokens) {
-    Span[] posTags = posTagger.find(tokens);
+  public Span[] seqToSpans(String[] tokens) {
+    Span[] posTags = posTagger.tag(tokens);
     return posTags;
   }
   
@@ -78,7 +78,6 @@ public class SequenceModelResource implements SerializableArtifact {
   public void serialize(OutputStream out) throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out));
     posModel.serialize(out);
-
     writer.flush();
   }
 

@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eus.ixa.ixa.pipe.ml.utils.Span;
+
 import opennlp.tools.tokenize.WhitespaceTokenizer;
-import opennlp.tools.util.Span;
 
 /**
  * Class for holding sequences for a single unit of text.

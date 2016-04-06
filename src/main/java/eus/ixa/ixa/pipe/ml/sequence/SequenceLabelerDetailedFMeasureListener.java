@@ -1,7 +1,6 @@
 package eus.ixa.ixa.pipe.ml.sequence;
 
-import opennlp.tools.cmdline.DetailedFMeasureListener;
-import opennlp.tools.util.Span;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 public class SequenceLabelerDetailedFMeasureListener extends
 DetailedFMeasureListener<SequenceSample> implements

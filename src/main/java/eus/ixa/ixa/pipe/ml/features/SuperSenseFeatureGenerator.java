@@ -26,9 +26,10 @@ import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.LemmaResource;
+import eus.ixa.ixa.pipe.ml.resources.LemmaDictionary;
 import eus.ixa.ixa.pipe.ml.resources.MFSResource;
-import eus.ixa.ixa.pipe.ml.resources.POSModelResource;
+import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * Generates Ciaramita and Altun (2006) features for super sense tagging.
@@ -42,11 +43,11 @@ import eus.ixa.ixa.pipe.ml.resources.POSModelResource;
 public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implements
     ArtifactToSerializerMapper {
 
-  private POSModelResource posModelResource;
-  private LemmaResource lemmaDictResource;
+  private SequenceModelResource posModelResource;
+  private LemmaDictionary lemmaDictResource;
   private MFSResource mfsDictResource;
   private String[] currentSentence;
-  private String[] currentTags;
+  private Span[] currentTags;
   private List<String> currentLemmas;
   private List<String> currentMFSList;
   private Boolean isBio = true;
@@ -60,7 +61,7 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     // cache results for each sentence
     if (currentSentence != tokens) {
       currentSentence = tokens;
-      currentTags = posModelResource.posTag(tokens);
+      currentTags = posModelResource.seqToSpans(tokens);
       currentLemmas = lemmaDictResource.lookUpLemmaArray(tokens, currentTags);
       if (isBio) {
         currentMFSList = mfsDictResource.getFirstSenseBio(currentLemmas, currentTags);
@@ -71,7 +72,7 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
 
     String curLemma = currentLemmas.get(index);
     String curTok = tokens[index];
-    String curPOS = currentTags[index];
+    String curPOS = currentTags[index].getType();
     String curShape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index]);
     String firstSense = currentMFSList.get(index);
     String prevLabel = null;
@@ -93,23 +94,23 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     if (index - 2 >= 0) {
       prev2Shape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index - 2]);
       prev2Lemma = currentLemmas.get(index - 2);
-      prev2POS = currentTags[index - 2];
+      prev2POS = currentTags[index - 2].getType();
     }
     if (index - 1 >= 0) {
       prevShape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index - 1]);
       prevLemma = currentLemmas.get(index - 1);
-      prevPOS = currentTags[index - 1];
+      prevPOS = currentTags[index - 1].getType();
       prevLabel = previousOutcomes[index - 1];
     }
     if (index + 1 < tokens.length) {
       nextShape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index + 1]);
       nextLemma = currentLemmas.get(index + 1);
-      nextPOS = currentTags[index + 1];
+      nextPOS = currentTags[index + 1].getType();
     }
     if (index + 2 < tokens.length) {
       next2Shape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index + 2]);
       next2Lemma = currentLemmas.get(index + 2);
-      next2POS = currentTags[index + 2];
+      next2POS = currentTags[index + 2].getType();
     }
 
     features.add("bias");
@@ -198,17 +199,17 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     Object posResource = resourceProvider.getResource(properties.get("model"));
-    if (!(posResource instanceof POSModelResource)) {
+    if (!(posResource instanceof SequenceModelResource)) {
       throw new InvalidFormatException("Not a POSModelResource for key: "
           + properties.get("model"));
     }
-    this.posModelResource = (POSModelResource) posResource;
+    this.posModelResource = (SequenceModelResource) posResource;
     Object lemmaResource = resourceProvider.getResource(properties.get("dict"));
-    if (!(lemmaResource instanceof LemmaResource)) {
+    if (!(lemmaResource instanceof LemmaDictionary)) {
       throw new InvalidFormatException("Not a LemmaResource for key: "
           + properties.get("dict"));
     }
-    this.lemmaDictResource = (LemmaResource) lemmaResource;
+    this.lemmaDictResource = (LemmaDictionary) lemmaResource;
     Object mfsResource = resourceProvider.getResource(properties.get("mfs"));
     if (!(mfsResource instanceof MFSResource)) {
       throw new InvalidFormatException("Not a MFSResource for key: "
@@ -226,9 +227,9 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
     mapping.put("posmodelserializer",
-        new POSModelResource.POSModelResourceSerializer());
+        new SequenceModelResource.SequenceModelResourceSerializer());
     mapping.put("lemmadictserializer",
-        new LemmaResource.LemmaResourceSerializer());
+        new LemmaDictionary.LemmaDictionarySerializer());
     mapping.put("mfsdictserializer", new MFSResource.MFSResourceSerializer());
     return Collections.unmodifiableMap(mapping);
   }

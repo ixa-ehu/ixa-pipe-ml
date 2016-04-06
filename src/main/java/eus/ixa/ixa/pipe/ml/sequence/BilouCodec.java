@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import opennlp.tools.util.SequenceCodec;
+import eus.ixa.ixa.pipe.ml.utils.Span;
+
 import opennlp.tools.util.SequenceValidator;
-import opennlp.tools.util.Span;
 
 public class BilouCodec implements SequenceCodec<String> {
 

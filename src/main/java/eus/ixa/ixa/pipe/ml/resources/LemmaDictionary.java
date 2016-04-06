@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import eus.ixa.ixa.pipe.ml.utils.Span;
+
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
@@ -40,18 +42,18 @@ import opennlp.tools.util.model.SerializableArtifact;
  * @version 2015-03-11
  * 
  */
-public class LemmaResource implements SerializableArtifact {
+public class LemmaDictionary implements SerializableArtifact {
 
   private static final Pattern spacePattern = Pattern.compile("\t");
   
-  public static class LemmaResourceSerializer implements ArtifactSerializer<LemmaResource> {
+  public static class LemmaDictionarySerializer implements ArtifactSerializer<LemmaDictionary> {
 
-    public LemmaResource create(InputStream in) throws IOException,
+    public LemmaDictionary create(InputStream in) throws IOException,
         InvalidFormatException {
-      return new LemmaResource(in);
+      return new LemmaDictionary(in);
     }
 
-    public void serialize(LemmaResource artifact, OutputStream out)
+    public void serialize(LemmaDictionary artifact, OutputStream out)
         throws IOException {
       artifact.serialize(out);
     }
@@ -67,7 +69,7 @@ public class LemmaResource implements SerializableArtifact {
    * @param in the input stream
    * @throws IOException the io exception
    */
-  public LemmaResource(InputStream in) throws IOException {
+  public LemmaDictionary(InputStream in) throws IOException {
     dictMap = new HashMap<List<String>, String>();
     BufferedReader breader = new BufferedReader(new InputStreamReader(
         in));
@@ -113,10 +115,10 @@ public class LemmaResource implements SerializableArtifact {
    * @param postags the postags for each token
    * @return the lemmas for the sentence
    */
-  public List<String> lookUpLemmaArray(String[] tokens, String[] postags) {
+  public List<String> lookUpLemmaArray(String[] tokens, Span[] postags) {
     List<String> lemmas = new ArrayList<String>();
     for (int i = 0; i < tokens.length; i++) {
-      String lemma = lookUpLemma(tokens[i], postags[i]);
+      String lemma = lookUpLemma(tokens[i], postags[i].getType());
       lemmas.add(lemma);
     }
     return lemmas;
@@ -153,7 +155,7 @@ public class LemmaResource implements SerializableArtifact {
   }
 
   public Class<?> getArtifactSerializerClass() {
-    return LemmaResourceSerializer.class;
+    return LemmaDictionarySerializer.class;
   }
 
 }

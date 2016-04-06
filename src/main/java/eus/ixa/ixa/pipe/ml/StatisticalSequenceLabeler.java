@@ -19,6 +19,7 @@ package eus.ixa.ixa.pipe.ml;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -83,6 +84,16 @@ public class StatisticalSequenceLabeler {
     sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
+  /**
+   * Get array of Spans from a list of tokens.
+   * @param tokens the sentence tokens
+   * @return the array of Sequence Spans
+   */
+  public final Span[] seqToSpans(final String[] tokens) {
+    Span[] annotatedText = sequenceLabeler.find(tokens);
+    List<Span> probSpans = new ArrayList<Span>(Arrays.asList(annotatedText));
+    return probSpans.toArray(new Span[probSpans.size()]);
+  }
   
   /**
    * Method to produce a list of the {@link Sequence} objects classified by the
@@ -156,7 +167,7 @@ public class StatisticalSequenceLabeler {
     }
     long lEndTime = new Date().getTime();
     long difference = lEndTime - lStartTime;
-    System.err.println("ixa-pipe-sequence model loaded in: " + difference
+    System.err.println("IXA pipes Sequence model loaded in: " + difference
         + " miliseconds ... [DONE]");
     return seqModels.get(lang);
   }

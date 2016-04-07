@@ -11,7 +11,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
-import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventModelSequenceTrainer;
@@ -115,42 +114,6 @@ public class SequenceLabelerME implements SequenceLabeler {
     Span[] spans = seqCodec.decode(c);
     spans = setProbs(spans);
     return spans;
-  }
-
-  /**
-   * Decodes the lemma from the word and the induced lemma class.
-   * @param toks the array of tokens
-   * @param preds the predicted lemma classes
-   * @return the array of decoded lemmas
-   */
-  public String[] decodeLemmas(String[] tokens, Span[] preds) {
-    List<String> lemmas = new ArrayList<>();
-    for (Span span : preds) {
-      String lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
-      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
-      if (lemma.length() == 0) {
-        lemma = "_";
-      }
-      lemmas.add(lemma);
-    }
-    return lemmas.toArray(new String[lemmas.size()]);
-  }
-  
-  /**
-   * Decodes the lemma from the word and the induced lemma class.
-   * @param toks the array of tokens
-   * @param preds the predicted lemma classes
-   * @return the array of decoded lemmas
-   */
-  public void decodeLemmasToSpans(String[] tokens, Span[] preds) {
-    for (Span span : preds) {
-      String lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
-      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
-      if (lemma.length() == 0) {
-        lemma = "_";
-      }
-      span.setType(lemma);
-    }
   }
 
   /**

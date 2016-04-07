@@ -84,7 +84,7 @@ public class Span implements Comparable<Span> {
    *          the start of the span (the token index, not the char index)
    * @param e
    *          the end of the span (the token index, not the char index)
-   * @param prob
+   * @param prob the probability score
    */
   public Span(int s, int e, double prob) {
     this(s, e, null, prob);
@@ -94,8 +94,8 @@ public class Span implements Comparable<Span> {
    * Initializes a new Span object with an existing Span which is shifted by an
    * offset.
    * 
-   * @param span
-   * @param offset
+   * @param span the span
+   * @param offset the offset
    */
   public Span(Span span, int offset) {
     this(span.start + offset, span.end + offset, span.getType(), span.getProb());
@@ -240,9 +240,7 @@ public class Span implements Comparable<Span> {
 
   /**
    * Return a copy of this span with leading and trailing white spaces removed.
-   * 
-   * @param text
-   * 
+   * @param text the text
    * @return the trimmed span or the same object if already trimmed
    */
   public Span trim(CharSequence text) {
@@ -376,9 +374,9 @@ public class Span implements Comparable<Span> {
   /**
    * Converts an array of {@link Span}s to an array of {@link String}s.
    * 
-   * @param spans
-   * @param s
-   * @return the strings
+   * @param spans the spans array
+   * @param s the strings
+   * @return the strings array
    */
   public static String[] spansToStrings(Span[] spans, CharSequence s) {
     String[] tokens = new String[spans.length];

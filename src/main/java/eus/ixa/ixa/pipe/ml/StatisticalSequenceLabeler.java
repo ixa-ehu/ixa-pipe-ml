@@ -30,6 +30,7 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Span;
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 /**
  * Statistical Sequence Labeling based on Apache OpenNLP Machine Learning API.
@@ -96,7 +97,7 @@ public class StatisticalSequenceLabeler {
   
   public final Span[] lemmatizeToSpans(final String[] tokens) {
     Span[] seqSpans = sequenceLabeler.tag(tokens);
-    sequenceLabeler.decodeLemmasToSpans(tokens, seqSpans);
+    StringUtils.decodeLemmasToSpans(tokens, seqSpans);
     return seqSpans;
   }
 
@@ -123,6 +124,7 @@ public class StatisticalSequenceLabeler {
     Span[] origSpans = sequenceLabeler.tag(tokens);
     Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
     List<Sequence> sequences = getLemmaSequencesFromSpans(tokens, seqSpans);
+    return sequences;
   }
   
   /**
@@ -147,10 +149,12 @@ public class StatisticalSequenceLabeler {
     List<Sequence> sequences = new ArrayList<>();
     for (Span seqSpan : seqSpans) {
       String seqString = seqSpan.getCoveredText(tokens);
-      sequenceLabeler.decodeLemmasToSpans(tokens, seqSpans);
-      String seqType = seqSpan
-      
+      String decodedLemma = StringUtils.decodeShortestEditScript(seqString.toLowerCase(), seqSpan.getType());
+      seqSpan.setType(decodedLemma);
+      Sequence sequence = sequenceFactory.createSequence(seqString, decodedLemma, seqSpan);
+      sequences.add(sequence);
     }
+    return sequences;
   }
   
   /**

@@ -363,5 +363,41 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
     return ses;
   }
 
+  /**
+   * Decodes the lemma from the word and the induced lemma class.
+   * @param tokens the array of tokens
+   * @param preds the predicted lemma classes
+   * @return the array of decoded lemmas
+   */
+  public static String[] decodeLemmas(String[] tokens, Span[] preds) {
+    List<String> lemmas = new ArrayList<>();
+    for (Span span : preds) {
+      String lemma = decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
+      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
+      if (lemma.length() == 0) {
+        lemma = "_";
+      }
+      lemmas.add(lemma);
+    }
+    return lemmas.toArray(new String[lemmas.size()]);
+  }
+
+  /**
+   * Decodes the lemma induced type into the lemma and sets it as
+   * value of the Span type.
+   * @param tokens the tokens in the sentence
+   * @param preds the predicted spans
+   */
+  public static void decodeLemmasToSpans(String[] tokens, Span[] preds) {
+    for (Span span : preds) {
+      String lemma = decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
+      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
+      if (lemma.length() == 0) {
+        lemma = "_";
+      }
+      span.setType(lemma);
+    }
+  }
+
 
 }

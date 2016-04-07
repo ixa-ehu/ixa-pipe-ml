@@ -10,6 +10,7 @@ import java.io.Writer;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Span;
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
@@ -18,12 +19,12 @@ import opennlp.tools.util.model.SerializableArtifact;
 
 
 /**
- * This class loads the pos tagger model required for
- * the POS FeatureGenerators. It also provides the serializer
+ * This class loads a SequenceLabeler model required for
+ * the Feature Generation. It also provides the serializer
  * required to add it as a resource to the final target model
  * model.
  * @author ragerri
- * @version 2015-10-03
+ * @version 2016-04-07
  * 
  */
 public class SequenceModelResource implements SerializableArtifact {
@@ -42,42 +43,55 @@ public class SequenceModelResource implements SerializableArtifact {
   }
   
   /**
-   * The POS model.
+   * The Sequence Labeler model.
    */
-  private SequenceLabelerModel posModel;
+  private SequenceLabelerModel seqModel;
   /**
-   * The POS tagger.
+   * The SequenceLabeler.
    */
-  private SequenceLabelerME posTagger;
+  private SequenceLabelerME sequenceLabeler;
   
   /**
-   * Construct the POSModelResource from the inputstream.
+   * Construct the SequenceModelResource from the inputstream.
    * @param in the input stream
    * @throws IOException io exception
    */
   public SequenceModelResource(InputStream in) throws IOException {
-    posModel = new SequenceLabelerModel(in);
-    posTagger = new SequenceLabelerME(posModel);
+    seqModel = new SequenceLabelerModel(in);
+    sequenceLabeler = new SequenceLabelerME(seqModel);
   }
   
   /**
-   * POS tag the current sentence.
+   * Tag the current sentence.
    * @param tokens the current sentence
-   * @return the array containing the pos tags
+   * @return the array of span sequences
    */
   public Span[] seqToSpans(String[] tokens) {
-    Span[] posTags = posTagger.tag(tokens);
-    return posTags;
+    Span[] origSpans = sequenceLabeler.tag(tokens);
+    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    return seqSpans;
   }
   
   /**
-   * Serialize the POS model into the NERC model.
+   * Lemmatize the current sentence.
+   * @param tokens the current sentence
+   * @return the array of span sequences
+   */
+  public String[] lemmatize(String[] tokens) {
+    Span[] origSpans = sequenceLabeler.tag(tokens);
+    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    String[] decodedLemmas = StringUtils.decodeLemmas(tokens, seqSpans);
+    return decodedLemmas;
+  }
+  
+  /**
+   * Serialize this model into the overall Sequence model.
    * @param out the output stream
    * @throws IOException io exception
    */
   public void serialize(OutputStream out) throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-    posModel.serialize(out);
+    seqModel.serialize(out);
     writer.flush();
   }
 

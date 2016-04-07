@@ -11,18 +11,17 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
-import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * This feature generator can also be placed in a sliding window.
  * @author ragerri
- * @version 2015-03-12
+ * @version 2016-04-07
  */
 public class LemmaModelFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
   
-  private SequenceModelResource posModelResource;
+  private SequenceModelResource seqModelResource;
   private String[] currentSentence;
-  private Span[] currentTags;
+  private String[] currentLemmas;
   
   public LemmaModelFeatureGenerator() {
   }
@@ -33,10 +32,10 @@ public class LemmaModelFeatureGenerator extends CustomFeatureGenerator implement
     //cache annotations for each sentence
     if (currentSentence != tokens) {
       currentSentence = tokens;
-      currentTags = posModelResource.seqToSpans(tokens);
+      currentLemmas = seqModelResource.lemmatize(tokens);
     }
-    String posTag = currentTags[index].getType();
-    features.add("posTag=" + posTag);
+    String lemma = currentLemmas[index];
+    features.add("lemmaModel=" + lemma);
   }
   
   @Override
@@ -55,7 +54,7 @@ public class LemmaModelFeatureGenerator extends CustomFeatureGenerator implement
     if (!(posResource instanceof SequenceModelResource)) {
       throw new InvalidFormatException("Not a SequenceModelResource for key: " + properties.get("model"));
     }
-    this.posModelResource = (SequenceModelResource) posResource;
+    this.seqModelResource = (SequenceModelResource) posResource;
   }
   
   @Override

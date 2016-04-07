@@ -26,7 +26,7 @@ import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.LemmaDictionary;
+import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
 import eus.ixa.ixa.pipe.ml.resources.MFSResource;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
 import eus.ixa.ixa.pipe.ml.utils.Span;
@@ -44,7 +44,7 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     ArtifactToSerializerMapper {
 
   private SequenceModelResource posModelResource;
-  private LemmaDictionary lemmaDictResource;
+  private DictionaryLemmatizer lemmaDictResource;
   private MFSResource mfsDictResource;
   private String[] currentSentence;
   private Span[] currentTags;
@@ -62,7 +62,7 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     if (currentSentence != tokens) {
       currentSentence = tokens;
       currentTags = posModelResource.seqToSpans(tokens);
-      currentLemmas = lemmaDictResource.lookUpLemmaArray(tokens, currentTags);
+      currentLemmas = lemmaDictResource.lemmatize(tokens, currentTags);
       if (isBio) {
         currentMFSList = mfsDictResource.getFirstSenseBio(currentLemmas, currentTags);
       } else {
@@ -205,11 +205,11 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     }
     this.posModelResource = (SequenceModelResource) posResource;
     Object lemmaResource = resourceProvider.getResource(properties.get("dict"));
-    if (!(lemmaResource instanceof LemmaDictionary)) {
+    if (!(lemmaResource instanceof DictionaryLemmatizer)) {
       throw new InvalidFormatException("Not a LemmaResource for key: "
           + properties.get("dict"));
     }
-    this.lemmaDictResource = (LemmaDictionary) lemmaResource;
+    this.lemmaDictResource = (DictionaryLemmatizer) lemmaResource;
     Object mfsResource = resourceProvider.getResource(properties.get("mfs"));
     if (!(mfsResource instanceof MFSResource)) {
       throw new InvalidFormatException("Not a MFSResource for key: "
@@ -229,7 +229,7 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     mapping.put("posmodelserializer",
         new SequenceModelResource.SequenceModelResourceSerializer());
     mapping.put("lemmadictserializer",
-        new LemmaDictionary.LemmaDictionarySerializer());
+        new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
     mapping.put("mfsdictserializer", new MFSResource.MFSResourceSerializer());
     return Collections.unmodifiableMap(mapping);
   }

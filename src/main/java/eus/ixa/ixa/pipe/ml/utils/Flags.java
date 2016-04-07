@@ -391,6 +391,37 @@ public class Flags {
     }
     return mfsFlagArray;
   }
+  
+  
+  public static String getLemmaModelFeatures(TrainingParameters params) {
+    String morphoFlag = null;
+    if (params.getSettings().get("LemmaModelFeatures") != null) {
+      morphoFlag = params.getSettings().get("LemmaModelFeatures");
+    } else {
+      morphoFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return morphoFlag;
+  }
+  
+  
+  public static String getLemmaDictionaryFeatures(TrainingParameters params) {
+    String morphoFlag = null;
+    if (params.getSettings().get("LemmaDictionaryFeatures") != null) {
+      morphoFlag = params.getSettings().get("LemmaDictionaryFeatures");
+    } else {
+      morphoFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return morphoFlag;
+  }
+  
+  public static String[] getLemmaDictionaryResources(String mfsFlag) {
+    String[] mfsFlagArray = mfsFlag.split(",");
+    if (mfsFlagArray.length != 2) {
+      System.err.println("LemmaDictionary resources requires two fields but got " + mfsFlagArray.length);
+      System.exit(1);
+    }
+    return mfsFlagArray;
+  }
 
   
   public static String getSuperSenseFeatures(TrainingParameters params) {
@@ -506,6 +537,16 @@ public class Flags {
   public static boolean isMFSFeatures(TrainingParameters params) {
     String mfsFeatures = getMFSFeatures(params);
     return !mfsFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isLemmaDictionaryFeatures(TrainingParameters params) {
+    String morphoFeatures = getLemmaDictionaryFeatures(params);
+    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isLemmaModelFeatures(TrainingParameters params) {
+    String morphoFeatures = getLemmaModelFeatures(params);
+    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
   public static boolean isPOSTagModelFeatures(TrainingParameters params) {

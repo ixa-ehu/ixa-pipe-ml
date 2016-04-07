@@ -322,6 +322,34 @@ public final class XMLFeatureDescriptor {
       generators.addContent(posTagClassFeatureWindow);
       System.err.println("-> POSTagModel Features added!");
     }
+    if (Flags.isLemmaModelFeatures(params)) {
+      setWindow(params);
+      String lemmaModelPath = Flags.getLemmaModelFeatures(params);
+      Element lemmaClassFeatureElement = new Element("custom");
+      lemmaClassFeatureElement.setAttribute("class", LemmaModelFeatureGenerator.class.getName());
+      lemmaClassFeatureElement.setAttribute("model", InputOutputUtils.normalizeLexiconName(new File(lemmaModelPath).getName()));
+      Element lemmaClassFeatureWindow = new Element("window");
+      lemmaClassFeatureWindow.setAttribute("prevLength", Integer.toString(leftWindow));
+      lemmaClassFeatureWindow.setAttribute("nextLength", Integer.toString(rightWindow));
+      lemmaClassFeatureWindow.addContent(lemmaClassFeatureElement);
+      generators.addContent(lemmaClassFeatureWindow);
+      System.err.println("-> LemmaModel Features added!");
+    }
+    if (Flags.isLemmaDictionaryFeatures(params)) {
+      setWindow(params);
+      String lemmaDictPath = Flags.getLemmaDictionaryFeatures(params);
+      String[] lemmaDictResources = Flags.getLemmaDictionaryResources(lemmaDictPath);
+      Element lemmaClassFeatureElement = new Element("custom");
+      lemmaClassFeatureElement.setAttribute("class", LemmaModelFeatureGenerator.class.getName());
+      lemmaClassFeatureElement.setAttribute("model", InputOutputUtils.normalizeLexiconName(new File(lemmaDictResources[0]).getName()));
+      lemmaClassFeatureElement.setAttribute("dict", InputOutputUtils.normalizeLexiconName(new File(lemmaDictResources[1]).getName()));
+      Element lemmaClassFeatureWindow = new Element("window");
+      lemmaClassFeatureWindow.setAttribute("prevLength", Integer.toString(leftWindow));
+      lemmaClassFeatureWindow.setAttribute("nextLength", Integer.toString(rightWindow));
+      lemmaClassFeatureWindow.addContent(lemmaClassFeatureElement);
+      generators.addContent(lemmaClassFeatureWindow);
+      System.err.println("-> LemmaDictionary Features added!");
+    }
     if (Flags.isMFSFeatures(params)) {
       setWindow(params);
       String mfsPath = Flags.getMFSFeatures(params);

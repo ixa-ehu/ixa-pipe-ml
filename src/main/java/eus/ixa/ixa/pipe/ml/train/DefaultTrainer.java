@@ -29,10 +29,10 @@ import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
+import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
 import eus.ixa.ixa.pipe.ml.resources.BrownCluster;
 import eus.ixa.ixa.pipe.ml.resources.ClarkCluster;
 import eus.ixa.ixa.pipe.ml.resources.Dictionary;
-import eus.ixa.ixa.pipe.ml.resources.LemmaDictionary;
 import eus.ixa.ixa.pipe.ml.resources.MFSResource;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
 import eus.ixa.ixa.pipe.ml.resources.Word2VecCluster;
@@ -68,7 +68,9 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
  * containing a token.
  * <li>Word2VecClusterFeatures: use the word2vec clustering class of a token as
  * a feature.
- * <li>POSTagFeatures: use pos tags, pos tag class as features.
+ * <li>POSTagModelFeatures: use pos tags, pos tag class as features.
+ * <li>LemmaModelFeatures: use lemma as features.
+ * <li>LemmaDictionaryFeatures: use lemma from a dictionary as features.
  * <li>MFSFeatures: Most Frequent sense feature.
  * <li>SuperSenseFeatures: Ciaramita and Altun (2006) features for super sense tagging.
  * </ol>
@@ -165,19 +167,35 @@ public class DefaultTrainer extends AbstractTrainer {
     }
     if (Flags.isPOSTagModelFeatures(params)) {
       String morphoResourcesPath = Flags.getPOSTagModelFeatures(params);
-      String posSerializerId = "postagserializer";
+      String posSerializerId = "seqmodelserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
       loadResource(posSerializerId, artifactSerializers, morphoResourcesPath, featureGenDescriptor, resources);
+    }
+    if (Flags.isLemmaModelFeatures(params)) {
+      String lemmaModelPath = Flags.getLemmaModelFeatures(params);
+      String lemmaSerializerId = "seqmodelserializer";
+      artifactSerializers.put(lemmaSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
+      loadResource(lemmaSerializerId, artifactSerializers, lemmaModelPath, featureGenDescriptor, resources);
+    }
+    if (Flags.isLemmaDictionaryFeatures(params)) {
+      String lemmaDictPath = Flags.getLemmaDictionaryFeatures(params);
+      String[] lemmaDictResources = Flags.getLemmaDictionaryResources(lemmaDictPath);
+      String posSerializerId = "seqmodelserializer";
+      String lemmaDictSerializerId = "lemmadictserializer";
+      artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
+      loadResource(posSerializerId, artifactSerializers, lemmaDictResources[0], featureGenDescriptor, resources);
+      artifactSerializers.put(lemmaDictSerializerId, new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
+      loadResource(lemmaDictSerializerId, artifactSerializers, lemmaDictResources[1], featureGenDescriptor, resources);
     }
     if (Flags.isSuperSenseFeatures(params)) {
       String mfsResourcesPath = Flags.getSuperSenseFeatures(params);
       String[] mfsResources = Flags.getSuperSenseResources(mfsResourcesPath);
-      String posSerializerId = "postagserializer";
-      String lemmaSerializerId = "lemmaserializer";
+      String posSerializerId = "seqmodelserializer";
+      String lemmaSerializerId = "lemmadictserializer";
       String mfsSerializerId = "mfsserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
       loadResource(posSerializerId, artifactSerializers, mfsResources[0], featureGenDescriptor, resources);
-      artifactSerializers.put(lemmaSerializerId, new LemmaDictionary.LemmaDictionarySerializer());
+      artifactSerializers.put(lemmaSerializerId, new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
       loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], featureGenDescriptor, resources);
       artifactSerializers.put(mfsSerializerId, new MFSResource.MFSResourceSerializer());
       loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], featureGenDescriptor, resources);
@@ -185,12 +203,12 @@ public class DefaultTrainer extends AbstractTrainer {
     if (Flags.isMFSFeatures(params)) {
       String mfsResourcesPath = Flags.getMFSFeatures(params);
       String[] mfsResources = Flags.getMFSResources(mfsResourcesPath);
-      String posSerializerId = "postagserializer";
-      String lemmaSerializerId = "lemmaserializer";
+      String posSerializerId = "seqmodelserializer";
+      String lemmaSerializerId = "lemmadictserializer";
       String mfsSerializerId = "mfsserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
       loadResource(posSerializerId, artifactSerializers, mfsResources[0], featureGenDescriptor, resources);
-      artifactSerializers.put(lemmaSerializerId, new LemmaDictionary.LemmaDictionarySerializer());
+      artifactSerializers.put(lemmaSerializerId, new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
       loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], featureGenDescriptor, resources);
       artifactSerializers.put(mfsSerializerId, new MFSResource.MFSResourceSerializer());
       loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], featureGenDescriptor, resources);

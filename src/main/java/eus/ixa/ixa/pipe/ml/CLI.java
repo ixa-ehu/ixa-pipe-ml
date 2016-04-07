@@ -242,7 +242,7 @@ public class CLI {
         .help("Reset the adaptive features; defaults to 'no'.\n");
     evalParser.addArgument("-f","--corpusFormat")
         .required(false)
-        .choices("conll02", "conll03", "tabulated")
+        .choices("conll02", "conll03", "lemmatizer", "tabulated")
         .setDefault(Flags.DEFAULT_EVAL_FORMAT)
         .help("Choose format of reference corpus; it defaults to conll02 format.\n");
     evalParser.addArgument("--evalReport")

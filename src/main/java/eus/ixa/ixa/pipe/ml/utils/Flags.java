@@ -20,14 +20,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import opennlp.tools.util.TrainingParameters;
-import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
 
 public class Flags {
 
   public static final boolean DEBUG = false;
   public static final String DEFAULT_FEATURE_FLAG = "no";
-  public static final String CHAR_NGRAM_RANGE = "2:5";
   public static final String DEFAULT_WINDOW = "2:2";
+  public static final String DEFAULT_TOKEN_RANGE = "lower";
+  public static final String DEFAULT_TOKENCLASS_RANGE = "lower,wac";
+  public static final String DEFAULT_SENTENCE_BEGIN = "true";
+  public static final String DEFAULT_SENTENCE_END = "false";
+  public static final String DEFAULT_PREFIX_BEGIN = "3";
+  public static final String DEFAULT_PREFIX_END = "4";
+  public static final String DEFAULT_SUFFIX_BEGIN = "0";
+  public static final String DEFAULT_SUFFIX_END = "4";
+  public static final String CHAR_NGRAM_RANGE = "2:5";
   public static final String DEFAULT_POSTAG_RANGE = "pos,posclass";
   public static final String DEFAULT_MFS_RANGE = "pos,posclass,lemma,mfs,no";
   public static final String DEFAULT_SUPERSENSE_RANGE = "mfs,monosemic";
@@ -185,6 +192,16 @@ public class Flags {
     }
     return tokenFlag;
   }
+  
+  public static String getTokenFeaturesRange(TrainingParameters params) {
+    String tokenRangeFlag = null;
+    if (params.getSettings().get("TokenFeaturesRange") != null) {
+      tokenRangeFlag = params.getSettings().get("TokenFeaturesRange");
+    } else {
+      tokenRangeFlag = DEFAULT_TOKEN_RANGE;
+    }
+    return tokenRangeFlag;
+  }
 
   public static String getTokenClassFeatures(TrainingParameters params) {
     String tokenClassFlag = null;
@@ -194,6 +211,25 @@ public class Flags {
       tokenClassFlag = Flags.DEFAULT_FEATURE_FLAG;
     }
     return tokenClassFlag;
+  }
+  
+  public static String getTokenClassFeaturesRange(TrainingParameters params) {
+    String tokenRangeFlag = null;
+    if (params.getSettings().get("TokenClassFeaturesRange") != null) {
+      tokenRangeFlag = params.getSettings().get("TokenClassFeaturesRange");
+    } else {
+      tokenRangeFlag = DEFAULT_TOKENCLASS_RANGE;
+    }
+    return tokenRangeFlag;
+  }
+  
+  public static String[] processTokenClassFeaturesRange(String mfsFlag) {
+    String[] mfsFlagArray = mfsFlag.split(",");
+    if (mfsFlagArray.length != 2) {
+      System.err.println("TokenClassFeaturesRange requires two fields but got " + mfsFlagArray.length);
+      System.exit(1);
+    }
+    return mfsFlagArray;
   }
 
   public static String getWordShapeSuperSenseFeatures(TrainingParameters params) {
@@ -235,6 +271,27 @@ public class Flags {
     }
     return sentenceFlag;
   }
+  
+  public static String getSentenceFeaturesBegin(TrainingParameters params) {
+    String beginFlag = null;
+    if (params.getSettings().get("SentenceFeaturesBegin") != null) {
+      beginFlag = params.getSettings().get("SentenceFeaturesBegin");
+    } else {
+      beginFlag = Flags.DEFAULT_SENTENCE_BEGIN;
+    }
+    return beginFlag;
+  }
+  
+  public static String getSentenceFeaturesEnd(TrainingParameters params) {
+    String endFlag = null;
+    if (params.getSettings().get("SentenceFeaturesEnd") != null) {
+      endFlag = params.getSettings().get("SentenceFeaturesEnd");
+    } else {
+      endFlag = Flags.DEFAULT_SENTENCE_END;
+    }
+    return endFlag;
+  }
+
 
   public static String getPreffixFeatures(TrainingParameters params) {
     String prefixFlag = null;
@@ -245,6 +302,27 @@ public class Flags {
     }
     return prefixFlag;
   }
+  
+  public static String getPrefixFeaturesBegin(TrainingParameters params) {
+    String beginFlag = null;
+    if (params.getSettings().get("PrefixFeaturesBegin") != null) {
+      beginFlag = params.getSettings().get("PrefixFeaturesBegin");
+    } else {
+      beginFlag = Flags.DEFAULT_PREFIX_BEGIN;
+    }
+    return beginFlag;
+  }
+  
+  public static String getPrefixFeaturesEnd(TrainingParameters params) {
+    String endFlag = null;
+    if (params.getSettings().get("PrefixFeaturesEnd") != null) {
+      endFlag = params.getSettings().get("PrefixFeaturesEnd");
+    } else {
+      endFlag = Flags.DEFAULT_PREFIX_END;
+    }
+    return endFlag;
+  }
+
 
   public static String getSuffixFeatures(TrainingParameters params) {
     String suffixFlag = null;
@@ -254,6 +332,26 @@ public class Flags {
       suffixFlag = Flags.DEFAULT_FEATURE_FLAG;
     }
     return suffixFlag;
+  }
+  
+  public static String getSuffixFeaturesBegin(TrainingParameters params) {
+    String beginFlag = null;
+    if (params.getSettings().get("SuffixFeaturesBegin") != null) {
+      beginFlag = params.getSettings().get("SuffixFeaturesBegin");
+    } else {
+      beginFlag = Flags.DEFAULT_SUFFIX_BEGIN;
+    }
+    return beginFlag;
+  }
+  
+  public static String getSuffixFeaturesEnd(TrainingParameters params) {
+    String endFlag = null;
+    if (params.getSettings().get("SuffixFeaturesEnd") != null) {
+      endFlag = params.getSettings().get("SuffixFeaturesEnd");
+    } else {
+      endFlag = Flags.DEFAULT_SUFFIX_END;
+    }
+    return endFlag;
   }
 
   public static String getBigramClassFeatures(TrainingParameters params) {
@@ -315,6 +413,15 @@ public class Flags {
     }
     return charNgramRangeFlag;
   }
+  
+  public static String[] processNgramRange(String charngramRangeFlag) {
+    String[] charngramArray = charngramRangeFlag.split("[ :-]");
+    if (charngramArray.length != 2) {
+      System.err.println("CharNgramFeaturesRange requires two fieds but got " + charngramArray.length);
+      System.exit(1);
+    }
+  return charngramArray;
+}
 
   public static String getDictionaryFeatures(TrainingParameters params) {
     String dictionaryFlag = null;
@@ -576,7 +683,6 @@ public class Flags {
   }
 
   public static boolean isCharNgramClassFeature(TrainingParameters params) {
-    XMLFeatureDescriptor.setNgramRange(params);
     String charngramParam = getCharNgramFeatures(params);
     return !charngramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }

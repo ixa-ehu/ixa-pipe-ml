@@ -23,7 +23,7 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 public class SentenceFeatureGenerator extends CustomFeatureGenerator {
 
-  private Map<String, String> attributes;
+  private Map<String, String> properties;
 
   public SentenceFeatureGenerator() {
   }
@@ -31,28 +31,19 @@ public class SentenceFeatureGenerator extends CustomFeatureGenerator {
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] previousOutcomes) {
 
-    if (attributes.get("begin").equalsIgnoreCase("true") && index == 0) {
+    if (properties.get("begin").equalsIgnoreCase("true") && index == 0) {
       features.add("S=begin");
     }
 
-    if (attributes.get("end").equalsIgnoreCase("true") && tokens.length == index + 1) {
+    if (properties.get("end").equalsIgnoreCase("true") && tokens.length == index + 1) {
       features.add("S=end");
     }
   }
 
   public void init(Map<String, String> attributes, FeatureGeneratorResourceProvider resourceProvider) {
-    this.attributes = attributes;
-    setBeginSentenceAttribute(attributes);
-    setEndSentenceAttribute(attributes);
+    this.properties = attributes;
   }
 
-  private void setBeginSentenceAttribute(Map<String, String> attributes) {
-    attributes.put("begin", "true");
-  }
-
-  private void setEndSentenceAttribute(Map<String, String> attributes) {
-    attributes.put("end", "false");
-  }
 
   @Override
   public void updateAdaptiveData(String[] tokens, String[] outcomes) {

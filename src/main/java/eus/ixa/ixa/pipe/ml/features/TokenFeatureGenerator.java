@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Rodrigo Agerri
+ * Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,31 +16,28 @@
 package eus.ixa.ixa.pipe.ml.features;
 
 import java.util.List;
+import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
-import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
  * Generates a feature which contains the token itself.
  */
-public class TokenFeatureGenerator extends FeatureGeneratorAdapter {
+public class TokenFeatureGenerator extends CustomFeatureGenerator {
 
-  private boolean lowercase;
-
-  public TokenFeatureGenerator(boolean lowercase) {
-    this.lowercase = lowercase;
-  }
-
+  private Map<String, String> attributes;
   
   public TokenFeatureGenerator() {
-    this(true);
   }
 
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] preds) {
 
-    if (lowercase) {
+    if (attributes.get("range").equalsIgnoreCase("lower")) {
       features.add("w=" + tokens[index].toLowerCase());
       if (Flags.DEBUG) {
         System.err.println("-> " + tokens[index].toLowerCase() + ": w=" + tokens[index].toLowerCase());
@@ -49,4 +46,21 @@ public class TokenFeatureGenerator extends FeatureGeneratorAdapter {
       features.add("w=" + tokens[index]);
     }
   }
+  
+  @Override
+  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  }
+
+  @Override
+  public void clearAdaptiveData() {
+  }
+  
+  @Override
+  public void init(Map<String, String> properties,
+      FeatureGeneratorResourceProvider resourceProvider)
+      throws InvalidFormatException {
+    this.attributes = properties;
+    
+  }
+  
 }

@@ -16,11 +16,14 @@
 package eus.ixa.ixa.pipe.ml.features;
 
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
-import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.featuregen.StringPattern;
 
 /**
@@ -42,22 +45,16 @@ import opennlp.tools.util.featuregen.StringPattern;
  * <li>other - other</li>
  * </ul>
  */
-public class TokenClassFeatureGenerator extends FeatureGeneratorAdapter {
+public class TokenClassFeatureGenerator extends CustomFeatureGenerator {
 
+  private boolean isLower;
+  private boolean isWordAndClassFeature;
   private static Pattern capPeriod;
-
   static {
     capPeriod = Pattern.compile("^[A-Z]\\.$");
   }
 
-  private boolean generateWordAndClassFeature;
-
   public TokenClassFeatureGenerator() {
-    this(true);
-  }
-
-  public TokenClassFeatureGenerator(boolean generateWordAndClassFeature) {
-    this.generateWordAndClassFeature = generateWordAndClassFeature;
   }
 
   public void createFeatures(List<String> features, String[] tokens, int index,
@@ -65,9 +62,14 @@ public class TokenClassFeatureGenerator extends FeatureGeneratorAdapter {
     String wordClass = tokenShapeFeature(tokens[index]);
     features.add("wc=" + wordClass);
 
-    if (generateWordAndClassFeature) {
-      features.add("w&c=" + tokens[index].toLowerCase()
-          + "," + wordClass);
+    if (isWordAndClassFeature) {
+      if (isLower) {
+        features.add("w&c=" + tokens[index].toLowerCase()
+            + "," + wordClass);
+      } else {
+        features.add("w&c=" + tokens[index]
+            + "," + wordClass);
+      }
     }
     if (Flags.DEBUG) {
       System.err.println("-> " + tokens[index].toLowerCase() + ": w&c=" + tokens[index].toLowerCase()
@@ -114,6 +116,36 @@ public class TokenClassFeatureGenerator extends FeatureGeneratorAdapter {
     }
 
     return (feat);
+  }
+  
+  @Override
+  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  }
+
+  @Override
+  public void clearAdaptiveData() {
+  }
+  
+  @Override
+  public void init(Map<String, String> properties,
+      FeatureGeneratorResourceProvider resourceProvider)
+      throws InvalidFormatException {
+   processRangeOptions(properties);
+  }
+  
+  /**
+   * Process the options of which type of features are to be generated.
+   * @param properties the properties map
+   */
+  private void processRangeOptions(Map<String, String> properties) {
+    String featuresRange = properties.get("range");
+    String[] rangeArray = Flags.processTokenClassFeaturesRange(featuresRange);
+    if (rangeArray[0].equalsIgnoreCase("lower")) {
+      isLower = true;
+    }
+    if (rangeArray[1].equalsIgnoreCase("wac")) {
+      isWordAndClassFeature = true;
+    }
   }
 
 }

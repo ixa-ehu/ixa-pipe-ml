@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Rodrigo Agerri
+ *  Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -23,28 +23,27 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
+public class PrefixFeatureGenerator extends CustomFeatureGenerator {
 
-public class SuffixFeatureGenerator extends CustomFeatureGenerator {
-  
   private Map<String, String> attributes;
-  
-  public String[] getSuffixes(String lex) {
+
+  public String[] getPrefixes(String lex) {
     Integer start = Integer.parseInt(attributes.get("begin"));
     Integer end = Integer.parseInt(attributes.get("end"));
-    String[] suffs = new String[end];
+    String[] prefs = new String[end];
     for (int i = start, l = end; i < l; i++) {
-      suffs[i] = lex.substring(Math.max(lex.length() - i - 1, 0));
+      prefs[i] = lex.substring(0, Math.min(i + 1, lex.length()));
     }
-    return suffs;
+    return prefs;
   }
-  
+
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] previousOutcomes) {
-    String[] suffs = getSuffixes(tokens[index]);
-    for (String suff : suffs) {
-      features.add("suf=" + suff);
+    String[] prefs = getPrefixes(tokens[index]);
+    for (String pref : prefs) {
+      features.add("pre=" + pref);
       if (Flags.DEBUG) {
-        System.err.println("-> " + tokens[index] + ": suf=" + suff);
+        System.err.println("-> " + tokens[index] + ": pre=" + pref);
       }
     }
   }
@@ -65,4 +64,5 @@ public class SuffixFeatureGenerator extends CustomFeatureGenerator {
       throws InvalidFormatException {
     attributes = properties;
   }
+  
 }

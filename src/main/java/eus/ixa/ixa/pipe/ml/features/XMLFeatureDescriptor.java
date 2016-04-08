@@ -34,7 +34,7 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 /**
  * Class to automatically generate the feature descriptor from a trainParams.properties file.
  * @author ragerri
- * @version 2015-03-30
+ * @version 2016-04-08
  */
 public final class XMLFeatureDescriptor {
   
@@ -46,14 +46,6 @@ public final class XMLFeatureDescriptor {
    * The rightWindow length.
    */
   private static int rightWindow = -1;
-  /**
-   * The minimum character ngram to be applied to a token.
-   */
-  private static int minCharNgram = -1;
-  /**
-   * The maximum character ngram to be applied to a token.
-   */
-  private static int maxCharNgram = -1;
   
   /**
    * This class is not to be instantiated.
@@ -74,21 +66,6 @@ public final class XMLFeatureDescriptor {
    */
   public static int getRightWindow() {
     return rightWindow;
-  }
-  /**
-   * Get the minimum character ngram.
-   * @return the minimum character ngram value
-   */
-  public static int getMinCharNgram() {
-    return minCharNgram;
-  }
-  
-  /**
-   * Get the maximum character ngram.
-   * @return the maximum character ngram value
-   */
-  public static int getMaxCharNgram() {
-    return maxCharNgram;
   }
   
   /**
@@ -112,8 +89,10 @@ public final class XMLFeatureDescriptor {
     //</window>
     if (Flags.isTokenFeature(params)) {
       setWindow(params);
+      String tokenFeatureRange = Flags.getTokenFeaturesRange(params);
       Element tokenFeature = new Element("custom");
       tokenFeature.setAttribute("class", TokenFeatureGenerator.class.getName());
+      tokenFeature.setAttribute("range", tokenFeatureRange);
       Element tokenWindow = new Element("window");
       tokenWindow.setAttribute("prevLength", Integer.toString(leftWindow));
       tokenWindow.setAttribute("nextLength", Integer.toString(rightWindow));
@@ -123,8 +102,10 @@ public final class XMLFeatureDescriptor {
     }
     if (Flags.isTokenClassFeature(params)) {
       setWindow(params);
+      String tokenClassFeatureRange = Flags.getTokenClassFeaturesRange(params);
       Element tokenClassFeature = new Element("custom");
       tokenClassFeature.setAttribute("class", TokenClassFeatureGenerator.class.getName());
+      tokenClassFeature.setAttribute("range", tokenClassFeatureRange);
       Element tokenClassWindow = new Element("window");
       tokenClassWindow.setAttribute("prevLength", Integer.toString(leftWindow));
       tokenClassWindow.setAttribute("nextLength", Integer.toString(rightWindow));
@@ -156,22 +137,32 @@ public final class XMLFeatureDescriptor {
       System.err.println("-> Previous Map Features added!");
     }
     if (Flags.isSentenceFeature(params)) {
+      String beginSentence = Flags.getSentenceFeaturesBegin(params);
+      String endSentence = Flags.getSentenceFeaturesEnd(params);
       Element sentenceFeature = new Element("custom");
       sentenceFeature.setAttribute("class", SentenceFeatureGenerator.class.getName());
-      sentenceFeature.setAttribute("begin", "true");
-      sentenceFeature.setAttribute("end", "false");
+      sentenceFeature.setAttribute("begin", beginSentence);
+      sentenceFeature.setAttribute("end", endSentence);
       generators.addContent(sentenceFeature);
       System.err.println("-> Sentence Features added!");
     }
     if (Flags.isPrefixFeature(params)) {
+      String beginPrefix = Flags.getPrefixFeaturesBegin(params);
+      String endPrefix = Flags.getPrefixFeaturesEnd(params);
       Element prefixFeature = new Element("custom");
-      prefixFeature.setAttribute("class", Prefix34FeatureGenerator.class.getName());
+      prefixFeature.setAttribute("class", PrefixFeatureGenerator.class.getName());
+      prefixFeature.setAttribute("begin", beginPrefix);
+      prefixFeature.setAttribute("end", endPrefix);
       generators.addContent(prefixFeature);
       System.err.println("-> Prefix Features added!");
     }
     if (Flags.isSuffixFeature(params)) {
+      String beginSuffix = Flags.getSuffixFeaturesBegin(params);
+      String endSuffix = Flags.getSuffixFeaturesEnd(params);
       Element suffixFeature = new Element("custom");
       suffixFeature.setAttribute("class", SuffixFeatureGenerator.class.getName());
+      suffixFeature.setAttribute("begin", beginSuffix);
+      suffixFeature.setAttribute("end", endSuffix);
       generators.addContent(suffixFeature);
       System.err.println("-> Suffix Features added!");
     }
@@ -200,11 +191,12 @@ public final class XMLFeatureDescriptor {
       System.err.println("-> Fivegram Class Features added!");
     }
     if (Flags.isCharNgramClassFeature(params)) {
-      setNgramRange(params);
+      String charngramRange = Flags.getCharNgramFeaturesRange(params);
+      String[] rangeArray = Flags.processNgramRange(charngramRange);
       Element charngramFeature = new Element("custom");
       charngramFeature.setAttribute("class", CharacterNgramFeatureGenerator.class.getName());
-      charngramFeature.setAttribute("minLength", Integer.toString(minCharNgram));
-      charngramFeature.setAttribute("maxLength",Integer.toString(maxCharNgram));
+      charngramFeature.setAttribute("minLength", rangeArray[0]);
+      charngramFeature.setAttribute("maxLength", rangeArray[1]);
       generators.addContent(charngramFeature);
       System.err.println("-> CharNgram Class Features added!");
     }
@@ -421,34 +413,6 @@ public final class XMLFeatureDescriptor {
       windowRange.add(Integer.parseInt(windowArray[1]));
     }
     return windowRange;
-  }
-  
-  /**
-   * Set the character ngrams minimum and maximum values.
-   * @param params the parameters file
-   */
-  public static void setNgramRange(TrainingParameters params) {
-    if (minCharNgram == -1 || maxCharNgram == -1) {
-      minCharNgram = getNgramRange(params).get(0);
-      maxCharNgram = getNgramRange(params).get(1);
-    }
-  }
-
-  /**
-   * Get the range of the character ngram of current token.
-   * @param params the training parameters
-   * @return a list containing the initial and maximum ngram values
-   */
-  public static List<Integer> getNgramRange(TrainingParameters params) {
-    List<Integer> ngramRange = new ArrayList<Integer>();
-      String charNgramParam = Flags.getCharNgramFeaturesRange(params);
-      String[] charngramArray = charNgramParam.split("[ :-]");
-      if (charngramArray.length == 2) {
-        ngramRange.add(Integer.parseInt(charngramArray[0]));
-        ngramRange.add(Integer.parseInt(charngramArray[1]));
-
-      }
-    return ngramRange;
   }
   
 }

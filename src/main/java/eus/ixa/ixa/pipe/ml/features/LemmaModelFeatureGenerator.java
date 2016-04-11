@@ -36,6 +36,7 @@ public class LemmaModelFeatureGenerator extends CustomFeatureGenerator implement
     }
     String lemma = currentLemmas[index];
     features.add("lemmaModel=" + lemma);
+    //System.err.println("-> Model Lemma: " + tokens[index] + " " + lemma);
   }
   
   @Override

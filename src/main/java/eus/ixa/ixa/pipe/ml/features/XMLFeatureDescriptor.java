@@ -332,7 +332,7 @@ public final class XMLFeatureDescriptor {
       String lemmaDictPath = Flags.getLemmaDictionaryFeatures(params);
       String[] lemmaDictResources = Flags.getLemmaDictionaryResources(lemmaDictPath);
       Element lemmaClassFeatureElement = new Element("custom");
-      lemmaClassFeatureElement.setAttribute("class", LemmaModelFeatureGenerator.class.getName());
+      lemmaClassFeatureElement.setAttribute("class", LemmaDictionaryFeatureGenerator.class.getName());
       lemmaClassFeatureElement.setAttribute("model", InputOutputUtils.normalizeLexiconName(new File(lemmaDictResources[0]).getName()));
       lemmaClassFeatureElement.setAttribute("dict", InputOutputUtils.normalizeLexiconName(new File(lemmaDictResources[1]).getName()));
       Element lemmaClassFeatureWindow = new Element("window");

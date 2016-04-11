@@ -61,6 +61,7 @@ public class LemmaDictionaryFeatureGenerator extends CustomFeatureGenerator impl
     }
     String lemma = currentLemmas.get(index);
     features.add("lemmaDict=" + lemma);
+    //System.err.println("-> Dictionary Lemma: " + tokens[index] + " " + lemma);
   }
 
   @Override

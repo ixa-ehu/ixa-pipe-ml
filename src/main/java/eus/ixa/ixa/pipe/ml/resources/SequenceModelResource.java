@@ -80,6 +80,7 @@ public class SequenceModelResource implements SerializableArtifact {
   public String[] lemmatize(String[] tokens) {
     Span[] origSpans = sequenceLabeler.tag(tokens);
     Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    //TODO work with Spans only
     String[] decodedLemmas = StringUtils.decodeLemmas(tokens, seqSpans);
     return decodedLemmas;
   }

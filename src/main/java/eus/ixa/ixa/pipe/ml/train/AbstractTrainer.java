@@ -33,7 +33,7 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-import eus.ixa.ixa.pipe.ml.utils.InputOutputUtils;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 /**
  * Abstract class for common training functionalities. Every other trainer class
@@ -159,16 +159,16 @@ public abstract class AbstractTrainer implements Trainer {
       final String clearFeatures, final String aCorpusFormat) throws IOException {
     ObjectStream<SequenceSample> samples = null;
     if (aCorpusFormat.equalsIgnoreCase("conll03")) {
-      ObjectStream<String> nameStream = InputOutputUtils.readFileIntoMarkableStreamFactory(inputData);
+      ObjectStream<String> nameStream = IOUtils.readFileIntoMarkableStreamFactory(inputData);
       samples = new CoNLL03Format(clearFeatures, nameStream);
     } else if (aCorpusFormat.equalsIgnoreCase("conll02")) {
-      ObjectStream<String> nameStream = InputOutputUtils.readFileIntoMarkableStreamFactory(inputData);
+      ObjectStream<String> nameStream = IOUtils.readFileIntoMarkableStreamFactory(inputData);
       samples = new CoNLL02Format(clearFeatures, nameStream);
     } else if (aCorpusFormat.equalsIgnoreCase("tabulated")) {
-      ObjectStream<String> nameStream = InputOutputUtils.readFileIntoMarkableStreamFactory(inputData);
+      ObjectStream<String> nameStream = IOUtils.readFileIntoMarkableStreamFactory(inputData);
       samples = new TabulatedFormat(clearFeatures, nameStream);
     } else if (aCorpusFormat.equalsIgnoreCase("lemmatizer")) {
-      ObjectStream<String> seqStream = InputOutputUtils.readFileIntoMarkableStreamFactory(inputData);
+      ObjectStream<String> seqStream = IOUtils.readFileIntoMarkableStreamFactory(inputData);
       samples = new LemmatizerFormat(clearFeatures, seqStream);
     } else {
       System.err.println("Test set corpus format not valid!!");

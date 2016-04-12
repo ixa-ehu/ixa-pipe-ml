@@ -37,7 +37,7 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.train.DefaultTrainer;
 import eus.ixa.ixa.pipe.ml.train.Trainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-import eus.ixa.ixa.pipe.ml.utils.InputOutputUtils;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 /**
  * Main class of ixa-pipe-ml, the IXA pipes (ixa2.si.ehu.es/ixa-pipes) Machine
@@ -149,7 +149,7 @@ public class CLI {
 
     // load training parameters file
     String paramFile = parsedArguments.getString("params");
-    TrainingParameters params = InputOutputUtils
+    TrainingParameters params = IOUtils
         .loadTrainingParameters(paramFile);
     String outModel = null;
     if (params.getSettings().get("OutputModel") == null || params.getSettings().get("OutputModel").length() == 0) {
@@ -205,7 +205,7 @@ public class CLI {
   public final void crossValidate() throws IOException {
 
     String paramFile = parsedArguments.getString("params");
-    TrainingParameters params = InputOutputUtils
+    TrainingParameters params = IOUtils
         .loadTrainingParameters(paramFile);
     CrossValidator crossValidator = new CrossValidator(params);
     crossValidator.crossValidate(params);

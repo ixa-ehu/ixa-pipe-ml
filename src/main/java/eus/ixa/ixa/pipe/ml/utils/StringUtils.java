@@ -16,11 +16,16 @@
 
 package eus.ixa.ixa.pipe.ml.utils;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import com.google.common.io.Files;
+
+import eus.ixa.ixa.pipe.ml.seg.RuleBasedSegmenter;
 
 /**
  * Pattern matching and other utility string functions.
@@ -30,6 +35,12 @@ import com.google.common.io.Files;
  */
 public final class StringUtils {
 
+  
+  /**
+   * Pattern to remove double bars from disjunct regex.
+   */
+  public static Pattern doubleBar = Pattern.compile("\\|\\|");
+  
   /**
    * Private constructor.
    */
@@ -398,6 +409,40 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
       span.setType(lemma);
     }
   }
-
-
+  
+  public static String createDisjunctRegexFromList(final List<String> words) {
+    final StringBuilder sb = new StringBuilder();
+    for (final String word : words) {
+      sb.append(word).append("|");
+    }
+    String regExp = sb.toString();
+    regExp = doubleBar.matcher(regExp).replaceAll("\\|");
+    regExp = regExp.replaceAll("\\.", "\\\\.");
+    final String result = regExp.substring(1, regExp.length() - 1);
+    return result;
+  }
+  
+  /**
+   * Reads standard input text from the BufferedReader and
+   * adds a line break mark for every line. The output of
+   * this functions is then further processed by methods
+   * called in the constructors of the SentenceSegmenter and
+   * Tokenizer.
+   * @param breader the buffered reader
+   * @return the input text in a string object
+   */
+  public static String readText(final BufferedReader breader) {
+    String line;
+    final StringBuilder sb = new StringBuilder();
+    try {
+      while ((line = breader.readLine()) != null) {
+        sb.append(line).append(RuleBasedSegmenter.LINE_BREAK);
+      }
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+    final String text = sb.toString();
+    return text;
+  }
 }
+

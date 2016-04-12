@@ -40,7 +40,7 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-import eus.ixa.ixa.pipe.ml.utils.InputOutputUtils;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 /**
@@ -229,7 +229,7 @@ public class DefaultTrainer extends AbstractTrainer {
 
     File resourceFile = new File(resourcePath);
     if (resourceFile != null) {
-      String resourceId = InputOutputUtils.normalizeLexiconName(resourceFile.getName());
+      String resourceId = IOUtils.normalizeLexiconName(resourceFile.getName());
       ArtifactSerializer<?> serializer = artifactSerializers.get(serializerId);
       InputStream resourceIn = CmdLineUtil.openInFile(resourceFile);
       try {

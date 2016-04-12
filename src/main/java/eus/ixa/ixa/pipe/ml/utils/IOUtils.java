@@ -38,12 +38,12 @@ import opennlp.tools.util.TrainingParameters;
  * Utility functions to read and save ObjectStreams.
  * @author ragerri
  */
-public final class InputOutputUtils {
+public final class IOUtils {
 
   /**
    * Private constructor. This class should only be used statically.
    */
-  private InputOutputUtils() {
+  private IOUtils() {
 
   }
   
@@ -93,11 +93,11 @@ public final class InputOutputUtils {
     InputStream dictInputStream = null;
     String[] dictPaths = normalizedPath.split("src/main/resources");
     if (dictPaths.length == 2) {
-      dictInputStream = InputOutputUtils.class.getClassLoader().getResourceAsStream(dictPaths[1]);
+      dictInputStream = IOUtils.class.getClassLoader().getResourceAsStream(dictPaths[1]);
     } else {
       String[] windowsPaths = normalizedPath.split("src\\\\main\\\\resources\\\\");
       if (windowsPaths.length == 2) {
-        dictInputStream = InputOutputUtils.class.getClassLoader().getResourceAsStream(windowsPaths[1]);
+        dictInputStream = IOUtils.class.getClassLoader().getResourceAsStream(windowsPaths[1]);
       }
     }
     return dictInputStream;

@@ -158,6 +158,25 @@ public class NonPeriodBreaker {
     }
     return nonBreakerInputStream;
   }
+  
+  /**
+   * Segment the rest of the text taking into account some exceptions
+   * for periods as sentence breakers. It decides when a period marks
+   * an end of sentence.
+   * @param lines the segmented sentences so far
+   * @return all the segmented sentences
+   */
+  public String[] segmenterExceptions(String[] lines) {
+    List<String> sentences = new ArrayList<>();
+    for (String line : lines) {
+      String segmentedLine = segmenterNonBreaker(line);
+      String[] lineSentences = segmentedLine.split("\n");
+      for (String lineSentence : lineSentences) {
+        sentences.add(lineSentence);
+      }
+    }
+    return sentences.toArray(new String[sentences.size()]);
+  }
 
   /**
    * This function implements exceptions for periods as sentence breakers. It
@@ -167,7 +186,7 @@ public class NonPeriodBreaker {
    *          the text to be processed
    * @return segmented text (with newlines included)
    */
-  public String SegmenterNonBreaker(String line) {
+  private String segmenterNonBreaker(String line) {
 
     // these are fine because they do not affect offsets
     line = line.trim();
@@ -176,11 +195,9 @@ public class NonPeriodBreaker {
     String segmentedText = "";
     int i;
     final String[] words = line.split(" ");
-    System.err.println("-> Line length to segment: " + words.length);
     //iterate over the words
     for (i = 0; i < (words.length - 1); i++) {
       Matcher nonSegmentedWordMatcher = nonSegmentedWords.matcher(words[i]);
-      System.err.println("-> IF 01");
       //candidate word to be segmented found:
       if (nonSegmentedWordMatcher.find()) {
         String curWord = nonSegmentedWordMatcher.replaceAll("$1");

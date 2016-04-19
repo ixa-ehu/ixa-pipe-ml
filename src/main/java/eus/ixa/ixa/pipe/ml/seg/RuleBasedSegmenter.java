@@ -219,11 +219,10 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
     //special case of multi-punctuation
     line = punctSpaceMultiPunct.matcher(line).replaceAll("$1\n$2");
 
-    //System.err.println("-> NonBreaker.....");
+    System.err.println("-> NonBreaker.....");
     // non breaker segments everything else with some exceptions
-    line = nonBreaker.SegmenterNonBreaker(line);
-    //System.err.println("-> Segmentation DONE!");
-    final String[] sentences = line.split("\n");
+    String[] lines = line.split("\n");
+    String[] sentences = nonBreaker.segmenterExceptions(lines);
     return sentences;
   }
 

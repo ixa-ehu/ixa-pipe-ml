@@ -128,6 +128,7 @@ public class NonPeriodBreaker {
     NON_BREAKER = StringUtils.createDisjunctRegexFromList(nonBreakerList);
   }
 
+  //TODO integrate in code
   private final InputStream getNonBreakerInputStream(final String lang) {
     InputStream nonBreakerInputStream = null;
     if (lang.equalsIgnoreCase("de")) {
@@ -175,10 +176,11 @@ public class NonPeriodBreaker {
     String segmentedText = "";
     int i;
     final String[] words = line.split(" ");
+    System.err.println("-> Line length to segment: " + words.length);
     //iterate over the words
     for (i = 0; i < (words.length - 1); i++) {
       Matcher nonSegmentedWordMatcher = nonSegmentedWords.matcher(words[i]);
-      //System.err.println("-> IF 01");
+      System.err.println("-> IF 01");
       //candidate word to be segmented found:
       if (nonSegmentedWordMatcher.find()) {
         String curWord = nonSegmentedWordMatcher.replaceAll("$1");

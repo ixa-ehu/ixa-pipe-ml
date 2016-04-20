@@ -122,10 +122,11 @@ public class Normalizer {
             .replaceAll("``"));
         token.setTokenValue(rightDoubleQuote.matcher(token.getTokenValue())
             .replaceAll("''"));
-      } else if (lang.equalsIgnoreCase("de") || lang.equalsIgnoreCase("es")
+      } else if (lang.equalsIgnoreCase("ca") || lang.equalsIgnoreCase("de") || lang.equalsIgnoreCase("es")
           || lang.equalsIgnoreCase("eu") || lang.equalsIgnoreCase("fr")
           || lang.equalsIgnoreCase("gl") || lang.equalsIgnoreCase("it")
-          || lang.equalsIgnoreCase("nl")) {
+          || lang.equalsIgnoreCase("nl") || lang.equalsIgnoreCase("pt") ||
+          lang.equalsIgnoreCase("ru")) {
         token.setTokenValue(toAsciiSingleQuote.matcher(token.getTokenValue())
             .replaceAll("'"));
         token.setTokenValue(toAsciiDoubleQuote.matcher(token.getTokenValue())

@@ -246,11 +246,7 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
       e.printStackTrace();
     }
     String text = sb.toString();
-    // <JAR><JAR> to PARAGRAPH mark in unicode
-    text = doubleLineBreak.matcher(text).replaceAll(
-        PARAGRAPH);
-    // <JAR> to " "
-    text = lineBreak.matcher(text).replaceAll(" ");
+    text = buildText(text);
     return text;
   }
   
@@ -261,7 +257,7 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
    * @param text the text from the reader
    * @return the original text
    */
-  public static String buildText(String text) {
+  private static String buildText(String text) {
     // <JAR><JAR> to PARAGRAPH mark in unicode
     text = doubleLineBreak.matcher(text).replaceAll(
         PARAGRAPH);

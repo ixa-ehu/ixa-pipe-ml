@@ -107,7 +107,7 @@ Surg
 tel
 Univ
 
-# freeling
+# abbreviations
 
 a.a
 a.a.a

@@ -41,11 +41,15 @@ public class NonPeriodBreaker {
   /**
    * Non segmented words, candidates for sentence breaking.
    */
-  public static Pattern nonSegmentedWords = Pattern.compile("([\\p{Alnum}\\.\\-]*)(" +  RuleBasedSegmenter.FINAL_PUNCT + "*)(\\.+)$", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern nonSegmentedWords = Pattern.compile(
+      "([\\p{Alnum}\\.\\-]*)(" + RuleBasedSegmenter.FINAL_PUNCT + "*)(\\.+)$",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Next word wrt to the candidate to indicate sentence breaker.
    */
-  public static Pattern nextCandidateWord = Pattern.compile("([\\ ]*" + RuleBasedSegmenter.INITIAL_PUNCT + "*[\\ ]*[\\p{Lu}\\p{Digit}])", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern nextCandidateWord = Pattern.compile("([\\ ]*"
+      + RuleBasedSegmenter.INITIAL_PUNCT + "*[\\ ]*[\\p{Lu}\\p{Digit}])",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Do not split dot after these words if followed by number.
    */
@@ -53,11 +57,13 @@ public class NonPeriodBreaker {
   /**
    * General acronyms.
    */
-  public static Pattern acronym = Pattern.compile("(\\.)[\\p{Lu}\\-]+([\\.]+)$", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern acronym = Pattern.compile(
+      "(\\.)[\\p{Lu}\\-]+([\\.]+)$", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Do not segment numbers like 11.1.
    */
-  public static Pattern numbers = Pattern.compile("(\\p{Digit}+[\\.])[\\ ]*(\\p{Digit}+)", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern numbers = Pattern.compile(
+      "(\\p{Digit}+[\\.])[\\ ]*(\\p{Digit}+)", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Any non white space followed by a period.
    */
@@ -65,19 +71,23 @@ public class NonPeriodBreaker {
   /**
    * Any alphabetic character.
    */
-  public static Pattern alphabetic = Pattern.compile("\\p{Alpha}", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern alphabetic = Pattern.compile("\\p{Alpha}",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Starts with a lowercase.
    */
-  public static Pattern startLower = Pattern.compile("^\\p{Lower}+", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern startLower = Pattern.compile("^\\p{Lower}+",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Starts with punctuation that is not beginning of sentence marker.
    */
-  public static Pattern startPunct = Pattern.compile("^[\\!#\\$%&\\(\\)\\*\\+,-\\/:;=>\\?@\\[\\\\\\]\\^\\{\\|\\}~]");
+  public static Pattern startPunct = Pattern
+      .compile("^[\\!#\\$%&\\(\\)\\*\\+,-\\/:;=>\\?@\\[\\\\\\]\\^\\{\\|\\}~]");
   /**
    * Starts with a digit.
    */
-  public static Pattern startDigit = Pattern.compile("^\\p{Digit}+", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern startDigit = Pattern.compile("^\\p{Digit}+",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Non breaker prefix read from the files in resources.
    */
@@ -107,8 +117,8 @@ public class NonPeriodBreaker {
 
     final InputStream nonBreakerInputStream = getNonBreakerInputStream(lang);
     if (nonBreakerInputStream == null) {
-      System.err.println("ERROR: Not nonbreaker file for language " + lang
-          + " in src/main/resources!!");
+      System.err.println("WARNING: No exceptions file for language " + lang
+          + " in ixa-pipe-ml/src/main/resources/tokenizer/!!");
       System.exit(1);
     }
     final BufferedReader breader = new BufferedReader(new InputStreamReader(
@@ -129,39 +139,50 @@ public class NonPeriodBreaker {
 
   private final InputStream getNonBreakerInputStream(final String lang) {
     InputStream nonBreakerInputStream = null;
-    if (lang.equalsIgnoreCase("de")) {
+    if (lang.equalsIgnoreCase("ca")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/de-nonbreaker.txt");
+          "/tokenizer/ca-exceptions.txt");
+    } else if (lang.equalsIgnoreCase("de")) {
+      nonBreakerInputStream = getClass().getResourceAsStream(
+          "/tokenizer/de-exceptions.txt");
     } else if (lang.equalsIgnoreCase("en")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/en-nonbreaker.txt");
+          "/tokenizer/en-exceptions.txt");
     } else if (lang.equalsIgnoreCase("es")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/es-nonbreaker.txt");
+          "/tokenizer/es-exceptions.txt");
     } else if (lang.equalsIgnoreCase("eu")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/eu-nonbreaker.txt");
+          "/tokenizer/eu-exceptions.txt");
     } else if (lang.equalsIgnoreCase("fr")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/fr-nonbreaker.txt");
+          "/tokenizer/fr-exceptions.txt");
     } else if (lang.equalsIgnoreCase("gl")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/gl-nonbreaker.txt");
+          "/tokenizer/gl-exceptions.txt");
     } else if (lang.equalsIgnoreCase("it")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/it-nonbreaker.txt");
+          "/tokenizer/it-exceptions.txt");
     } else if (lang.equalsIgnoreCase("nl")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/nl-nonbreaker.txt");
+          "/tokenizer/nl-exceptions.txt");
+    } else if (lang.equalsIgnoreCase("pt")) {
+      nonBreakerInputStream = getClass().getResourceAsStream(
+          "/tokenizer/pt-exceptions.txt");
+    } else if (lang.equalsIgnoreCase("ru")) {
+      nonBreakerInputStream = getClass().getResourceAsStream(
+          "/tokenizer/ru-exceptions.txt");
     }
     return nonBreakerInputStream;
   }
-  
+
   /**
-   * Segment the rest of the text taking into account some exceptions
-   * for periods as sentence breakers. It decides when a period marks
-   * an end of sentence.
-   * @param lines the segmented sentences so far
+   * Segment the rest of the text taking into account some exceptions for
+   * periods as sentence breakers. It decides when a period marks an end of
+   * sentence.
+   * 
+   * @param lines
+   *          the segmented sentences so far
    * @return all the segmented sentences
    */
   public String[] segmenterExceptions(String[] lines) {
@@ -193,10 +214,10 @@ public class NonPeriodBreaker {
     String segmentedText = "";
     int i;
     final String[] words = line.split(" ");
-    //iterate over the words
+    // iterate over the words
     for (i = 0; i < (words.length - 1); i++) {
       Matcher nonSegmentedWordMatcher = nonSegmentedWords.matcher(words[i]);
-      //candidate word to be segmented found:
+      // candidate word to be segmented found:
       if (nonSegmentedWordMatcher.find()) {
         String curWord = nonSegmentedWordMatcher.replaceAll("$1");
         String finalPunct = nonSegmentedWordMatcher.replaceAll("$2");
@@ -250,12 +271,10 @@ public class NonPeriodBreaker {
       if (wordDotMatcher.find()) {
         final String curWord = wordDotMatcher.replaceAll("$1");
 
-        if ((curWord.contains(".")
-            && alphabetic.matcher(curWord).find())
+        if ((curWord.contains(".") && alphabetic.matcher(curWord).find())
             || curWord.matches("(" + NON_BREAKER + ")")
-            || (i < words.length - 1
-            && (startLower.matcher(words[i + 1]).find() || startPunct.matcher(
-                words[i + 1]).find()))) {
+            || (i < words.length - 1 && (startLower.matcher(words[i + 1])
+                .find() || startPunct.matcher(words[i + 1]).find()))) {
           // do not tokenize if (word contains a period and is alphabetic) OR
           // word is a non breaker OR (word is a non breaker and next is
           // (lowercase or starts with punctuation that is end of sentence

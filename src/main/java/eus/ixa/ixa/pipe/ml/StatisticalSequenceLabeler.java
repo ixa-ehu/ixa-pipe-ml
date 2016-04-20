@@ -83,7 +83,7 @@ public class StatisticalSequenceLabeler {
     SequenceLabelerModel seqModel = loadModel(lang, model);
     sequenceLabeler = new SequenceLabelerME(seqModel);
   }
-
+  
   /**
    * Get array of Spans from a list of tokens.
    * @param tokens the sentence tokens

@@ -21,6 +21,11 @@ import java.util.List;
 
 import opennlp.tools.util.TrainingParameters;
 
+/**
+ * Flags for training.
+ * @author ragerri
+ *
+ */
 public class Flags {
 
   public static final boolean DEBUG = false;

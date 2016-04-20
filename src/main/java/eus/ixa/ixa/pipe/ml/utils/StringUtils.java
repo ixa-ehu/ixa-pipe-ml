@@ -23,6 +23,8 @@ import java.util.regex.Pattern;
 
 import com.google.common.io.Files;
 
+import eus.ixa.ixa.pipe.ml.tok.Token;
+
 
 /**
  * Pattern matching and other utility string functions.
@@ -417,6 +419,20 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
     regExp = regExp.replaceAll("\\.", "\\\\.");
     final String result = regExp.substring(1, regExp.length() - 1);
     return result;
+  }
+  
+  /**
+   * Convert a list of token objects (e.g. a tokenized sentence) into
+   * an array containing the token strings.
+   * @param tokenizedSentence the list of token objects
+   * @return the array of token strings
+   */
+  public static String[] convertListTokenToArrayStrings(List<Token> tokenizedSentence) {
+    List<String> tokensList = new ArrayList<>();
+    for (Token token : tokenizedSentence) {
+      tokensList.add(token.getTokenValue());
+    }
+    return tokensList.toArray(new String[tokensList.size()]);
   }
 }
 

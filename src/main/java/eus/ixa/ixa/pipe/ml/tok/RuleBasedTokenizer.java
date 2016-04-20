@@ -22,7 +22,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import eus.ixa.ixa.pipe.ml.seg.RuleBasedSegmenter;
 
 /**
  * This class provides a multilingual rule based tokenizer. The

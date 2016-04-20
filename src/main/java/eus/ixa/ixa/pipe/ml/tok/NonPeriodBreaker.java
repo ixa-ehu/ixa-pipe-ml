@@ -26,7 +26,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import eus.ixa.ixa.pipe.ml.seg.RuleBasedSegmenter;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 /**
@@ -128,33 +127,32 @@ public class NonPeriodBreaker {
     NON_BREAKER = StringUtils.createDisjunctRegexFromList(nonBreakerList);
   }
 
-  //TODO integrate in code
   private final InputStream getNonBreakerInputStream(final String lang) {
     InputStream nonBreakerInputStream = null;
     if (lang.equalsIgnoreCase("de")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/de-nonbreaker.txt");
+          "/tokenizer/de-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("en")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/en-nonbreaker.txt");
+          "/tokenizer/en-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("es")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/es-nonbreaker.txt");
+          "/tokenizer/es-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("eu")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/eu-nonbreaker.txt");
+          "/tokenizer/eu-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("fr")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/fr-nonbreaker.txt");
+          "/tokenizer/fr-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("gl")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/gl-nonbreaker.txt");
+          "/tokenizer/gl-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("it")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/it-nonbreaker.txt");
+          "/tokenizer/it-nonbreaker.txt");
     } else if (lang.equalsIgnoreCase("nl")) {
       nonBreakerInputStream = getClass().getResourceAsStream(
-          "/nl-nonbreaker.txt");
+          "/tokenizer/nl-nonbreaker.txt");
     }
     return nonBreakerInputStream;
   }

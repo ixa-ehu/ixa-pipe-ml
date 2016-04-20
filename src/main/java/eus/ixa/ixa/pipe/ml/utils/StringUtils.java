@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 import com.google.common.io.Files;
 
-import eus.ixa.ixa.pipe.ml.seg.RuleBasedSegmenter;
+import eus.ixa.ixa.pipe.ml.tok.RuleBasedSegmenter;
 
 /**
  * Pattern matching and other utility string functions.
@@ -419,6 +419,7 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
     regExp = doubleBar.matcher(regExp).replaceAll("\\|");
     regExp = regExp.replaceAll("\\.", "\\\\.");
     final String result = regExp.substring(1, regExp.length() - 1);
+    System.err.println(result);
     return result;
   }
   

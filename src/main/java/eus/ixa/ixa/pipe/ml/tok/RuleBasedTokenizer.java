@@ -23,6 +23,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
+
 /**
  * This class provides a multilingual rule based tokenizer. The
  * input of the tokenizer must be a list of already segmented
@@ -186,7 +187,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    * Construct a rule based tokenizer.
    * 
    * @param text
-   *          the text used for offset calculation
+   *          the the breader used for offset calculation
    * @param properties
    *          the options
    */
@@ -196,7 +197,7 @@ public class RuleBasedTokenizer implements Tokenizer {
     nonBreaker = new NonPeriodBreaker(properties);
     tokenFactory = new TokenFactory();
     // TODO improve this
-    originalText = RuleBasedSegmenter.buildText(text);
+    originalText = text;
   }
 
   /*

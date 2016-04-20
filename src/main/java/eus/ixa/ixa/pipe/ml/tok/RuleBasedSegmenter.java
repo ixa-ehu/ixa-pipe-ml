@@ -16,8 +16,11 @@
 
 package eus.ixa.ixa.pipe.ml.tok;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.util.Properties;
 import java.util.regex.Pattern;
+
 
 
 /**
@@ -146,7 +149,7 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
    * Construct a RuleBasedSegmenter from the original text and the properties object.
    * 
    * @param originalText
-   *          the text to be segmented
+   *          the bufferedreader
    * @param properties
    *          the properties
    */
@@ -160,7 +163,7 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
       nonBreaker = new NonPeriodBreaker(properties);
     }
     // TODO improve this, when should we load the text?
-    text = buildText(originalText);
+    text = originalText;
   }
 
   /*
@@ -223,12 +226,47 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
     return sentences;
   }
 
-  public static String buildText(String text) {
+  /**
+   * Reads standard input text from the BufferedReader and
+   * adds a line break mark for every line. The output of
+   * this functions is then further processed by methods
+   * called in the constructors of the SentenceSegmenter and
+   * Tokenizer.
+   * @param breader the buffered reader
+   * @return the input text in a string object
+   */
+  public static String readText(final BufferedReader breader) {
+    String line;
+    final StringBuilder sb = new StringBuilder();
+    try {
+      while ((line = breader.readLine()) != null) {
+        sb.append(line).append(LINE_BREAK);
+      }
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+    String text = sb.toString();
     // <JAR><JAR> to PARAGRAPH mark in unicode
-    text = RuleBasedSegmenter.doubleLineBreak.matcher(text).replaceAll(
+    text = doubleLineBreak.matcher(text).replaceAll(
         PARAGRAPH);
     // <JAR> to " "
-    text = RuleBasedSegmenter.lineBreak.matcher(text).replaceAll(" ");
+    text = lineBreak.matcher(text).replaceAll(" ");
+    return text;
+  }
+  
+  /**
+   * Builds the text for Segmentation and Tokenization. This is
+   * original text, namely, the string used to calculate the
+   * character offsets.
+   * @param text the text from the reader
+   * @return the original text
+   */
+  public static String buildText(String text) {
+    // <JAR><JAR> to PARAGRAPH mark in unicode
+    text = doubleLineBreak.matcher(text).replaceAll(
+        PARAGRAPH);
+    // <JAR> to " "
+    text = lineBreak.matcher(text).replaceAll(" ");
     return text;
   }
 

@@ -18,6 +18,8 @@ package eus.ixa.ixa.pipe.ml.utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -129,6 +131,15 @@ public final class StringUtils {
       }
     }
     return neChars;
+  }
+  
+  public static String getSetStringFromList(List<String> posLemmaValues) {
+    final StringBuilder sb = new StringBuilder();
+    HashSet<String> posLemmaSet = new LinkedHashSet<String>(posLemmaValues);
+    for (final String tok : posLemmaSet) {
+      sb.append(tok).append(" ");
+    }
+    return sb.toString().trim();
   }
 
   /**

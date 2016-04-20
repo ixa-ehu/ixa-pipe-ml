@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
+
 import eus.ixa.ixa.pipe.ml.sequence.Sequence;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
@@ -100,6 +103,39 @@ public class StatisticalSequenceLabeler {
     StringUtils.decodeLemmasToSpans(tokens, seqSpans);
     return seqSpans;
   }
+  
+
+  /**
+   * Produces a multidimensional array containing all the tagging
+   * possible for a given sentence.
+   * @param tokens the tokens
+   * @return the array containing for each row the tags
+   */
+  public final Span[][] getAllPosTags(final String[] tokens) {
+    final Span[][] allPosTags = this.sequenceLabeler.tag(13, tokens);
+    return allPosTags;
+  }
+  
+  /**
+   * Takes a sentence with multiple tags alternatives for each word and produces
+   * a lemma for each of the word-tag combinations.
+   * @param tokens the sentence tokens
+   * @param posTags the alternative postags
+   * @return the ordered map containing all the possible tag#lemma values for token
+   */
+  public ListMultimap<String, String> getMultipleLemmas(String[] tokens, Span[][] posTags) {
+    
+    ListMultimap<String, String> morphMap = ArrayListMultimap.create();
+    for (int i = 0; i < posTags.length; i++) {
+      Span[] rowLemmas = this.lemmatizer.lemmatize(tokens, posTags[i]);
+      String[] decodedLemmas = StringUtils.decodeLemmas(tokens, rowLemmas);
+      for (int j = 0; j < decodedLemmas.length; j++) {
+        morphMap.put(tokens[j], posTags[i][j].getType() + "#" + decodedLemmas[j]);
+      }
+    }
+    return morphMap;
+  }
+
 
   /**
    * Produce a list of the {@link Sequence} objects classified by the

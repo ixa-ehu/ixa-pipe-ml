@@ -115,6 +115,33 @@ public class SequenceLabelerME implements SequenceLabeler {
     spans = setProbs(spans);
     return spans;
   }
+  
+  public Span[][] tag(int numTaggings, String[] tokens) {
+    return tag(numTaggings, tokens, EMPTY);
+  }
+  
+  /**
+   * Returns at most the specified number of taggings for the specified sentence.
+   *
+   * @param numTaggings The number of tagging to be returned.
+   * @param sentence An array of tokens which make up a sentence.
+   *
+   * @return At most the specified number of taggings for the specified sentence.
+   */
+  public Span[][] tag(int numTaggings, String[] tokens, String[][] additionalContext) {
+    additionalContextFeatureGenerator.setCurrentContext(additionalContext);
+    Sequence[] bestSequences = model.bestSequences(numTaggings, tokens, additionalContext,
+        contextGenerator, sequenceValidator);
+    Span[][] tags = new Span[bestSequences.length][];
+    for (int i = 0; i < tags.length; i++) {
+      List<String> c = bestSequences[i].getOutcomes();
+      contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
+      Span[] spans = seqCodec.decode(c);
+      tags[i] = setProbs(spans);
+    }
+    return tags;
+  }
+
 
   /**
    * Forgets all adaptive data which was collected during previous calls to one

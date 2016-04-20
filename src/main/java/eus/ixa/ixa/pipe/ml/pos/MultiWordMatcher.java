@@ -51,9 +51,6 @@ public class MultiWordMatcher {
 
   /**
    * Construct a multiword matcher with a dictionary for a given language.
-   * 
-   * @param props
-   *          the properties options
    * @throws IOException
    *           throw exception is files does not exist
    */
@@ -65,9 +62,6 @@ public class MultiWordMatcher {
 
   /**
    * Load the dictionaries.
-   * 
-   * @param props
-   *          the properties object
    * @throws IOException
    *           if io problems
    */

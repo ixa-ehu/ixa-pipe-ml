@@ -9,6 +9,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -62,7 +63,7 @@ private static final Pattern spacePattern = Pattern.compile("\t");
   public DictionaryLemmatizer(final InputStream dictionary) {
     this.dictMap = new HashMap<List<String>, String>();
     final BufferedReader breader = new BufferedReader(new InputStreamReader(
-        dictionary));
+        dictionary, Charset.forName("UTF-8")));
     String line;
     try {
       while ((line = breader.readLine()) != null) {

@@ -1,5 +1,5 @@
 /**
- * Package containing class related o the lemmatizer.
+ * Package containing classes related to dictionary lemmatizers.
  * @author ragerri
  *
  */

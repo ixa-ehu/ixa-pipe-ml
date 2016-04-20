@@ -419,7 +419,6 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
     regExp = doubleBar.matcher(regExp).replaceAll("\\|");
     regExp = regExp.replaceAll("\\.", "\\\\.");
     final String result = regExp.substring(1, regExp.length() - 1);
-    System.err.println(result);
     return result;
   }
   

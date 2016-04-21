@@ -44,8 +44,6 @@ public class SimpleDictionaryTagger implements DictionaryTagger {
    * 
    * @param dictionary
    *          the input dictionary via inputstream
-   * @param aLang
-   *          the language
    */
   public SimpleDictionaryTagger(final InputStream dictionary) {
     this.dictMap = new HashMap<String, String>();

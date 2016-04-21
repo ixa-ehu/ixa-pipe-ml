@@ -36,9 +36,6 @@ import opennlp.tools.util.featuregen.TokenClassFeatureGenerator;
 import opennlp.tools.util.featuregen.TokenFeatureGenerator;
 import opennlp.tools.util.featuregen.WindowFeatureGenerator;
 
-/**
- * Class for creating a maximum-entropy-based name finder.
- */
 public class SequenceLabelerME implements SequenceLabeler {
 
   private static String[][] EMPTY = new String[0][0];
@@ -96,10 +93,10 @@ public class SequenceLabelerME implements SequenceLabeler {
   }
   
   /**
-   * Generates name tags for the given sequence, typically a sentence, returning
-   * token spans for any identified names.
+   * Generates sequence tags for the given sequence, returning
+   * spans for any identified sequences.
    *
-   * @param tokens an array of the tokens or words of the sequence, typically a
+   * @param tokens an array of the tokens or words, typically a
    * sentence.
    * @param additionalContext features which are based on context outside of the
    * sentence but which should also be used.
@@ -116,32 +113,26 @@ public class SequenceLabelerME implements SequenceLabeler {
     return spans;
   }
   
-  public Span[][] tag(int numTaggings, String[] tokens) {
-    return tag(numTaggings, tokens, EMPTY);
-  }
-  
   /**
    * Returns at most the specified number of taggings for the specified sentence.
    *
-   * @param numTaggings The number of tagging to be returned.
-   * @param sentence An array of tokens which make up a sentence.
+   * @param numTaggings the number of labels to be returned.
+   * @param tokens an array of tokens which make up a sentence.
    *
-   * @return At most the specified number of taggings for the specified sentence.
+   * @return at most the specified number of labels for the specified sentence.
    */
-  public Span[][] tag(int numTaggings, String[] tokens, String[][] additionalContext) {
-    additionalContextFeatureGenerator.setCurrentContext(additionalContext);
-    Sequence[] bestSequences = model.bestSequences(numTaggings, tokens, additionalContext,
+  public Span[][] tag(int numTaggings, String[] tokens) {
+    Sequence[] bestSequences = model.bestSequences(numTaggings, tokens, null,
         contextGenerator, sequenceValidator);
     Span[][] tags = new Span[bestSequences.length][];
     for (int i = 0; i < tags.length; i++) {
       List<String> c = bestSequences[i].getOutcomes();
       contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
       Span[] spans = seqCodec.decode(c);
-      tags[i] = setProbs(spans);
+      tags[i] = spans;
     }
     return tags;
   }
-
 
   /**
    * Forgets all adaptive data which was collected during previous calls to one

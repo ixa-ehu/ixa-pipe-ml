@@ -70,6 +70,16 @@ public class StatisticalSequenceLabeler {
     SequenceLabelerModel seqModel = loadModel(lang, model);
     sequenceLabeler = new SequenceLabelerME(seqModel);
   }
+  
+  /**
+   * Construct a StatisticalSequenceLabeler specifying the model to be used.
+   * @param model the specific model to be used.
+   * @param lang the language
+   */
+  public StatisticalSequenceLabeler(final String model, final String lang) {
+    SequenceLabelerModel seqModel = loadModel(lang, model);
+    sequenceLabeler = new SequenceLabelerME(seqModel);
+  }
 
   /**
    * Construct a StatisticalSequenceLabeler specifying the factory to
@@ -79,9 +89,21 @@ public class StatisticalSequenceLabeler {
    * @param aSeqFactory the name factory to construct Name objects
    */
   public StatisticalSequenceLabeler(final Properties props, final SequenceFactory aSeqFactory) {
-
     String lang = props.getProperty("language");
     String model = props.getProperty("model");
+    this.sequenceFactory = aSeqFactory;
+    SequenceLabelerModel seqModel = loadModel(lang, model);
+    sequenceLabeler = new SequenceLabelerME(seqModel);
+  }
+  
+  /**
+   * Construct a StatisticalSequenceLabeler specifying the model and the
+   * factory to be used.
+   * @param model the specific model to be used.
+   * @param lang the language
+   * @param aSeqFactory the factory
+   */
+  public StatisticalSequenceLabeler(final String model, final String lang, final SequenceFactory aSeqFactory) {
     this.sequenceFactory = aSeqFactory;
     SequenceLabelerModel seqModel = loadModel(lang, model);
     sequenceLabeler = new SequenceLabelerME(seqModel);
@@ -106,12 +128,12 @@ public class StatisticalSequenceLabeler {
   
 
   /**
-   * Produces a multidimensional array containing all the tagging
+   * Produces a multidimensional array containing all the taggings
    * possible for a given sentence.
    * @param tokens the tokens
    * @return the array containing for each row the tags
    */
-  public final Span[][] getAllPosTags(final String[] tokens) {
+  public final Span[][] getAllTags(final String[] tokens) {
     final Span[][] allPosTags = this.sequenceLabeler.tag(13, tokens);
     return allPosTags;
   }
@@ -127,7 +149,7 @@ public class StatisticalSequenceLabeler {
     
     ListMultimap<String, String> morphMap = ArrayListMultimap.create();
     for (int i = 0; i < posTags.length; i++) {
-      Span[] rowLemmas = this.lemmatizer.lemmatize(tokens, posTags[i]);
+      Span[] rowLemmas = this.sequenceLabeler.tag(tokens);
       String[] decodedLemmas = StringUtils.decodeLemmas(tokens, rowLemmas);
       for (int j = 0; j < decodedLemmas.length; j++) {
         morphMap.put(tokens[j], posTags[i][j].getType() + "#" + decodedLemmas[j]);
@@ -135,7 +157,6 @@ public class StatisticalSequenceLabeler {
     }
     return morphMap;
   }
-
 
   /**
    * Produce a list of the {@link Sequence} objects classified by the
@@ -219,8 +240,8 @@ public class StatisticalSequenceLabeler {
     long lStartTime = new Date().getTime();
     try {
       synchronized (seqModels) {
-        if (!seqModels.containsKey(lang)) {
-          seqModels.put(lang, new SequenceLabelerModel(new FileInputStream(model)));
+        if (!seqModels.containsKey(lang+model)) {
+          seqModels.put(lang+model, new SequenceLabelerModel(new FileInputStream(model)));
         }
       }
     } catch (IOException e) {
@@ -230,6 +251,6 @@ public class StatisticalSequenceLabeler {
     long difference = lEndTime - lStartTime;
     System.err.println("IXA pipes Sequence model loaded in: " + difference
         + " miliseconds ... [DONE]");
-    return seqModels.get(lang);
+    return seqModels.get(lang+model);
   }
 }

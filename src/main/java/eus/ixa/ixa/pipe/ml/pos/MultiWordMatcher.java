@@ -50,9 +50,9 @@ public class MultiWordMatcher {
   private static Map<String, String> dictionary;
 
   /**
-   * Construct a multiword matcher with a dictionary for a given language.
-   * @throws IOException
-   *           throw exception is files does not exist
+   * Construct a multiword dictionary matcher.
+   * @param dictInputStream the dictionary
+   * @throws IOException if io problems
    */
   public MultiWordMatcher(final InputStream dictInputStream) throws IOException {
     if (dictionary == null) {

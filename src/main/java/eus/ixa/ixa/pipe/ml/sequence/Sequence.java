@@ -84,7 +84,7 @@ public class Sequence {
    */
   public Sequence(final String aStr, final String aType, final Span aSeqSpan) {
     this.str = aStr;
-    this.type = aType.toUpperCase();
+    this.type = aType;
     this.sequenceSpan = aSeqSpan;
   }
 
@@ -103,7 +103,7 @@ public class Sequence {
   public Sequence(final String aStr, final String aType,
       final int aStartOffset, final int aSeqLength) {
     this.str = aStr;
-    this.type = aType.toUpperCase();
+    this.type = aType;
     setStartOffset(aStartOffset);
     setSequenceLength(aSeqLength);
   }
@@ -125,7 +125,7 @@ public class Sequence {
   public Sequence(final String aStr, final String aType, final Span aSeqSpan,
       final int aStartOffset, final int aSeqLength) {
     this.str = aStr;
-    this.type = aType.toUpperCase();
+    this.type = aType;
     this.sequenceSpan = aSeqSpan;
     setStartOffset(aStartOffset);
     setSequenceLength(aSeqLength);
@@ -175,7 +175,7 @@ public class Sequence {
    *          the class of the Sequence
    */
   public final void setType(final String neType) {
-    type = neType.toUpperCase();
+    type = neType;
   }
 
   /**

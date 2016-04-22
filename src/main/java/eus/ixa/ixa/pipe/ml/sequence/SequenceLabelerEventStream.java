@@ -69,22 +69,22 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
   public static String[] generateOutcomes(Span[] names, String type, int length) {
     String[] outcomes = new String[length];
     for (int i = 0; i < outcomes.length; i++) {
-      outcomes[i] = SequenceLabelerME.OTHER;
+      outcomes[i] = BilouCodec.OTHER;
     }
     for (Span name : names) {
       if (name.getType() == null) {
-        outcomes[name.getStart()] = type + "-" + SequenceLabelerME.START;
+        outcomes[name.getStart()] = type + "-" + BilouCodec.START;
       }
       else {
-        outcomes[name.getStart()] = name.getType() + "-" + SequenceLabelerME.START;
+        outcomes[name.getStart()] = name.getType() + "-" + BilouCodec.START;
       }
       // now iterate from begin + 1 till end
       for (int i = name.getStart() + 1; i < name.getEnd(); i++) {
         if (name.getType() == null) {
-          outcomes[i] = type + "-" + SequenceLabelerME.CONTINUE;
+          outcomes[i] = type + "-" + BilouCodec.CONTINUE;
         }
         else {
-          outcomes[i] = name.getType() + "-" + SequenceLabelerME.CONTINUE;
+          outcomes[i] = name.getType() + "-" + BilouCodec.CONTINUE;
         }
       }
     }

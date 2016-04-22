@@ -94,8 +94,8 @@ public DefaultSequenceContextGenerator(AdaptiveFeatureGenerator... featureGenera
     }
 
     //previous outcome features
-    String po = SequenceLabelerME.OTHER;
-    String ppo = SequenceLabelerME.OTHER;
+    String po = BilouCodec.OTHER;
+    String ppo = BilouCodec.OTHER;
 
     // TODO: These should be moved out here in its own feature generator!
     if (preds != null) {

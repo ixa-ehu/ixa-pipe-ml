@@ -8,17 +8,17 @@ SequenceValidator<String> {
 public boolean validSequence(int i, String[] inputSequence,
   String[] outcomesSequence, String outcome) {
 
-if (outcome.endsWith(SequenceLabelerME.CONTINUE) || outcome.endsWith(BilouCodec.LAST)) {
+if (outcome.endsWith(BilouCodec.CONTINUE) || outcome.endsWith(BilouCodec.LAST)) {
 
   int li = outcomesSequence.length - 1;
 
   if (li == -1) {
     return false;
-  } else if (outcomesSequence[li].endsWith(SequenceLabelerME.OTHER) ||
+  } else if (outcomesSequence[li].endsWith(BilouCodec.OTHER) ||
       outcomesSequence[li].endsWith(BilouCodec.UNIT)) {
     return false;
-  } else if (outcomesSequence[li].endsWith(SequenceLabelerME.CONTINUE) ||
-      outcomesSequence[li].endsWith(SequenceLabelerME.START)) {
+  } else if (outcomesSequence[li].endsWith(BilouCodec.CONTINUE) ||
+      outcomesSequence[li].endsWith(BilouCodec.START)) {
     // if it is continue, we have to check if previous match was of the same type
     String previousNameType = SequenceLabelerME.extractNameType(outcomesSequence[li]);
     String nameType = SequenceLabelerME.extractNameType(outcome);
@@ -34,8 +34,8 @@ if (outcome.endsWith(SequenceLabelerME.CONTINUE) || outcome.endsWith(BilouCodec.
 }
 
 if (outcomesSequence.length - 1 > 0) {
-  if (outcome.endsWith(SequenceLabelerME.OTHER)) {
-    if (outcomesSequence[outcomesSequence.length - 1].endsWith(SequenceLabelerME.START) || outcomesSequence[outcomesSequence.length - 1].endsWith(SequenceLabelerME.CONTINUE)) {
+  if (outcome.endsWith(BilouCodec.OTHER)) {
+    if (outcomesSequence[outcomesSequence.length - 1].endsWith(BilouCodec.START) || outcomesSequence[outcomesSequence.length - 1].endsWith(BilouCodec.CONTINUE)) {
       return false;
     }
   }

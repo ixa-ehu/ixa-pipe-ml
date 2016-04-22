@@ -126,36 +126,10 @@ public class StatisticalSequenceLabeler {
     return seqSpans;
   }
   
-
-  /**
-   * Produces a multidimensional array containing all the taggings
-   * possible for a given sentence.
-   * @param tokens the tokens
-   * @return the array containing for each row the tags
-   */
-  public final Span[][] getAllTags(final String[] tokens) {
-    final Span[][] allPosTags = this.sequenceLabeler.tag(13, tokens);
-    return allPosTags;
-  }
-  
-  /**
-   * Takes a sentence with multiple tags alternatives for each word and produces
-   * a lemma for each of the word-tag combinations.
-   * @param tokens the sentence tokens
-   * @param posTags the alternative postags
-   * @return the ordered map containing all the possible tag#lemma values for token
-   */
-  public ListMultimap<String, String> getMultipleLemmas(String[] tokens, Span[][] posTags) {
-    
-    ListMultimap<String, String> morphMap = ArrayListMultimap.create();
-    for (int i = 0; i < posTags.length; i++) {
-      Span[] rowLemmas = this.sequenceLabeler.tag(tokens);
-      String[] decodedLemmas = StringUtils.decodeLemmas(tokens, rowLemmas);
-      for (int j = 0; j < decodedLemmas.length; j++) {
-        morphMap.put(tokens[j], posTags[i][j].getType() + "#" + decodedLemmas[j]);
-      }
-    }
-    return morphMap;
+  public final String[] seqToStrings(final String[] tokens) {
+    String[] seqStrings = sequenceLabeler.tagToStrings(tokens);
+    String[] decodedStringSequences = sequenceLabeler.decodeSequences(seqStrings);
+    return decodedStringSequences;
   }
 
   /**
@@ -212,6 +186,37 @@ public class StatisticalSequenceLabeler {
       sequences.add(sequence);
     }
     return sequences;
+  }
+  
+  /**
+   * Produces a multidimensional array containing all the taggings
+   * possible for a given sentence.
+   * @param tokens the tokens
+   * @return the array containing for each row the tags
+   */
+  public final Span[][] getAllTags(final String[] tokens) {
+    final Span[][] allPosTags = this.sequenceLabeler.tag(13, tokens);
+    return allPosTags;
+  }
+  
+  /**
+   * Takes a sentence with multiple tags alternatives for each word and produces
+   * a lemma for each of the word-tag combinations.
+   * @param tokens the sentence tokens
+   * @param posTags the alternative postags
+   * @return the ordered map containing all the possible tag#lemma values for token
+   */
+  public ListMultimap<String, String> getMultipleLemmas(String[] tokens, Span[][] posTags) {
+    
+    ListMultimap<String, String> morphMap = ArrayListMultimap.create();
+    for (int i = 0; i < posTags.length; i++) {
+      Span[] rowLemmas = this.sequenceLabeler.tag(tokens);
+      String[] decodedLemmas = StringUtils.decodeLemmas(tokens, rowLemmas);
+      for (int j = 0; j < decodedLemmas.length; j++) {
+        morphMap.put(tokens[j], posTags[i][j].getType() + "#" + decodedLemmas[j]);
+      }
+    }
+    return morphMap;
   }
   
   /**

@@ -101,13 +101,13 @@ public class BioCodec implements SequenceCodec<String> {
 
     for (int i = 0; i < outcomes.length; i++) {
       String outcome = outcomes[i];
-      if (outcome.endsWith(SequenceLabelerME.START)) {
+      if (outcome.endsWith(START)) {
         start.add(outcome.substring(0, outcome.length()
-            - SequenceLabelerME.START.length()));
-      } else if (outcome.endsWith(SequenceLabelerME.CONTINUE)) {
+            - START.length()));
+      } else if (outcome.endsWith(CONTINUE)) {
         cont.add(outcome.substring(0, outcome.length()
-            - SequenceLabelerME.CONTINUE.length()));
-      } else if (outcome.equals(SequenceLabelerME.OTHER)) {
+            - CONTINUE.length()));
+      } else if (outcome.equals(OTHER)) {
         // don't fail anymore if couldn't find outcome named OTHER
       } else {
         // got unexpected outcome

@@ -11,15 +11,15 @@ public class SequenceLabelerSequenceValidator implements
 
     // outcome is formatted like "cont" or "sometype-cont", so we
     // can check if it ends with "cont".
-    if (outcome.endsWith(SequenceLabelerME.CONTINUE)) {
+    if (outcome.endsWith(BilouCodec.CONTINUE)) {
 
       int li = outcomesSequence.length - 1;
 
       if (li == -1) {
         return false;
-      } else if (outcomesSequence[li].endsWith(SequenceLabelerME.OTHER)) {
+      } else if (outcomesSequence[li].endsWith(BilouCodec.OTHER)) {
         return false;
-      } else if (outcomesSequence[li].endsWith(SequenceLabelerME.CONTINUE)) {
+      } else if (outcomesSequence[li].endsWith(BilouCodec.CONTINUE)) {
         // if it is continue, we have to check if previous match was of the same type
         String previousSeqType = SequenceLabelerME.extractNameType(outcomesSequence[li]);
         String seqType = SequenceLabelerME.extractNameType(outcome);

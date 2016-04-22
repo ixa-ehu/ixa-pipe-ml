@@ -67,7 +67,8 @@ public class AnnotateProperties {
   
   /**
    * Generate Properties objects for CLI usage. Language, model and lemmatizerModel are compulsory.
-   * @param model the model to perform the annotation
+   * @param model the pos tagger model
+   * @param lemmatizerModel the lemmatizer model
    * @param language the language
    * @param multiwords whether multiwords are to be detected
    * @param dictag whether tagging from a dictionary is activated

@@ -41,10 +41,12 @@ public class SequenceLabelerME implements SequenceLabeler {
   private static String[][] EMPTY = new String[0][0];
   public static final int DEFAULT_BEAM_SIZE = 3;
   private static final Pattern typedOutcomePattern = Pattern.compile("(.+)-\\w+");
-
-  public static final String START = "start";
-  public static final String CONTINUE = "cont";
-  public static final String OTHER = "other";
+  
+  public static Pattern startPattern = Pattern.compile("(\\p{Alpha}+)-start", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern contPattern = Pattern.compile("(\\p{Alpha}+)-cont", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern lastPattern = Pattern.compile("(\\p{Alpha}+)-last", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern unitPattern = Pattern.compile("(\\p{Alpha}+)-unit", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern otherPattern = Pattern.compile("other");
 
   private SequenceCodec<String> seqCodec = new BioCodec();
 
@@ -111,6 +113,13 @@ public class SequenceLabelerME implements SequenceLabeler {
     Span[] spans = seqCodec.decode(c);
     spans = setProbs(spans);
     return spans;
+  }
+  
+  public String[] tagToStrings(String[] tokens) {
+    bestSequence = model.bestSequence(tokens, null, contextGenerator, sequenceValidator);
+    List<String> c = bestSequence.getOutcomes();
+    contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
+    return c.toArray(new String[c.size()]);
   }
   
   /**
@@ -201,15 +210,11 @@ public class SequenceLabelerME implements SequenceLabeler {
     double[] probs = bestSequence.getProbs();
 
     for (int si = 0; si < spans.length; si++) {
-
       double p = 0;
-
       for (int oi = spans[si].getStart(); oi < spans[si].getEnd(); oi++) {
         p += probs[oi];
       }
-
       p /= spans[si].length();
-
       sprobs[si] = p;
     }
 
@@ -303,9 +308,7 @@ public class SequenceLabelerME implements SequenceLabeler {
     Collections.sort(sortedSpans);
 
     Iterator<Span> it = sortedSpans.iterator();
-
     Span lastSpan = null;
-
     while (it.hasNext()) {
       Span span = it.next();
 
@@ -315,11 +318,28 @@ public class SequenceLabelerME implements SequenceLabeler {
           span = lastSpan;
         }
       }
-
       lastSpan = span;
     }
-
     return sortedSpans.toArray(new Span[sortedSpans.size()]);
   }
+  
+  /**
+   * Decode Sequences from an array of Strings.
+   * @param preds the sequences in an string array.
+   * @return the decoded sequences
+   */
+  public String[] decodeSequences(String[] preds) {
+    List<String> decodedSequences = new ArrayList<>();
+    for (String pred : preds) {
+      pred = startPattern.matcher(pred).replaceAll("B-$1");
+      pred = contPattern.matcher(pred).replaceAll("I-$1");
+      pred = lastPattern.matcher(pred).replaceAll("I-$1");
+      pred = unitPattern.matcher(pred).replaceAll("B-$1");
+      pred = otherPattern.matcher(pred).replaceAll("O");
+      decodedSequences.add(pred);
+    }
+    return decodedSequences.toArray(new String[decodedSequences.size()]);
+  }
+  
 }
 

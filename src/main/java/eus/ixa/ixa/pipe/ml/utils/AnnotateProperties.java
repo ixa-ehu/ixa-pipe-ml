@@ -66,7 +66,8 @@ public class AnnotateProperties {
   }
   
   /**
-   * Generate Properties objects for CLI usage. Language, model and lemmatizerModel are compulsory.
+   * Generate Properties object for POS tagging and Lemmatizing.
+   * Language, model and lemmatizerModel are compulsory.
    * @param model the pos tagger model
    * @param lemmatizerModel the lemmatizer model
    * @param language the language
@@ -84,6 +85,22 @@ public class AnnotateProperties {
     annotateProperties.setProperty("multiwords", multiwords);
     annotateProperties.setProperty("dictag", dictag);
     annotateProperties.setProperty("allMorphology", allMorphology);
+    return annotateProperties;
+  }
+  
+  /**
+   * Generate Properties object for chunking. Both parameters are
+   * compulsory.
+   * @param model
+   *          the model to perform the annotation
+   * @param language
+   *          the language
+   * @return a properties object
+   */
+  public Properties setChunkingProperties(final String model, final String language) {
+    final Properties annotateProperties = new Properties();
+    annotateProperties.setProperty("model", model);
+    annotateProperties.setProperty("language", language);
     return annotateProperties;
   }
 

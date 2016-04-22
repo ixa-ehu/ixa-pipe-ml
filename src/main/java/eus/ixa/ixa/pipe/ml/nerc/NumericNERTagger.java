@@ -26,12 +26,12 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
-public class NumericNameFinder {
+public class NumericNERTagger {
   
   private NumericNameLexer numericLexer;
   private SequenceFactory nameFactory;
   
-  public NumericNameFinder(BufferedReader breader, SequenceFactory aNameFactory) {
+  public NumericNERTagger(BufferedReader breader, SequenceFactory aNameFactory) {
     this.nameFactory = aNameFactory;
     numericLexer = new NumericNameLexer(breader, aNameFactory);
   }

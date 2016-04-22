@@ -47,7 +47,7 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
  * 
  */
 
-public class DictionariesNameFinder {
+public class DictionariesNERTagger {
 
   /**
    * The name factory to create Name objects.
@@ -69,7 +69,7 @@ public class DictionariesNameFinder {
    * @param aDictionaries
    *          the dictionaries
    */
-  public DictionariesNameFinder(final Dictionaries aDictionaries) {
+  public DictionariesNERTagger(final Dictionaries aDictionaries) {
     this.dictionaries = aDictionaries;
   }
 
@@ -82,7 +82,7 @@ public class DictionariesNameFinder {
    * @param aNameFactory
    *          the factory
    */
-  public DictionariesNameFinder(final Dictionaries aDictionaries,
+  public DictionariesNERTagger(final Dictionaries aDictionaries,
       final SequenceFactory aNameFactory) {
     this.dictionaries = aDictionaries;
     this.nameFactory = aNameFactory;

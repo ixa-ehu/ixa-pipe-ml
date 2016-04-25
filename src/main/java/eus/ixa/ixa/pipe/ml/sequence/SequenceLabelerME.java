@@ -42,10 +42,10 @@ public class SequenceLabelerME implements SequenceLabeler {
   public static final int DEFAULT_BEAM_SIZE = 3;
   private static final Pattern typedOutcomePattern = Pattern.compile("(.+)-\\w+");
   
-  public static Pattern startPattern = Pattern.compile("(\\p{Alpha}+)-start", Pattern.UNICODE_CHARACTER_CLASS);
-  public static Pattern contPattern = Pattern.compile("(\\p{Alpha}+)-cont", Pattern.UNICODE_CHARACTER_CLASS);
-  public static Pattern lastPattern = Pattern.compile("(\\p{Alpha}+)-last", Pattern.UNICODE_CHARACTER_CLASS);
-  public static Pattern unitPattern = Pattern.compile("(\\p{Alpha}+)-unit", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern startPattern = Pattern.compile("(\\S+)-start", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern contPattern = Pattern.compile("(\\S+)-cont", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern lastPattern = Pattern.compile("(\\S+)-last", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern unitPattern = Pattern.compile("(\\S+)-unit", Pattern.UNICODE_CHARACTER_CLASS);
   public static Pattern otherPattern = Pattern.compile("other");
 
   private SequenceCodec<String> seqCodec = new BioCodec();

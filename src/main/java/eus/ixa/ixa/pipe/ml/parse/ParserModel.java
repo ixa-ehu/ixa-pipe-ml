@@ -19,7 +19,6 @@ package eus.ixa.ixa.pipe.ml.parse;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -28,71 +27,59 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Map;
 
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-
-import opennlp.tools.cmdline.TerminateToolException;
-import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.Version;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.BaseModel;
 import opennlp.tools.util.model.UncloseableInputStream;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 
 /**
  * This is an abstract base class for {@link ParserModel} implementations.
  */
 public class ParserModel extends BaseModel {
 
-  private static class SequenceLabelerModelSerializer implements ArtifactSerializer<SequenceLabelerModel> {
+  private static class SequenceLabelerModelSerializer implements
+      ArtifactSerializer<SequenceLabelerModel> {
 
     public SequenceLabelerModel create(InputStream in) throws IOException,
         InvalidFormatException {
-      SequenceLabelerModel posModel = new SequenceLabelerModel(new UncloseableInputStream(in));
+      SequenceLabelerModel posModel = new SequenceLabelerModel(
+          new UncloseableInputStream(in));
       return posModel;
     }
-
     public void serialize(SequenceLabelerModel artifact, OutputStream out)
         throws IOException {
       artifact.serialize(out);
     }
   }
 
-  private static class HeadRulesSerializer implements ArtifactSerializer<opennlp.tools.parser.lang.en.HeadRules> {
+  public static class PennTreebankHeadRulesSerializer implements
+      ArtifactSerializer<PennTreebankHeadRules> {
 
-    public opennlp.tools.parser.lang.en.HeadRules create(InputStream in)
-        throws IOException, InvalidFormatException {
-      return new opennlp.tools.parser.lang.en.HeadRules(new BufferedReader(
+    public PennTreebankHeadRules create(InputStream in) throws IOException,
+        InvalidFormatException {
+      return new PennTreebankHeadRules(new BufferedReader(
           new InputStreamReader(in, "UTF-8")));
     }
-
-    public void serialize(opennlp.tools.parser.lang.en.HeadRules artifact,
-        OutputStream out) throws IOException {
+    public void serialize(PennTreebankHeadRules artifact, OutputStream out)
+        throws IOException {
       artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
     }
   }
-  
-  static HeadRules createHeadRules(String languageCode) throws IOException {
-    ArtifactSerializer headRulesSerializer = null;
 
-      if (languageCode.equalsIgnoreCase("en")) {
-        headRulesSerializer = new opennlp.tools.parser.lang.en.HeadRules.HeadRulesSerializer();
-      }
-      else if (languageCode.equalsIgnoreCase("es")) {
-        headRulesSerializer = new opennlp.tools.parser.lang.es.AncoraSpanishHeadRules.HeadRulesSerializer();
-      }
-      else {
-        // default for now, this case should probably cause an error ...
-        headRulesSerializer = new opennlp.tools.parser.lang.en.HeadRules.HeadRulesSerializer();
-      }
-    Object headRulesObject = headRulesSerializer.create(new FileInputStream(params.getHeadRules()));
+  public static class AncoraHeadRulesSerializer implements
+      ArtifactSerializer<AncoraHeadRules> {
 
-    if (headRulesObject instanceof HeadRules) {
-      return (HeadRules) headRulesObject;
+    public AncoraHeadRules create(InputStream in) throws IOException,
+        InvalidFormatException {
+      return new AncoraHeadRules(new BufferedReader(new InputStreamReader(in,
+          "UTF-8")));
     }
-    else {
-      throw new TerminateToolException(-1, "HeadRules Artifact Serializer must create an object of type HeadRules!");
+    public void serialize(AncoraHeadRules artifact, OutputStream out)
+        throws IOException {
+      artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
     }
   }
 
@@ -103,7 +90,10 @@ public class ParserModel extends BaseModel {
   private static final String CHUNKER_TAGGER_MODEL_ENTRY_NAME = "parserchunker.chunker";
   private static final String HEAD_RULES_MODEL_ENTRY_NAME = "head-rules.headrules";
 
-  public ParserModel(String languageCode, MaxentModel buildModel, MaxentModel checkModel, SequenceLabelerModel parserTagger, SequenceLabelerModel chunkerTagger, HeadRules headRules, Map<String, String> manifestInfoEntries) {
+  public ParserModel(String languageCode, MaxentModel buildModel,
+      MaxentModel checkModel, SequenceLabelerModel parserTagger,
+      SequenceLabelerModel chunkerTagger, HeadRules headRules,
+      Map<String, String> manifestInfoEntries) {
 
     super(COMPONENT_NAME, languageCode, manifestInfoEntries);
     artifactMap.put(BUILD_MODEL_ENTRY_NAME, buildModel);
@@ -114,11 +104,11 @@ public class ParserModel extends BaseModel {
     checkArtifactMap();
   }
 
-  public ParserModel(String languageCode, MaxentModel buildModel, MaxentModel checkModel,
-      SequenceLabelerModel parserTagger,
+  public ParserModel(String languageCode, MaxentModel buildModel,
+      MaxentModel checkModel, SequenceLabelerModel parserTagger,
       SequenceLabelerModel chunkerTagger, HeadRules headRules) {
-    this(languageCode, buildModel, checkModel, parserTagger,
-        chunkerTagger, headRules, null);
+    this(languageCode, buildModel, checkModel, parserTagger, chunkerTagger,
+        headRules, null);
   }
 
   public ParserModel(InputStream in) throws IOException, InvalidFormatException {
@@ -136,19 +126,13 @@ public class ParserModel extends BaseModel {
   @Override
   protected void createArtifactSerializers(
       Map<String, ArtifactSerializer> serializers) {
-
     super.createArtifactSerializers(serializers);
 
-    // In 1.6.x the headrules artifact is serialized with the new API
-    // which uses the Serializeable interface
-    // This change is not backward compatible with the 1.5.x models.
-    // In order to laod 1.5.x model the English headrules serializer must be
-    // put on the serializer map.
-
-    if (getVersion().getMajor() == 1 && getVersion().getMinor() == 5) {
-        serializers.put("headrules", new HeadRulesSerializer());
+    if (getLanguage().equalsIgnoreCase("es")) {
+      serializers.put("headrules", new AncoraHeadRulesSerializer());
+    } else {
+      serializers.put("headrules", new PennTreebankHeadRulesSerializer());
     }
-
     serializers.put("postagger", new SequenceLabelerModelSerializer());
     serializers.put("chunker", new SequenceLabelerModelSerializer());
   }
@@ -162,28 +146,29 @@ public class ParserModel extends BaseModel {
   }
 
   public SequenceLabelerModel getParserTaggerModel() {
-    return (SequenceLabelerModel) artifactMap.get(PARSER_TAGGER_MODEL_ENTRY_NAME);
+    return (SequenceLabelerModel) artifactMap
+        .get(PARSER_TAGGER_MODEL_ENTRY_NAME);
   }
 
   public SequenceLabelerModel getParserChunkerModel() {
-    return (SequenceLabelerModel) artifactMap.get(CHUNKER_TAGGER_MODEL_ENTRY_NAME);
+    return (SequenceLabelerModel) artifactMap
+        .get(CHUNKER_TAGGER_MODEL_ENTRY_NAME);
   }
 
   public HeadRules getHeadRules() {
-    return (HeadRules)
-        artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME);
+    return (HeadRules) artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME);
   }
 
-  // TODO: Update model methods should make sure properties are copied correctly ...
+  // TODO: Update model methods should make sure properties are copied correctly
+  // ...
   public ParserModel updateBuildModel(MaxentModel buildModel) {
     return new ParserModel(getLanguage(), buildModel, getCheckModel(),
-        getParserTaggerModel(), getParserChunkerModel(),
-        getHeadRules());
+        getParserTaggerModel(), getParserChunkerModel(), getHeadRules());
   }
 
   public ParserModel updateCheckModel(MaxentModel checkModel) {
-    return new ParserModel(getLanguage(), getBuildModel(), checkModel, getParserTaggerModel(),
-        getParserChunkerModel(), getHeadRules());
+    return new ParserModel(getLanguage(), getBuildModel(), checkModel,
+        getParserTaggerModel(), getParserChunkerModel(), getHeadRules());
   }
 
   public ParserModel updateTaggerModel(SequenceLabelerModel taggerModel) {
@@ -200,23 +185,23 @@ public class ParserModel extends BaseModel {
   protected void validateArtifactMap() throws InvalidFormatException {
     super.validateArtifactMap();
 
-    if (!(artifactMap.get(BUILD_MODEL_ENTRY_NAME)  instanceof AbstractModel)) {
+    if (!(artifactMap.get(BUILD_MODEL_ENTRY_NAME) instanceof AbstractModel)) {
       throw new InvalidFormatException("Missing the build model!");
     }
 
-    if (!(artifactMap.get(CHECK_MODEL_ENTRY_NAME)  instanceof AbstractModel)) {
+    if (!(artifactMap.get(CHECK_MODEL_ENTRY_NAME) instanceof AbstractModel)) {
       throw new InvalidFormatException("Missing the check model!");
     }
 
-    if (!(artifactMap.get(PARSER_TAGGER_MODEL_ENTRY_NAME)  instanceof SequenceLabelerModel)) {
+    if (!(artifactMap.get(PARSER_TAGGER_MODEL_ENTRY_NAME) instanceof SequenceLabelerModel)) {
       throw new InvalidFormatException("Missing the tagger model!");
     }
 
-    if (!(artifactMap.get(CHUNKER_TAGGER_MODEL_ENTRY_NAME)  instanceof SequenceLabelerModel)) {
+    if (!(artifactMap.get(CHUNKER_TAGGER_MODEL_ENTRY_NAME) instanceof SequenceLabelerModel)) {
       throw new InvalidFormatException("Missing the chunker model!");
     }
 
-    if (!(artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME)  instanceof HeadRules)) {
+    if (!(artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME) instanceof HeadRules)) {
       throw new InvalidFormatException("Missing the head rules!");
     }
   }

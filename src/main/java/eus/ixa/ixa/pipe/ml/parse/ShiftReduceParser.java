@@ -25,10 +25,9 @@ import java.util.Map;
 import java.util.Set;
 
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
-import opennlp.tools.chunker.Chunker;
-import opennlp.tools.chunker.ChunkerME;
-import opennlp.tools.chunker.ChunkerModel;
 import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
@@ -39,25 +38,17 @@ import opennlp.tools.ngram.NGramModel;
 import opennlp.tools.parser.AbstractBottomUpParser;
 import opennlp.tools.parser.ChunkContextGenerator;
 import opennlp.tools.parser.ChunkSampleStream;
-import opennlp.tools.parser.HeadRules;
-import opennlp.tools.parser.Parse;
 import opennlp.tools.parser.Parser;
 import opennlp.tools.parser.ParserChunkerSequenceValidator;
 import opennlp.tools.parser.ParserEventTypeEnum;
-import opennlp.tools.parser.ParserModel;
-import opennlp.tools.parser.ParserType;
 import opennlp.tools.parser.PosSampleStream;
 import opennlp.tools.parser.chunking.BuildContextGenerator;
 import opennlp.tools.parser.chunking.CheckContextGenerator;
 import opennlp.tools.parser.chunking.ParserEventStream;
-import opennlp.tools.postag.POSModel;
-import opennlp.tools.postag.POSTagger;
-import opennlp.tools.postag.POSTaggerME;
 import opennlp.tools.util.Heap;
 import opennlp.tools.util.ListHeap;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
-import opennlp.tools.util.Span;
 import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
 
@@ -209,7 +200,7 @@ public class ShiftReduceParser {
   
   public ShiftReduceParser(ParserModel model, int beamSize, double advancePercentage) {
     this(model.getBuildModel(), model.getCheckModel(),
-        new SequenceLabelerME(model),
+        new SequenceLabelerME(model.getParserTaggerModel()),
         new SequenceLabelerME(model.getParserChunkerModel()),
             model.getHeadRules(), beamSize, advancePercentage);
   }
@@ -639,13 +630,13 @@ public class ShiftReduceParser {
     parseSamples.reset();
 
     // tag
-    POSModel posModel = POSTaggerME.train(languageCode, new PosSampleStream(parseSamples),
+    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, new PosSampleStream(parseSamples),
         mlParams.getParameters("tagger"), null, null);
 
     parseSamples.reset();
 
     // chunk
-    ChunkerModel chunkModel = ChunkerME.train(languageCode,
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
         new ChunkSampleStream(parseSamples),
         new ChunkContextGenerator(), mlParams.getParameters("chunker"));
 

@@ -1,20 +1,18 @@
 /*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License. You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+ *Copyright 2016 Rodrigo Agerri
 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 package eus.ixa.ixa.pipe.ml.parse;
 
 import java.io.BufferedReader;
@@ -35,16 +33,8 @@ import opennlp.tools.parser.GapLabeler;
 import opennlp.tools.parser.Parse;
 
 /**
-* Class for storing the Spanish head rules associated with parsing. The
-* headrules are specified in $src/main/resources/es-head-rules
-* 
-* NOTE: This is the very same class than the one inside
-* opennlp.tools.parser.lang.es package. The main change is the return of the getHead()
-* method: Every return constituents[i].getHead() has been replaced by the
-* same return statement without the .getHead() method call.
-* 
-* Other changes include removal of deprecated methods we do not need to use and
-* adding some other methods for debugging.
+* Class for obtaining head rules from Spanish Ancora parse
+* trees.
 * @author ragerri
 * @version 2015-05-06
 */

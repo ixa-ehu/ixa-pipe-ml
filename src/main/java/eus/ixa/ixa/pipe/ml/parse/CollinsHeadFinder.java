@@ -1,5 +1,5 @@
 /*
- *Copyright 2015 Rodrigo Agerri
+ *Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -31,7 +31,7 @@ import opennlp.tools.parser.Parse;
  * Collins' original head rules).
  * 
  * @author ragerri
- * @version 2015-04-30
+ * @version 2016-05-03
  * 
  */
 public class CollinsHeadFinder implements HeadFinder {
@@ -69,9 +69,9 @@ public class CollinsHeadFinder implements HeadFinder {
 
     InputStream headsFileInputStream = null;
     if (lang.equals("en")) {
-      headsFileInputStream = getClass().getResourceAsStream("/en-head-rules");
+      headsFileInputStream = getClass().getResourceAsStream("/parser/en-head-rules");
     } else if (lang.equals("es")) {
-      headsFileInputStream = getClass().getResourceAsStream("/es-head-rules");
+      headsFileInputStream = getClass().getResourceAsStream("/parser/es-head-rules");
     }
     return headsFileInputStream;
   }

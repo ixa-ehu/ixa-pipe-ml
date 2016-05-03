@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<generators>
+  <cache>
+    <generators>
+      <window prevLength="2" nextLength="2">
+        <custom class="eus.ixa.ixa.pipe.ml.features.TokenFeatureGenerator" range="lower" />
+      </window>
+      <window prevLength="2" nextLength="2">
+        <custom class="eus.ixa.ixa.pipe.ml.features.TokenClassFeatureGenerator" range="lower,wac" />
+      </window>
+      <custom class="eus.ixa.ixa.pipe.ml.features.OutcomePriorFeatureGenerator" />
+      <custom class="eus.ixa.ixa.pipe.ml.features.PreviousMapFeatureGenerator" />
+      <custom class="eus.ixa.ixa.pipe.ml.features.SentenceFeatureGenerator" begin="true" end="false" />
+      <custom class="eus.ixa.ixa.pipe.ml.features.PrefixFeatureGenerator" begin="3" end="4" />
+      <custom class="eus.ixa.ixa.pipe.ml.features.SuffixFeatureGenerator" begin="0" end="4" />
+    </generators>
+  </cache>
+</generators>

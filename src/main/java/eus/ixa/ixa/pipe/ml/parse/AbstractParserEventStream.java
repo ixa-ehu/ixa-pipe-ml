@@ -22,21 +22,23 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import opennlp.tools.chunker.ChunkerContextGenerator;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerContextGenerator;
+
 import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.ml.model.Event;
-import opennlp.tools.parser.chunking.Parser;
-import opennlp.tools.postag.DefaultPOSContextGenerator;
-import opennlp.tools.postag.POSContextGenerator;
+import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.featuregen.AdditionalContextFeatureGenerator;
+import opennlp.tools.util.featuregen.WindowFeatureGenerator;
 
 /**
  * Abstract class extended by parser event streams which perform tagging and chunking.
  */
 public abstract class AbstractParserEventStream extends opennlp.tools.util.AbstractEventStream<Parse> {
 
-  private ChunkerContextGenerator chunkerContextGenerator;
-  private POSContextGenerator tagContextGenerator;
+  private SequenceLabelerContextGenerator chunkerContextGenerator;
+  private SequenceLabelerContextGenerator tagContextGenerator;
+  private AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
   protected HeadRules rules;
   protected Set<String> punctSet;
 
@@ -47,20 +49,21 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
   protected boolean fixPossesives;
   protected Dictionary dict;
 
-  public AbstractParserEventStream(ObjectStream<Parse> d, HeadRules rules, ParserEventTypeEnum etype, Dictionary dict) {
-    super(d);
+  public AbstractParserEventStream(ObjectStream<Parse> dataStream, HeadRules rules, SequenceLabelerContextGenerator taggerContextGenerator, SequenceLabelerContextGenerator chunkerContextGenerator, Dictionary dict) {
+    super(dataStream);
     this.dict = dict;
-    if (etype == ParserEventTypeEnum.CHUNK) {
-      this.chunkerContextGenerator = new ChunkContextGenerator();
-    }
-    else if (etype == ParserEventTypeEnum.TAG) {
-      this.tagContextGenerator = new DefaultPOSContextGenerator(null);
-    }
+    this.chunkerContextGenerator = chunkerContextGenerator;
+    this.chunkerContextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
+    this.tagContextGenerator = taggerContextGenerator;
+    this.tagContextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
+    
     this.rules = rules;
     punctSet = rules.getPunctuationTags();
-    this.etype = etype;
-
     init();
+  }
+  
+  public AbstractParserEventStream(ObjectStream<Parse> d, HeadRules rules, SequenceLabelerContextGenerator taggerContextGenerator, SequenceLabelerContextGenerator chunkerContextGenerator) {
+    this(d,rules,taggerContextGenerator,chunkerContextGenerator,null);
   }
 
   @Override
@@ -80,7 +83,7 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
       addChunkEvents(newEvents, chunks);
     }
     else {
-      addParseEvents(newEvents, Parser.collapsePunctuation(chunks,punctSet));
+      addParseEvents(newEvents, ShiftReduceParser.collapsePunctuation(chunks,punctSet));
     }
 
     return newEvents.iterator();
@@ -90,9 +93,7 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
     fixPossesives = false;
   }
 
-  public AbstractParserEventStream(ObjectStream<Parse> d, HeadRules rules, ParserEventTypeEnum etype) {
-    this(d,rules,etype,null);
-  }
+ 
 
   public static Parse[] getInitialChunks(Parse p) {
     List<Parse> chunks = new ArrayList<Parse>();
@@ -141,7 +142,7 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
       if (c.isPosTag()) {
         toks.add(c.getCoveredText());
         tags.add(c.getType());
-        preds.add(Parser.OTHER);
+        preds.add(ShiftReduceParser.OTHER);
       }
       else {
         boolean start = true;
@@ -152,11 +153,11 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
           toks.add(tok.getCoveredText());
           tags.add(tok.getType());
           if (start) {
-            preds.add(Parser.START + ctype);
+            preds.add(ShiftReduceParser.START + ctype);
             start = false;
           }
           else {
-            preds.add(Parser.CONT + ctype);
+            preds.add(ShiftReduceParser.CONT + ctype);
           }
         }
       }
@@ -197,7 +198,7 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
    * @return true if the specified child is the last child of the specified parent; false otherwise.
    */
   protected boolean lastChild(Parse child, Parse parent) {
-    Parse[] kids = AbstractBottomUpParser.collapsePunctuation(parent.getChildren(),punctSet);
+    Parse[] kids = ShiftReduceParser.collapsePunctuation(parent.getChildren(),punctSet);
     return (kids[kids.length - 1] == child);
   }
 

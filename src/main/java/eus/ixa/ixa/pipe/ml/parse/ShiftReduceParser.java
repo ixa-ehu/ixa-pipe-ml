@@ -598,46 +598,44 @@ public class ShiftReduceParser {
     return newParses;
   }
 
-  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters mlParams, SequenceLabelerFactory sequenceLabelerFactory)
+  //TODO add a training method loading POS models as resource.
+  //TODO should we do the same with the Chunker??? Test it.
+  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters trainParams, SequenceLabelerFactory sequenceLabelerFactory)
           throws IOException {
 
     System.err.println("Building dictionary");
 
-    Dictionary mdict = buildDictionary(parseSamples, rules, mlParams);
+    Dictionary mdict = buildDictionary(parseSamples, rules, trainParams);
 
     parseSamples.reset();
 
     Map<String, String> manifestInfoEntries = new HashMap<String, String>();
 
-    // build
+    //TODO tag
+    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null, new POSSampleStream(parseSamples),
+        trainParams.getParameters("tagger"), new SequenceLabelerFactory());
+    parseSamples.reset();
+
+    //TODO chunk
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, null, new ChunkSampleStream(parseSamples),
+        trainParams.getParameters("chunker"), new SequenceLabelerFactory());
+    parseSamples.reset();
+    
+    //TODO build
     System.err.println("Training builder");
     ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules, ParserEventTypeEnum.BUILD, mdict);
     Map<String, String> buildReportMap = new HashMap<String, String>();
-    MaxentModel buildModel = TrainUtil.train(bes, mlParams.getSettings("build"), buildReportMap);
+    MaxentModel buildModel = TrainUtil.train(bes, trainParams.getSettings("build"), buildReportMap);
     mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
-
     parseSamples.reset();
 
-    // tag
-    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null, new POSSampleStream(parseSamples),
-        mlParams.getParameters("tagger"), sequenceLabelerFactory);
-
-    parseSamples.reset();
-
-    // chunk
-    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, null, new ChunkSampleStream(parseSamples),
-        mlParams.getParameters("chunker"), sequenceLabelerFactory);
-
-    parseSamples.reset();
-
-    // check
+    //TODO check
     System.err.println("Training checker");
     ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules, ParserEventTypeEnum.CHECK);
     Map<String, String> checkReportMap = new HashMap<String, String>();
-    MaxentModel checkModel = TrainUtil.train(kes, mlParams.getSettings("check"), checkReportMap);
+    MaxentModel checkModel = TrainUtil.train(kes, trainParams.getSettings("check"), checkReportMap);
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
-
-    // TODO: Remove cast for HeadRules
+    
     return new ParserModel(languageCode, buildModel, checkModel,
         posModel, chunkModel, rules, manifestInfoEntries);
   }

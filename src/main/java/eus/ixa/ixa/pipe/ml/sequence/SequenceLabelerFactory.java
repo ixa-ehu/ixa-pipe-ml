@@ -47,7 +47,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (InputStream in = SequenceLabelerFactory.class.getResourceAsStream(
-        "/opennlp/tools/namefind/ner-default-features.xml")) {
+        "/sequenceLabeler/default-feature-descriptor.xml")) {
       
       if (in == null) {
         throw new IllegalStateException("Classpath must contain ner-default-features.xml file!");
@@ -144,13 +144,12 @@ public class SequenceLabelerFactory extends BaseToolFactory {
       featureGeneratorBytes = (byte[]) artifactProvider.getArtifact(
           SequenceLabelerModel.GENERATOR_DESCRIPTOR_ENTRY_NAME);
     }
-    
     if (featureGeneratorBytes == null) {
+      System.err.println("WARNING: loading the default feature generator descriptor!!");
       featureGeneratorBytes = loadDefaultFeatureGeneratorBytes();
     }
 
     InputStream descriptorIn = new ByteArrayInputStream(featureGeneratorBytes);
-
     AdaptiveFeatureGenerator generator = null;
     try {
       generator = GeneratorFactory.create(descriptorIn, new FeatureGeneratorResourceProvider() {

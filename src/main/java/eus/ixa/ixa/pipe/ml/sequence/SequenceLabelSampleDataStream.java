@@ -7,22 +7,22 @@ import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
 
 /**
- * The {@link SequenceSampleDataStream} class converts tagged {@link String}s
- * provided by a {@link DataStream} to {@link SequenceSample} objects.
+ * The {@link SequenceLabelSampleDataStream} class converts tagged {@link String}s
+ * provided by a {@link DataStream} to {@link SequenceLabelSample} objects.
  * It uses text that is is one-sentence per line and tokenized
  * with names identified by <code>&lt;START&gt;</code> and <code>&lt;END&gt;</code> tags.
  */
-public class SequenceSampleDataStream extends FilterObjectStream<String, SequenceSample> {
+public class SequenceLabelSampleDataStream extends FilterObjectStream<String, SequenceLabelSample> {
 
   public static final String START_TAG_PREFIX = "<START:";
   public static final String START_TAG = "<START>";
   public static final String END_TAG = "<END>";
 
-  public SequenceSampleDataStream(ObjectStream<String> in) {
+  public SequenceLabelSampleDataStream(ObjectStream<String> in) {
     super(in);
   }
 
-  public SequenceSample read() throws IOException {
+  public SequenceLabelSample read() throws IOException {
       String token = samples.read();
 
       boolean isClearAdaptiveData = false;
@@ -36,7 +36,7 @@ public class SequenceSampleDataStream extends FilterObjectStream<String, Sequenc
       }
 
       if (token != null) {
-        return SequenceSample.parse(token, isClearAdaptiveData);
+        return SequenceLabelSample.parse(token, isClearAdaptiveData);
       }
       else {
         return null;

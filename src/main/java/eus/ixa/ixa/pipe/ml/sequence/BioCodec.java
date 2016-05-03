@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
-public class BioCodec implements SequenceCodec<String> {
+public class BioCodec implements SequenceLabelerCodec<String> {
 
   public static final String START = "start";
   public static final String CONTINUE = "cont";

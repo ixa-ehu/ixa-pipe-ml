@@ -16,15 +16,15 @@ import opennlp.tools.util.featuregen.WindowFeatureGenerator;
  * Class for creating an event stream out of data files for training an name
  * finder.
  */
-public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEventStream<SequenceSample> {
+public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEventStream<SequenceLabelSample> {
 
-  private SequenceContextGenerator contextGenerator;
+  private SequenceLabelerContextGenerator contextGenerator;
 
   private AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
 
   private String type;
 
-  private SequenceCodec<String> codec;
+  private SequenceLabelerCodec<String> codec;
 
   /**
    * Creates a new name finder event stream using the specified data stream and context generator.
@@ -33,7 +33,7 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
    * @param contextGenerator The context generator used to generate features for the event stream.
    * @param codec the encoding
    */
-  public SequenceLabelerEventStream(ObjectStream<SequenceSample> dataStream, String type, SequenceContextGenerator contextGenerator, SequenceCodec codec) {
+  public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream, String type, SequenceLabelerContextGenerator contextGenerator, SequenceLabelerCodec codec) {
     super(dataStream);
 
     this.codec = codec;
@@ -51,8 +51,8 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
       this.type = "default";
   }
 
-  public SequenceLabelerEventStream(ObjectStream<SequenceSample> dataStream) {
-    this(dataStream, null, new DefaultSequenceContextGenerator(), null);
+  public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream) {
+    this(dataStream, null, new DefaultSequenceLabelerContextGenerator(), null);
   }
 
   /**
@@ -91,7 +91,7 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
     return outcomes;
   }
 
-  public static List<Event> generateEvents(String[] sentence, String[] outcomes, SequenceContextGenerator cg) {
+  public static List<Event> generateEvents(String[] sentence, String[] outcomes, SequenceLabelerContextGenerator cg) {
     List<Event> events = new ArrayList<Event>(outcomes.length);
     for (int i = 0; i < outcomes.length; i++) {
       events.add(new Event(outcomes[i], cg.getContext(i, sentence, outcomes,null)));
@@ -103,7 +103,7 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
   }
 
   @Override
-  protected Iterator<Event> createEvents(SequenceSample sample) {
+  protected Iterator<Event> createEvents(SequenceLabelSample sample) {
 
     if (sample.isClearAdaptiveDataSet()) {
       contextGenerator.clearAdaptiveData();

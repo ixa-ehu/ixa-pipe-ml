@@ -28,8 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 
-import eus.ixa.ixa.pipe.ml.sequence.Sequence;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Span;
@@ -58,7 +58,7 @@ public class StatisticalSequenceLabeler {
   /**
    * The Sequence factory.
    */
-  private SequenceFactory sequenceFactory;
+  private SequenceLabelFactory sequenceFactory;
 
   /**
    * Construct a probabilistic sequence labeler.
@@ -88,7 +88,7 @@ public class StatisticalSequenceLabeler {
    * @param props the properties
    * @param aSeqFactory the name factory to construct Name objects
    */
-  public StatisticalSequenceLabeler(final Properties props, final SequenceFactory aSeqFactory) {
+  public StatisticalSequenceLabeler(final Properties props, final SequenceLabelFactory aSeqFactory) {
     String lang = props.getProperty("language");
     String model = props.getProperty("model");
     this.sequenceFactory = aSeqFactory;
@@ -103,7 +103,7 @@ public class StatisticalSequenceLabeler {
    * @param lang the language
    * @param aSeqFactory the factory
    */
-  public StatisticalSequenceLabeler(final String model, final String lang, final SequenceFactory aSeqFactory) {
+  public StatisticalSequenceLabeler(final String model, final String lang, final SequenceLabelFactory aSeqFactory) {
     this.sequenceFactory = aSeqFactory;
     SequenceLabelerModel seqModel = loadModel(lang, model);
     sequenceLabeler = new SequenceLabelerME(seqModel);
@@ -133,56 +133,56 @@ public class StatisticalSequenceLabeler {
   }
 
   /**
-   * Produce a list of the {@link Sequence} objects classified by the
+   * Produce a list of the {@link SequenceLabel} objects classified by the
    * probabilistic model.
    *
    * Takes an array of tokens, calls seqToSpans function for probabilistic Sequence
-   * Labeling and returns a List of {@link Sequence} objects containing the string, the
+   * Labeling and returns a List of {@link SequenceLabel} objects containing the string, the
    * type and the {@link Span}.
    *
    * @param tokens
    *          an array of tokenized text
    * @return a List of sequences
    */
-  public final List<Sequence> getSequences(final String[] tokens) {
+  public final List<SequenceLabel> getSequences(final String[] tokens) {
     Span[] origSpans = sequenceLabeler.tag(tokens);
     Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<Sequence> sequences = getSequencesFromSpans(tokens, seqSpans);
+    List<SequenceLabel> sequences = getSequencesFromSpans(tokens, seqSpans);
     return sequences;
   }
   
-  public final List<Sequence> getLemmaSequences(final String[] tokens) {
+  public final List<SequenceLabel> getLemmaSequences(final String[] tokens) {
     Span[] origSpans = sequenceLabeler.tag(tokens);
     Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<Sequence> sequences = getLemmaSequencesFromSpans(tokens, seqSpans);
+    List<SequenceLabel> sequences = getLemmaSequencesFromSpans(tokens, seqSpans);
     return sequences;
   }
   
   /**
-   * Creates a list of {@link Sequence} objects from spans and tokens.
+   * Creates a list of {@link SequenceLabel} objects from spans and tokens.
    *
    * @param seqSpans the sequence spans of a sentence
    * @param tokens the tokens in the sentence
-   * @return a list of {@link Sequence} objects
+   * @return a list of {@link SequenceLabel} objects
    */
-  public final List<Sequence> getSequencesFromSpans(final String[] tokens, final Span[] seqSpans) {
-    List<Sequence> sequences = new ArrayList<Sequence>();
+  public final List<SequenceLabel> getSequencesFromSpans(final String[] tokens, final Span[] seqSpans) {
+    List<SequenceLabel> sequences = new ArrayList<SequenceLabel>();
     for (Span seqSpan : seqSpans) {
       String seqString = seqSpan.getCoveredText(tokens);
       String seqType = seqSpan.getType();
-      Sequence sequence = sequenceFactory.createSequence(seqString, seqType, seqSpan);
+      SequenceLabel sequence = sequenceFactory.createSequence(seqString, seqType, seqSpan);
       sequences.add(sequence);
     }
     return sequences;
   }
   
-  public final List<Sequence> getLemmaSequencesFromSpans(final String[] tokens, Span[] seqSpans) {
-    List<Sequence> sequences = new ArrayList<>();
+  public final List<SequenceLabel> getLemmaSequencesFromSpans(final String[] tokens, Span[] seqSpans) {
+    List<SequenceLabel> sequences = new ArrayList<>();
     for (Span seqSpan : seqSpans) {
       String seqString = seqSpan.getCoveredText(tokens);
       String decodedLemma = StringUtils.decodeShortestEditScript(seqString.toLowerCase(), seqSpan.getType());
       seqSpan.setType(decodedLemma);
-      Sequence sequence = sequenceFactory.createSequence(seqString, decodedLemma, seqSpan);
+      SequenceLabel sequence = sequenceFactory.createSequence(seqString, decodedLemma, seqSpan);
       sequences.add(sequence);
     }
     return sequences;

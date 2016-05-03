@@ -3,11 +3,11 @@ package eus.ixa.ixa.pipe.ml.sequence;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 public class SequenceLabelerDetailedFMeasureListener extends
-DetailedFMeasureListener<SequenceSample> implements
+DetailedFMeasureListener<SequenceLabelSample> implements
 SequenceLabelerEvaluationMonitor {
 
 @Override
-protected Span[] asSpanArray(SequenceSample sample) {
+protected Span[] asSpanArray(SequenceLabelSample sample) {
 return sample.getSequences();
 }
 

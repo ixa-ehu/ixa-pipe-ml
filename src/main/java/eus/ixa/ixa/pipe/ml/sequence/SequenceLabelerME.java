@@ -48,11 +48,11 @@ public class SequenceLabelerME implements SequenceLabeler {
   public static Pattern unitPattern = Pattern.compile("(\\S+)-unit", Pattern.UNICODE_CHARACTER_CLASS);
   public static Pattern otherPattern = Pattern.compile("other");
 
-  private SequenceCodec<String> seqCodec = new BioCodec();
+  private SequenceLabelerCodec<String> seqCodec = new BioCodec();
 
   protected SequenceClassificationModel<String> model;
 
-  protected SequenceContextGenerator contextGenerator;
+  protected SequenceLabelerContextGenerator contextGenerator;
   private Sequence bestSequence;
 
   private AdditionalContextFeatureGenerator additionalContextFeatureGenerator
@@ -231,7 +231,7 @@ public class SequenceLabelerME implements SequenceLabeler {
   }
 
   public static SequenceLabelerModel train(String languageCode, String type,
-          ObjectStream<SequenceSample> samples, TrainingParameters trainParams,
+          ObjectStream<SequenceLabelSample> samples, TrainingParameters trainParams,
           SequenceLabelerFactory factory) throws IOException {
     String beamSizeString = trainParams.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
 

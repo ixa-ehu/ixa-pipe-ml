@@ -9,13 +9,13 @@ import opennlp.tools.util.eval.EvaluationMonitor;
  * to an output stream.
  *
  */
-public class SequenceEvaluationErrorListener extends
-    EvaluationErrorPrinter<SequenceSample> implements SequenceLabelerEvaluationMonitor {
+public class SequenceLabelerEvaluationErrorListener extends
+    EvaluationErrorPrinter<SequenceLabelSample> implements SequenceLabelerEvaluationMonitor {
 
   /**
    * Creates a listener that will print to System.err
    */
-  public SequenceEvaluationErrorListener() {
+  public SequenceLabelerEvaluationErrorListener() {
     super(System.err);
   }
 
@@ -24,12 +24,12 @@ public class SequenceEvaluationErrorListener extends
    *
  * @param outputStream the outputstream
  */
-public SequenceEvaluationErrorListener(OutputStream outputStream) {
+public SequenceLabelerEvaluationErrorListener(OutputStream outputStream) {
     super(outputStream);
   }
 
   @Override
-  public void missclassified(SequenceSample reference, SequenceSample prediction) {
+  public void missclassified(SequenceLabelSample reference, SequenceLabelSample prediction) {
     printError(reference.getId(), reference.getSequences(), prediction.getSequences(), reference,
         prediction, reference.getTokens());
   }

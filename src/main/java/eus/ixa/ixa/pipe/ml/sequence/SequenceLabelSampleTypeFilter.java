@@ -16,23 +16,23 @@ import opennlp.tools.util.ObjectStream;
 /**
  * A stream which removes Name Samples which do not have a certain type.
  */
-public class SequenceSampleTypeFilter extends FilterObjectStream<SequenceSample, SequenceSample> {
+public class SequenceLabelSampleTypeFilter extends FilterObjectStream<SequenceLabelSample, SequenceLabelSample> {
 
   private final Set<String> types;
 
-  public SequenceSampleTypeFilter(String[] types, ObjectStream<SequenceSample> samples) {
+  public SequenceLabelSampleTypeFilter(String[] types, ObjectStream<SequenceLabelSample> samples) {
     super(samples);
     this.types = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(types)));
   }
 
-  public SequenceSampleTypeFilter(Set<String> types, ObjectStream<SequenceSample> samples) {
+  public SequenceLabelSampleTypeFilter(Set<String> types, ObjectStream<SequenceLabelSample> samples) {
     super(samples);
     this.types = Collections.unmodifiableSet(new HashSet<String>(types));
   }
 
-  public SequenceSample read() throws IOException {
+  public SequenceLabelSample read() throws IOException {
 
-    SequenceSample sample = samples.read();
+    SequenceLabelSample sample = samples.read();
 
     if (sample != null) {
 
@@ -44,7 +44,7 @@ public class SequenceSampleTypeFilter extends FilterObjectStream<SequenceSample,
         }
       }
 
-      return new SequenceSample(sample.getId(), sample.getTokens(),
+      return new SequenceLabelSample(sample.getId(), sample.getTokens(),
           filteredNames.toArray(new Span[filteredNames.size()]), null, sample.isClearAdaptiveDataSet());
     }
     else {

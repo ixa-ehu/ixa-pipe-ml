@@ -10,7 +10,7 @@ import opennlp.tools.util.InputStreamFactory;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.StringUtil;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
@@ -24,7 +24,7 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  * @version 2016-03-15
  * 
  */
-public class TabulatedFormat implements ObjectStream<SequenceSample> {
+public class TabulatedFormat implements ObjectStream<SequenceLabelSample> {
 
   /**
    * The stream.
@@ -70,7 +70,7 @@ public class TabulatedFormat implements ObjectStream<SequenceSample> {
     }
   }
 
-  public SequenceSample read() throws IOException {
+  public SequenceLabelSample read() throws IOException {
 
     List<String> tokens = new ArrayList<String>();
     List<String> seqTypes = new ArrayList<String>();
@@ -122,7 +122,7 @@ public class TabulatedFormat implements ObjectStream<SequenceSample> {
       if (beginIndex != -1)
         sequences.add(new Span(beginIndex, endIndex, seqTypes.get(beginIndex)));
 
-      return new SequenceSample(tokens.toArray(new String[tokens.size()]),
+      return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
           sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
     } else if (line != null) {
       // Just filter out empty events, if two lines in a row are empty

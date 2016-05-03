@@ -6,7 +6,7 @@ import opennlp.tools.util.SequenceValidator;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
-public interface SequenceCodec<T> {
+public interface SequenceLabelerCodec<T> {
 
   /**
    * Decodes a sequence T objects into Span objects.

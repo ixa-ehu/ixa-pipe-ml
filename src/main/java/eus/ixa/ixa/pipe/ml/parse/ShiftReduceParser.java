@@ -24,19 +24,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.utils.Span;
-
 import opennlp.tools.dictionary.Dictionary;
-import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.TrainUtil;
-import opennlp.tools.ml.model.TwoPassDataIndexer;
 import opennlp.tools.ngram.NGramModel;
-import opennlp.tools.parser.Parser;
-import opennlp.tools.parser.ParserChunkerSequenceValidator;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.Heap;
 import opennlp.tools.util.ListHeap;
@@ -44,6 +36,10 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * Class for a shift reduce style parser based on Adwait Ratnaparkhi's 1998 thesis.
@@ -602,7 +598,7 @@ public class ShiftReduceParser {
     return newParses;
   }
 
-  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters mlParams)
+  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters mlParams, SequenceLabelerFactory sequenceLabelerFactory)
           throws IOException {
 
     System.err.println("Building dictionary");
@@ -624,14 +620,13 @@ public class ShiftReduceParser {
 
     // tag
     SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null, new POSSampleStream(parseSamples),
-        mlParams.getParameters("tagger"), sequenceLabelFactory);
+        mlParams.getParameters("tagger"), sequenceLabelerFactory);
 
     parseSamples.reset();
 
     // chunk
-    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
-        new ChunkSampleStream(parseSamples),
-        new ChunkContextGenerator(), mlParams.getParameters("chunker"));
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, null, new ChunkSampleStream(parseSamples),
+        mlParams.getParameters("chunker"), sequenceLabelerFactory);
 
     parseSamples.reset();
 
@@ -644,8 +639,7 @@ public class ShiftReduceParser {
 
     // TODO: Remove cast for HeadRules
     return new ParserModel(languageCode, buildModel, checkModel,
-        posModel, chunkModel, (opennlp.tools.parser.HeadRules) rules,
-        ParserType.CHUNKING, manifestInfoEntries);
+        posModel, chunkModel, rules, manifestInfoEntries);
   }
   
   public static void mergeReportIntoManifest(Map<String, String> manifest,

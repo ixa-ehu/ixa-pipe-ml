@@ -19,17 +19,17 @@ package eus.ixa.ixa.pipe.ml.sequence;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
- * This class provides the functionality to create {@link Sequence} objects.
+ * This class provides the functionality to create {@link SequenceLabel} objects.
  *
  * @author ragerri
  * @version 2016-03-14
  *
  */
 
-public class SequenceFactory {
+public class SequenceLabelFactory {
 
   /**
-   * Constructs a {@link Sequence} as a String with a class type (e.g. Person,
+   * Constructs a {@link SequenceLabel} as a String with a class type (e.g. Person,
    * location, organization, NNP, etc.)
    *
    * @param seqString
@@ -39,15 +39,15 @@ public class SequenceFactory {
    * @return a new Name object
    *
    */
-  public final Sequence createSequence(final String seqString, final String seqType) {
-    Sequence name = new Sequence();
+  public final SequenceLabel createSequence(final String seqString, final String seqType) {
+    SequenceLabel name = new SequenceLabel();
     name.setValue(seqString);
     name.setType(seqType);
     return name;
   }
 
   /**
-   * Constructs a {@link Sequence} as a String with a type and a {@link Span}
+   * Constructs a {@link SequenceLabel} as a String with a type and a {@link Span}
    * specified in terms of the number of tokens it contains.
    *
    * @param seqString
@@ -60,9 +60,9 @@ public class SequenceFactory {
    *
    */
 
-  public final Sequence createSequence(final String seqString, final String seqType,
+  public final SequenceLabel createSequence(final String seqString, final String seqType,
       final Span seqSpan) {
-    Sequence sequence = new Sequence();
+    SequenceLabel sequence = new SequenceLabel();
     sequence.setValue(seqString);
     sequence.setType(seqType);
     sequence.setSpan(seqSpan);
@@ -70,7 +70,7 @@ public class SequenceFactory {
   }
 
   /**
-   * Constructs a {@link Sequence} as a String with corresponding offsets and length
+   * Constructs a {@link SequenceLabel} as a String with corresponding offsets and length
    * from which to calculate start and end position of the Name.
    *
    * @param seqString
@@ -84,9 +84,9 @@ public class SequenceFactory {
    * @return a new Sequence object
    *
    */
-  public final Sequence createSequence(final String seqString, final String seqType,
+  public final SequenceLabel createSequence(final String seqString, final String seqType,
       final int offset, final int length) {
-    Sequence sequence = new Sequence();
+    SequenceLabel sequence = new SequenceLabel();
     sequence.setValue(seqString);
     sequence.setType(seqType);
     sequence.setStartOffset(offset);
@@ -110,9 +110,9 @@ public class SequenceFactory {
    * @return a new Name object
    *
    */
-  public final Sequence createSequence(final String seqString, final String seqType,
+  public final SequenceLabel createSequence(final String seqString, final String seqType,
       final Span seqSpan, final int offset, final int length) {
-    Sequence sequence = new Sequence();
+    SequenceLabel sequence = new SequenceLabel();
     sequence.setValue(seqString);
     sequence.setType(seqType);
     sequence.setSpan(seqSpan);

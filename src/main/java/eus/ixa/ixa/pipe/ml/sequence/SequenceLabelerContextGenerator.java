@@ -8,7 +8,7 @@ import opennlp.tools.util.featuregen.AdaptiveFeatureGenerator;
  * set of feature generators.
  * 
  */
-public interface SequenceContextGenerator extends
+public interface SequenceLabelerContextGenerator extends
     BeamSearchContextGenerator<String> {
 
   /**

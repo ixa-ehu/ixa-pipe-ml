@@ -30,8 +30,8 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSampleTypeFilter;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
@@ -58,11 +58,11 @@ public abstract class AbstractTrainer implements Trainer {
   /**
    * ObjectStream of the training data.
    */
-  private ObjectStream<SequenceSample> trainSamples;
+  private ObjectStream<SequenceLabelSample> trainSamples;
   /**
    * ObjectStream of the test data.
    */
-  private ObjectStream<SequenceSample> testSamples;
+  private ObjectStream<SequenceLabelSample> testSamples;
   /**
    * The corpus format: conll02, conll03 and opennlp.
    */
@@ -110,8 +110,8 @@ public abstract class AbstractTrainer implements Trainer {
     if (params.getSettings().get("Types") != null) {
       String netypes = params.getSettings().get("Types");
       String[] neTypes = netypes.split(",");
-      trainSamples = new SequenceSampleTypeFilter(neTypes, trainSamples);
-      testSamples = new SequenceSampleTypeFilter(neTypes, testSamples);
+      trainSamples = new SequenceLabelSampleTypeFilter(neTypes, trainSamples);
+      testSamples = new SequenceLabelSampleTypeFilter(neTypes, testSamples);
     }
   }
 
@@ -155,9 +155,9 @@ public abstract class AbstractTrainer implements Trainer {
    * @throws IOException
    *           the io exception
    */
-  public static ObjectStream<SequenceSample> getSequenceStream(final String inputData,
+  public static ObjectStream<SequenceLabelSample> getSequenceStream(final String inputData,
       final String clearFeatures, final String aCorpusFormat) throws IOException {
-    ObjectStream<SequenceSample> samples = null;
+    ObjectStream<SequenceLabelSample> samples = null;
     if (aCorpusFormat.equalsIgnoreCase("conll03")) {
       ObjectStream<String> nameStream = IOUtils.readFileIntoMarkableStreamFactory(inputData);
       samples = new CoNLL03Format(clearFeatures, nameStream);

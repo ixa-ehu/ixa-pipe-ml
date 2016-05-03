@@ -28,14 +28,14 @@ import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceCodec;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceEvaluationErrorListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCrossValidator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSampleTypeFilter;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.train.AbstractTrainer;
 import eus.ixa.ixa.pipe.ml.train.DefaultTrainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
@@ -59,7 +59,7 @@ public class CrossValidator {
   /**
    * ObjectStream of the training data.
    */
-  private ObjectStream<SequenceSample> trainSamples;
+  private ObjectStream<SequenceLabelSample> trainSamples;
   /**
    * beamsize value needs to be established in any class extending this one.
    */
@@ -71,7 +71,7 @@ public class CrossValidator {
   /**
    * The sequence encoding of the named entity spans, e.g., BIO or BILOU.
    */
-  private SequenceCodec<String> sequenceCodec;
+  private SequenceLabelerCodec<String> sequenceCodec;
   /**
    * The corpus format: conll02, conll03.
    */
@@ -83,7 +83,7 @@ public class CrossValidator {
   /**
    * The evaluation listeners.
    */
-  private List<EvaluationMonitor<SequenceSample>> listeners = new LinkedList<EvaluationMonitor<SequenceSample>>();
+  private List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
   SequenceLabelerDetailedFMeasureListener detailedFListener;
 
   
@@ -100,7 +100,7 @@ public class CrossValidator {
     if (params.getSettings().get("Types") != null) {
       String netypes = params.getSettings().get("Types");
       String[] neTypes = netypes.split(",");
-      trainSamples = new SequenceSampleTypeFilter(neTypes, trainSamples);
+      trainSamples = new SequenceLabelSampleTypeFilter(neTypes, trainSamples);
     }
     createNameFactory(params);
     getEvalListeners(params);
@@ -120,7 +120,7 @@ public class CrossValidator {
   
   private void getEvalListeners(TrainingParameters params) {
     if (params.getSettings().get("EvaluationType").equalsIgnoreCase("error")) {
-      listeners.add(new SequenceEvaluationErrorListener());
+      listeners.add(new SequenceLabelerEvaluationErrorListener());
     }
     if (params.getSettings().get("EvaluationType").equalsIgnoreCase("detailed")) {
       detailedFListener = new SequenceLabelerDetailedFMeasureListener();

@@ -8,7 +8,7 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
 
 import opennlp.tools.util.SequenceValidator;
 
-public class BilouCodec implements SequenceCodec<String> {
+public class BilouCodec implements SequenceLabelerCodec<String> {
 
   public static final String START = "start";
   public static final String CONTINUE = "cont";

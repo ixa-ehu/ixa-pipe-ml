@@ -24,13 +24,13 @@ import opennlp.tools.util.eval.Mean;
 /**
  * The {@link SequenceLabelerEvaluator} measures the performance
  * of the given {@link SequenceLabeler} with the provided
- * reference {@link SequenceSample}s.
+ * reference {@link SequenceLabelSample}s.
  *
  * @see Evaluator
  * @see SequenceLabeler
- * @see SequenceSample
+ * @see SequenceLabelSample
  */
-public class SequenceLabelerEvaluator extends Evaluator<SequenceSample> {
+public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
 
   private FMeasure fmeasure = new FMeasure();
   private Mean wordAccuracy = new Mean();
@@ -38,7 +38,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceSample> {
 
   /**
    * The {@link SequenceLabeler} used to create the predicted
-   * {@link SequenceSample} objects.
+   * {@link SequenceLabelSample} objects.
    */
   private SequenceLabeler sequenceLabeler;
 
@@ -55,19 +55,19 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceSample> {
   }
 
   /**
-   * Evaluates the given reference {@link SequenceSample} object.
+   * Evaluates the given reference {@link SequenceLabelSample} object.
    *
    * This is done by finding the sequneces with the
    * {@link SequenceLabeler} in the sentence from the reference
-   * {@link SequenceSample}. The found sequences are then used to
+   * {@link SequenceLabelSample}. The found sequences are then used to
    * calculate and update the scores.
    *
-   * @param reference the reference {@link SequenceSample}.
+   * @param reference the reference {@link SequenceLabelSample}.
    *
-   * @return the predicted {@link SequenceSample}.
+   * @return the predicted {@link SequenceLabelSample}.
    */
   @Override
-  protected SequenceSample processSample(SequenceSample reference) {
+  protected SequenceLabelSample processSample(SequenceLabelSample reference) {
 
     if (reference.isClearAdaptiveDataSet()) {
       sequenceLabeler.clearAdaptiveData();
@@ -95,7 +95,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceSample> {
       }
     }
     fmeasure.updateScores(references, predictedNames);
-    return new SequenceSample(reference.getTokens(), predictedNames, reference.isClearAdaptiveDataSet());
+    return new SequenceLabelSample(reference.getTokens(), predictedNames, reference.isClearAdaptiveDataSet());
   }
 
   public FMeasure getFMeasure() {

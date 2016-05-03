@@ -27,7 +27,7 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  * @version 2016-03-14
  *
  */
-public class Sequence {
+public class SequenceLabel {
 
   /**
    * The string of the sequence.
@@ -56,7 +56,7 @@ public class Sequence {
   /**
    * Create a new <code>Sequence</code> with a null content (i.e., str).
    */
-  public Sequence() {
+  public SequenceLabel() {
   }
 
   /**
@@ -67,7 +67,7 @@ public class Sequence {
    * @param aType
    *          the class of the name
    */
-  public Sequence(final String aStr, final String aType) {
+  public SequenceLabel(final String aStr, final String aType) {
     this.str = aStr;
     this.type = aType.toUpperCase();
   }
@@ -82,7 +82,7 @@ public class Sequence {
    * @param aSeqSpan
    *          the span of the sequence
    */
-  public Sequence(final String aStr, final String aType, final Span aSeqSpan) {
+  public SequenceLabel(final String aStr, final String aType, final Span aSeqSpan) {
     this.str = aStr;
     this.type = aType;
     this.sequenceSpan = aSeqSpan;
@@ -100,7 +100,7 @@ public class Sequence {
    * @param aSeqLength
    *          End offset in original text
    */
-  public Sequence(final String aStr, final String aType,
+  public SequenceLabel(final String aStr, final String aType,
       final int aStartOffset, final int aSeqLength) {
     this.str = aStr;
     this.type = aType;
@@ -122,7 +122,7 @@ public class Sequence {
    * @param aSeqLength
    *          End offset in original text
    */
-  public Sequence(final String aStr, final String aType, final Span aSeqSpan,
+  public SequenceLabel(final String aStr, final String aType, final Span aSeqSpan,
       final int aStartOffset, final int aSeqLength) {
     this.str = aStr;
     this.type = aType;

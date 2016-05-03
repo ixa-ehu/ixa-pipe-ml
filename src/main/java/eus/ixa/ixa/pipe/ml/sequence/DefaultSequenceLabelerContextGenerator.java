@@ -17,7 +17,7 @@ import opennlp.tools.util.featuregen.WindowFeatureGenerator;
  * Class for determining contextual features for a tag/chunk style
  * named-entity recognizer.
  */
-public class DefaultSequenceContextGenerator implements SequenceContextGenerator {
+public class DefaultSequenceLabelerContextGenerator implements SequenceLabelerContextGenerator {
 
   private AdaptiveFeatureGenerator[] featureGenerators;
   
@@ -36,7 +36,7 @@ public class DefaultSequenceContextGenerator implements SequenceContextGenerator
    *
  * @param featureGenerators the array of feature generators
  */
-public DefaultSequenceContextGenerator(AdaptiveFeatureGenerator... featureGenerators) {
+public DefaultSequenceLabelerContextGenerator(AdaptiveFeatureGenerator... featureGenerators) {
 
     if (featureGenerators != null) {
       this.featureGenerators = featureGenerators;

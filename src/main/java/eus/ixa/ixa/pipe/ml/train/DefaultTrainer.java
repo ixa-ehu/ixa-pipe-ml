@@ -36,7 +36,7 @@ import eus.ixa.ixa.pipe.ml.resources.Dictionary;
 import eus.ixa.ixa.pipe.ml.resources.MFSResource;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
 import eus.ixa.ixa.pipe.ml.resources.Word2VecCluster;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceCodec;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
@@ -99,7 +99,7 @@ public class DefaultTrainer extends AbstractTrainer {
    */
   public void createTrainer(TrainingParameters params) throws IOException {
     String seqCodec = getSequenceCodec();
-    SequenceCodec<String> sequenceCodec = SequenceLabelerFactory
+    SequenceLabelerCodec<String> sequenceCodec = SequenceLabelerFactory
         .instantiateSequenceCodec(seqCodec);
     String featureDescription = XMLFeatureDescriptor
         .createXMLFeatureDescriptor(params);

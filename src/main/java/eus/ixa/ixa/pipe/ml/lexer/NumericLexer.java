@@ -9,8 +9,8 @@ import java.io.Reader;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
-import eus.ixa.ixa.pipe.ml.sequence.Sequence;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelFactory;
 
 	
 /* -----------------Options and Declarations Section----------------- */
@@ -1366,7 +1366,7 @@ class NumericLexer {
 
   /* user code: */
 
-  private SequenceFactory nameFactory;
+  private SequenceLabelFactory nameFactory;
   private static final Logger LOGGER = Logger.getLogger(NumericLexer.class.getName());
   private boolean seenUntokenizableCharacter;
   private enum UntokenizableOptions { NONE_DELETE, FIRST_DELETE, ALL_DELETE, NONE_KEEP, FIRST_KEEP, ALL_KEEP }
@@ -1378,7 +1378,7 @@ class NumericLexer {
   /////////////////
   
   
-  public NumericLexer(Reader breader, SequenceFactory aNameFactory) {
+  public NumericLexer(Reader breader, SequenceLabelFactory aNameFactory) {
     this(breader);
     this.nameFactory = aNameFactory;
   }
@@ -1389,12 +1389,12 @@ class NumericLexer {
   ////////////////////////
   
   
-  private Sequence makeName(String nameString, String neType) {
-    Sequence name = nameFactory.createSequence(nameString, neType, yychar, yylength());
+  private SequenceLabel makeName(String nameString, String neType) {
+    SequenceLabel name = nameFactory.createSequence(nameString, neType, yychar, yylength());
     return name;
   }
   
-  private Sequence makeName() {
+  private SequenceLabel makeName() {
     return makeName("MISC","MISC");
   }
 
@@ -1627,7 +1627,7 @@ class NumericLexer {
    * @return      the next token
    * @exception   java.io.IOException  if any I/O-Error occurs
    */
-  public Sequence yylex() throws java.io.IOException {
+  public SequenceLabel yylex() throws java.io.IOException {
     int zzInput;
     int zzAction;
 

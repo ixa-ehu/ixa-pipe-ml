@@ -54,7 +54,7 @@ public class SequenceLabelerModel extends BaseModel {
 
   public SequenceLabelerModel(String languageCode, SequenceClassificationModel<String> nameFinderModel,
       byte[] generatorDescriptor, Map<String, Object> resources, Map<String, String> manifestInfoEntries,
-      SequenceCodec<String> seqCodec, SequenceLabelerFactory factory) {
+      SequenceLabelerCodec<String> seqCodec, SequenceLabelerFactory factory) {
     super(COMPONENT_NAME, languageCode, manifestInfoEntries, factory);
 
     init(nameFinderModel, generatorDescriptor, resources, manifestInfoEntries, seqCodec);
@@ -66,7 +66,7 @@ public class SequenceLabelerModel extends BaseModel {
 
   public SequenceLabelerModel(String languageCode, MaxentModel nameFinderModel, int beamSize,
       byte[] generatorDescriptor, Map<String, Object> resources, Map<String, String> manifestInfoEntries,
-      SequenceCodec<String> seqCodec, SequenceLabelerFactory factory) {
+      SequenceLabelerCodec<String> seqCodec, SequenceLabelerFactory factory) {
     super(COMPONENT_NAME, languageCode, manifestInfoEntries, factory);
 
 
@@ -106,7 +106,7 @@ public class SequenceLabelerModel extends BaseModel {
 
   private void init(Object nameFinderModel,
       byte[] generatorDescriptor, Map<String, Object> resources, Map<String, String> manifestInfoEntries,
-      SequenceCodec<String> seqCodec) {
+      SequenceLabelerCodec<String> seqCodec) {
 
     Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
     manifest.put(SEQUENCE_CODEC_CLASS_NAME_PARAMETER, seqCodec.getClass().getName());

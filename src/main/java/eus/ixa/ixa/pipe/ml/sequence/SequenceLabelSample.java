@@ -15,7 +15,7 @@ import opennlp.tools.tokenize.WhitespaceTokenizer;
 /**
  * Class for holding sequences for a single unit of text.
  */
-public class SequenceSample {
+public class SequenceLabelSample {
 
   private final String id;
   private final List<String> tokens;
@@ -26,7 +26,7 @@ public class SequenceSample {
   /** The a default type value when there is no type in training data. */
   public static final String DEFAULT_TYPE = "default";
 
-  public SequenceSample(String id, String[] tokens, Span[] sequences,
+  public SequenceLabelSample(String id, String[] tokens, Span[] sequences,
       String[][] additionalContext, boolean clearAdaptiveData) {
 
     this.id = id;
@@ -67,12 +67,12 @@ public class SequenceSample {
    * @param clearAdaptiveData if true the adaptive data of the
    *     feature generators is cleared
    */
-  public SequenceSample(String[] tokens, Span[] sequences,
+  public SequenceLabelSample(String[] tokens, Span[] sequences,
       String[][] additionalContext, boolean clearAdaptiveData) {
     this(null, tokens, sequences, additionalContext, clearAdaptiveData);
   }
 
-  public SequenceSample(String[] tokens, Span[] sequences, boolean clearAdaptiveData) {
+  public SequenceLabelSample(String[] tokens, Span[] sequences, boolean clearAdaptiveData) {
     this(tokens, sequences, null, clearAdaptiveData);
   }
 
@@ -102,8 +102,8 @@ public class SequenceSample {
     if (this == obj) {
       return true;
     }
-    else if (obj instanceof SequenceSample) {
-      SequenceSample a = (SequenceSample) obj;
+    else if (obj instanceof SequenceLabelSample) {
+      SequenceLabelSample a = (SequenceLabelSample) obj;
 
       return Arrays.equals(getTokens(), a.getTokens()) &&
           Arrays.equals(getSequences(), a.getSequences()) &&
@@ -133,15 +133,15 @@ public class SequenceSample {
           // check if nameTypes is null, or if the nameType for this specific
           // entity is empty. If it is, we leave the nameType blank.
           if (sequence.getType() == null) {
-            result.append(SequenceSampleDataStream.START_TAG).append(' ');
+            result.append(SequenceLabelSampleDataStream.START_TAG).append(' ');
           }
           else {
-            result.append(SequenceSampleDataStream.START_TAG_PREFIX).append(sequence.getType()).append("> ");
+            result.append(SequenceLabelSampleDataStream.START_TAG_PREFIX).append(sequence.getType()).append("> ");
           }
         }
 
         if (sequence.getEnd() == tokenIndex) {
-          result.append(SequenceSampleDataStream.END_TAG).append(' ');
+          result.append(SequenceLabelSampleDataStream.END_TAG).append(' ');
         }
       }
 
@@ -153,7 +153,7 @@ public class SequenceSample {
 
     for (Span name : sequences) {
       if (name.getEnd() == tokens.size()) {
-        result.append(' ').append(SequenceSampleDataStream.END_TAG);
+        result.append(' ').append(SequenceLabelSampleDataStream.END_TAG);
       }
     }
 
@@ -188,12 +188,12 @@ public class SequenceSample {
 
   private static final Pattern START_TAG_PATTERN = Pattern.compile("<START(:([^:>\\s]*))?>");
 
-  public static SequenceSample parse(String taggedTokens,
+  public static SequenceLabelSample parse(String taggedTokens,
       boolean isClearAdaptiveData) throws IOException {
     return parse(taggedTokens, DEFAULT_TYPE, isClearAdaptiveData);
   }
 
-  public static SequenceSample parse(String taggedTokens, String defaultType,
+  public static SequenceLabelSample parse(String taggedTokens, String defaultType,
       boolean isClearAdaptiveData)
     // TODO: Should throw another exception, and then convert it into an IOException in the stream
     throws IOException {
@@ -228,7 +228,7 @@ public class SequenceSample {
         }
 
       }
-      else if (parts[pi].equals(SequenceSampleDataStream.END_TAG)) {
+      else if (parts[pi].equals(SequenceLabelSampleDataStream.END_TAG)) {
         if(catchingSequence == false) {
           throw new IOException("Found unexpected annotation: " + errorTokenWithContext(parts, pi));
         }
@@ -245,7 +245,7 @@ public class SequenceSample {
     String[] tokens = tokenList.toArray(new String[tokenList.size()]);
     Span[] sequences = seqList.toArray(new Span[seqList.size()]);
 
-    return new SequenceSample(tokens, sequences, isClearAdaptiveData);
+    return new SequenceLabelSample(tokens, sequences, isClearAdaptiveData);
   }
 }
 

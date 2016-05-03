@@ -24,15 +24,15 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.EvaluationMonitor;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceEvaluationErrorListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabeler;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSampleTypeFilter;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.train.AbstractTrainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
@@ -47,7 +47,7 @@ public class Evaluate {
   /**
    * The reference corpus to evaluate against.
    */
-  private ObjectStream<SequenceSample> testSamples;
+  private ObjectStream<SequenceLabelSample> testSamples;
   /**
    * An instance of the probabilistic {@link SequenceLabelerME}.
    */
@@ -79,7 +79,7 @@ public class Evaluate {
     testSamples = AbstractTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
     if (seqTypes != Flags.DEFAULT_SEQUENCE_TYPES) {
       String[] neTypes = seqTypes.split(",");
-      testSamples = new SequenceSampleTypeFilter(neTypes, testSamples);
+      testSamples = new SequenceLabelSampleTypeFilter(neTypes, testSamples);
     }
     seqModels.putIfAbsent(lang, new SequenceLabelerModel(new FileInputStream(model)));
     sequenceLabeler = new SequenceLabelerME(seqModels.get(lang));
@@ -103,7 +103,7 @@ public class Evaluate {
    * @throws IOException if test corpus not loaded
    */
   public final void detailEvaluate() throws IOException {
-    List<EvaluationMonitor<SequenceSample>> listeners = new LinkedList<EvaluationMonitor<SequenceSample>>();
+    List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
     SequenceLabelerDetailedFMeasureListener detailedFListener = new SequenceLabelerDetailedFMeasureListener();
     listeners.add(detailedFListener);
     SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler,
@@ -116,8 +116,8 @@ public class Evaluate {
    * @throws IOException if test corpus not loaded
    */
   public final void evalError() throws IOException {
-    List<EvaluationMonitor<SequenceSample>> listeners = new LinkedList<EvaluationMonitor<SequenceSample>>();
-    listeners.add(new SequenceEvaluationErrorListener());
+    List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
+    listeners.add(new SequenceLabelerEvaluationErrorListener());
     SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler,
         listeners.toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
     evaluator.evaluate(testSamples);

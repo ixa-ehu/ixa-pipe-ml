@@ -36,7 +36,9 @@ import opennlp.tools.util.model.UncloseableInputStream;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 
 /**
- * This is an abstract base class for {@link ParserModel} implementations.
+ * ParserModel class. Based on opennlp.tools.parse.ParserModel.java.
+ * @author ragerri
+ * @version 2016-05-03
  */
 public class ParserModel extends BaseModel {
 

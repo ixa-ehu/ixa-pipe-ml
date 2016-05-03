@@ -22,7 +22,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
 
   private byte[] featureGeneratorBytes;
   private Map<String, Object> resources;
-  private SequenceCodec<String> seqCodec;
+  private SequenceLabelerCodec<String> seqCodec;
 
   /**
    * Creates a {@link SequenceLabelerFactory} that provides the default implementation
@@ -33,11 +33,11 @@ public class SequenceLabelerFactory extends BaseToolFactory {
   }
 
   public SequenceLabelerFactory(byte[] featureGeneratorBytes, final Map<String, Object> resources,
-      SequenceCodec<String> seqCodec) {
+      SequenceLabelerCodec<String> seqCodec) {
     init(featureGeneratorBytes, resources, seqCodec);
   }
 
-  void init(byte[] featureGeneratorBytes, final Map<String, Object> resources, SequenceCodec<String> seqCodec) {
+  void init(byte[] featureGeneratorBytes, final Map<String, Object> resources, SequenceLabelerCodec<String> seqCodec) {
     this.featureGeneratorBytes = featureGeneratorBytes;
     this.resources = resources;
     this.seqCodec = seqCodec;
@@ -66,7 +66,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     return bytes.toByteArray();
   }
   
-  protected SequenceCodec<String> getSequenceCodec() {
+  protected SequenceLabelerCodec<String> getSequenceCodec() {
     return seqCodec;
   }
 
@@ -79,7 +79,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
   }
 
   public static SequenceLabelerFactory create(String subclassName, byte[] featureGeneratorBytes, final Map<String, Object> resources,
-      SequenceCodec<String> seqCodec)
+      SequenceLabelerCodec<String> seqCodec)
       throws InvalidFormatException {
     SequenceLabelerFactory theFactory;
     if (subclassName == null) {
@@ -106,7 +106,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     // no additional artifacts
   }
 
-  public SequenceCodec<String> createSequenceCodec() {
+  public SequenceLabelerCodec<String> createSequenceCodec() {
 
     if (artifactProvider != null) {
       String sequeceCodecImplName = artifactProvider.getManifestProperty(
@@ -118,7 +118,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     }
   }
 
-  public SequenceContextGenerator createContextGenerator() {
+  public SequenceLabelerContextGenerator createContextGenerator() {
 
     AdaptiveFeatureGenerator featureGenerator = createFeatureGenerators();
 
@@ -126,7 +126,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
       featureGenerator = SequenceLabelerME.createFeatureGenerator();
     }
 
-    return new DefaultSequenceContextGenerator(featureGenerator);
+    return new DefaultSequenceLabelerContextGenerator(featureGenerator);
   }
 
   /**
@@ -184,12 +184,12 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     return generator;
   }
 
-  public static SequenceCodec<String> instantiateSequenceCodec(
+  public static SequenceLabelerCodec<String> instantiateSequenceCodec(
       String sequenceCodecImplName) {
 
     if (sequenceCodecImplName != null) {
       return ExtensionLoader.instantiateExtension(
-          SequenceCodec.class, sequenceCodecImplName);
+          SequenceLabelerCodec.class, sequenceCodecImplName);
     }
     else {
       // If nothing is specified return old default!

@@ -18,13 +18,13 @@ public class SequenceLabelerCrossValidator {
 
 	  private class DocumentSample {
 
-	    private SequenceSample samples[];
+	    private SequenceLabelSample samples[];
 
-	    DocumentSample(SequenceSample samples[]) {
+	    DocumentSample(SequenceLabelSample samples[]) {
 	      this.samples = samples;
 	    }
 
-	    private SequenceSample[] getSamples() {
+	    private SequenceLabelSample[] getSamples() {
 	      return samples;
 	    }
 	  }
@@ -32,17 +32,17 @@ public class SequenceLabelerCrossValidator {
 	  /**
 	   * Reads Name Samples to group them as a document based on the clear adaptive data flag.
 	   */
-	  private class NameToDocumentSampleStream extends FilterObjectStream<SequenceSample, DocumentSample> {
+	  private class NameToDocumentSampleStream extends FilterObjectStream<SequenceLabelSample, DocumentSample> {
 
-	    private SequenceSample beginSample;
+	    private SequenceLabelSample beginSample;
 
-	    protected NameToDocumentSampleStream(ObjectStream<SequenceSample> samples) {
+	    protected NameToDocumentSampleStream(ObjectStream<SequenceLabelSample> samples) {
 	      super(samples);
 	    }
 
 	    public DocumentSample read() throws IOException {
 
-	      List<SequenceSample> document = new ArrayList<SequenceSample>();
+	      List<SequenceLabelSample> document = new ArrayList<SequenceLabelSample>();
 
 	      if (beginSample == null) {
 	        // Assume that the clear flag is set
@@ -56,7 +56,7 @@ public class SequenceLabelerCrossValidator {
 
 	      document.add(beginSample);
 
-	      SequenceSample sample;
+	      SequenceLabelSample sample;
 	      while ((sample = samples.read()) != null) {
 
 	        if (sample.isClearAdaptiveDataSet()) {
@@ -73,7 +73,7 @@ public class SequenceLabelerCrossValidator {
 	        beginSample = null;
 	      }
 
-	      return new DocumentSample(document.toArray(new SequenceSample[document.size()]));
+	      return new DocumentSample(document.toArray(new SequenceLabelSample[document.size()]));
 	    }
 
 	    @Override
@@ -87,15 +87,15 @@ public class SequenceLabelerCrossValidator {
 	  /**
 	   * Splits DocumentSample into NameSamples.
 	   */
-	  private class DocumentToNameSampleStream extends FilterObjectStream<DocumentSample, SequenceSample>{
+	  private class DocumentToNameSampleStream extends FilterObjectStream<DocumentSample, SequenceLabelSample>{
 
 	    protected DocumentToNameSampleStream(ObjectStream<DocumentSample> samples) {
 	      super(samples);
 	    }
 
-	    private Iterator<SequenceSample> documentSamples = Collections.<SequenceSample>emptyList().iterator();
+	    private Iterator<SequenceLabelSample> documentSamples = Collections.<SequenceLabelSample>emptyList().iterator();
 
-	    public SequenceSample read() throws IOException {
+	    public SequenceLabelSample read() throws IOException {
 
 	      // Note: Empty document samples should be skipped
 
@@ -137,7 +137,7 @@ public class SequenceLabelerCrossValidator {
 	 */
 	public SequenceLabelerCrossValidator(String languageCode, String type,
 	      TrainingParameters trainParams, byte[] featureGeneratorBytes,
-	      Map<String, Object> resources, SequenceCodec<String> codec,
+	      Map<String, Object> resources, SequenceLabelerCodec<String> codec,
 	      SequenceLabelerEvaluationMonitor... listeners) {
 
 	    this.languageCode = languageCode;
@@ -173,7 +173,7 @@ public class SequenceLabelerCrossValidator {
 	   *          number of folds
 	   * @throws IOException if io errors
 	   */
-	  public void evaluate(ObjectStream<SequenceSample> samples, int nFolds)
+	  public void evaluate(ObjectStream<SequenceLabelSample> samples, int nFolds)
 	      throws IOException {
 
 	    // Note: The name samples need to be grouped on a document basis.

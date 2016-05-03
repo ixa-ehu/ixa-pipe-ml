@@ -20,8 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import eus.ixa.ixa.pipe.ml.lexer.NumericNameLexer;
-import eus.ixa.ixa.pipe.ml.sequence.Sequence;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
@@ -29,24 +29,24 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 public class NumericNERTagger {
   
   private NumericNameLexer numericLexer;
-  private SequenceFactory nameFactory;
+  private SequenceLabelFactory nameFactory;
   
-  public NumericNERTagger(BufferedReader breader, SequenceFactory aNameFactory) {
+  public NumericNERTagger(BufferedReader breader, SequenceLabelFactory aNameFactory) {
     this.nameFactory = aNameFactory;
     numericLexer = new NumericNameLexer(breader, aNameFactory);
   }
 
-  public List<Sequence> getNames(String[] tokens) {
+  public List<SequenceLabel> getNames(String[] tokens) {
     Span[] origSpans = nercToSpans(tokens);
     Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<Sequence> names = getNamesFromSpans(neSpans, tokens);
+    List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
     return names;
   }
 
   public Span[] nercToSpans(final String[] tokens) {
     List<Span> neSpans = new ArrayList<Span>();
-    List<Sequence> flexNameList = numericLexer.getNumericNames();
-    for (Sequence name : flexNameList) {
+    List<SequenceLabel> flexNameList = numericLexer.getNumericNames();
+    for (SequenceLabel name : flexNameList) {
       //System.err.println("numeric name: " + name.value());
       List<Integer> neIds = StringUtils.exactTokenFinderIgnoreCase(name.getString(), tokens);
       for (int i = 0; i < neIds.size(); i += 2) {
@@ -57,12 +57,12 @@ public class NumericNERTagger {
     return neSpans.toArray(new Span[neSpans.size()]);
   }
 
-  public List<Sequence> getNamesFromSpans(Span[] neSpans, String[] tokens) {
-    List<Sequence> names = new ArrayList<Sequence>();
+  public List<SequenceLabel> getNamesFromSpans(Span[] neSpans, String[] tokens) {
+    List<SequenceLabel> names = new ArrayList<SequenceLabel>();
     for (Span neSpan : neSpans) {
       String nameString = neSpan.getCoveredText(tokens);
       String neType = neSpan.getType();
-      Sequence name = nameFactory.createSequence(nameString, neType, neSpan);
+      SequenceLabel name = nameFactory.createSequence(nameString, neType, neSpan);
       names.add(name);
     }
     return names;

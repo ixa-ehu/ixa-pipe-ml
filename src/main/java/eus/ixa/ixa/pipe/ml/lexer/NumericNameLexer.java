@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import eus.ixa.ixa.pipe.ml.sequence.Sequence;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelFactory;
 
 
 /**
@@ -45,7 +45,7 @@ public class NumericNameLexer {
    * The lexer specification.
    */
   private NumericLexer jlexer;
-  private Sequence nextToken;
+  private SequenceLabel nextToken;
   
   /**
    * Construct a new NumericNameLexer.
@@ -53,7 +53,7 @@ public class NumericNameLexer {
    * @param nameFactory The NameFactory that will be invoked to convert
    *        each string extracted by the @link NumericLexer into a @Sequence object
    */
-  public NumericNameLexer(final BufferedReader breader, final SequenceFactory nameFactory) {
+  public NumericNameLexer(final BufferedReader breader, final SequenceLabelFactory nameFactory) {
     jlexer = new NumericLexer(breader, nameFactory);
   }
   
@@ -62,8 +62,8 @@ public class NumericNameLexer {
    *
    * @return A list of all tokens remaining in the underlying Reader
    */
-  public List<Sequence> getNumericNames() {
-    List<Sequence> result = new ArrayList<Sequence>();
+  public List<SequenceLabel> getNumericNames() {
+    List<SequenceLabel> result = new ArrayList<SequenceLabel>();
     while (hasNextToken()) {
       result.add(getNextToken());
     }
@@ -91,7 +91,7 @@ public class NumericNameLexer {
    * Get the next token provided by yylex().
    * @return the next name
    */
-  public Sequence getNextToken() {
+  public SequenceLabel getNextToken() {
     if (nextToken == null) {
       try {
         nextToken = jlexer.yylex();
@@ -100,7 +100,7 @@ public class NumericNameLexer {
         e.printStackTrace();
       }
     }
-    Sequence result = nextToken;
+    SequenceLabel result = nextToken;
     nextToken = null;
     if (result == null) {
       throw new NoSuchElementException();

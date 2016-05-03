@@ -21,17 +21,17 @@ import java.io.IOException;
 
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 
-public class POSSampleStream extends FilterObjectStream<Parse, SequenceSample> {
+public class POSSampleStream extends FilterObjectStream<Parse, SequenceLabelSample> {
 
   public POSSampleStream(ObjectStream<Parse> in) {
     super(in);
   }
 
-  public SequenceSample read() throws IOException {
+  public SequenceLabelSample read() throws IOException {
 
     Parse parse = samples.read();
     boolean isClearAdaptiveData = false;
@@ -50,7 +50,7 @@ public class POSSampleStream extends FilterObjectStream<Parse, SequenceSample> {
         preds[ti] = tok.getSpan();
       }
 
-      return new SequenceSample(toks, preds, isClearAdaptiveData);
+      return new SequenceLabelSample(toks, preds, isClearAdaptiveData);
     }
     else {
       return null;

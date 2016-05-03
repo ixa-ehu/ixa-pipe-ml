@@ -19,9 +19,12 @@ package eus.ixa.ixa.pipe.ml.parse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,54 +32,33 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.model.ArtifactSerializer;
+import opennlp.tools.util.model.SerializableArtifact;
+
 /**
  * Class for storing the English head rules associated with parsing. The
  * headrules are specified in $src/main/resources/en-head-rules
- * 
- * NOTE: This is the very same class than the one inside
- * opennlp.tools.parser.lang.en package. The main change is the return of the getHead()
- * method: Every return constituents[i].getHead() has been replaced by the
- * same return statement without the .getHead() method call.
- * 
- * Other changes include removal of deprecated methods we do not need to use and
- * adding some other methods for debugging.
+ *
+ * This class is inspired by opennlp.tools.parser.lang.en.HeadRules.java.
  * @author ragerri
  * @version 2015-05-06
  */
-public class PennTreebankHeadRules implements HeadRules, GapLabeler {
+public class PennTreebankHeadRules implements HeadRules, GapLabeler, SerializableArtifact {
 
-  private static class HeadRule {
-    public boolean leftToRight;
-    public String[] tags;
+  public static class PennTreebankHeadRulesSerializer implements ArtifactSerializer<PennTreebankHeadRules> {
 
-    public HeadRule(final boolean l2r, final String[] tags) {
-      this.leftToRight = l2r;
-
-      for (final String tag : tags) {
-        if (tag == null) {
-          throw new IllegalArgumentException(
-              "tags must not contain null values!");
-        }
-      }
-
-      this.tags = tags;
+    public PennTreebankHeadRules create(InputStream in) throws IOException,
+        InvalidFormatException {
+      return new PennTreebankHeadRules(new BufferedReader(new InputStreamReader(in, "UTF-8")));
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-      if (obj == this) {
-        return true;
-      } else if (obj instanceof HeadRule) {
-        final HeadRule rule = (HeadRule) obj;
-
-        return rule.leftToRight == this.leftToRight
-            && Arrays.equals(rule.tags, this.tags);
-      } else {
-        return false;
-      }
+    public void serialize(PennTreebankHeadRules artifact, OutputStream out)
+        throws IOException {
+      artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
     }
   }
-
+  
   private Map<String, HeadRule> headRules;
   private final Set<String> punctSet;
 
@@ -100,6 +82,25 @@ public class PennTreebankHeadRules implements HeadRules, GapLabeler {
     this.punctSet.add("''");
     // punctSet.add(":");
   }
+  
+  private void readHeadRules(final BufferedReader str) throws IOException {
+    String line;
+    this.headRules = new HashMap<String, HeadRule>(30);
+    while ((line = str.readLine()) != null) {
+      final StringTokenizer st = new StringTokenizer(line);
+      final String num = st.nextToken();
+      final String type = st.nextToken();
+      final String dir = st.nextToken();
+      final String[] tags = new String[Integer.parseInt(num) - 2];
+      int ti = 0;
+      while (st.hasMoreTokens()) {
+        tags[ti] = st.nextToken();
+        ti++;
+      }
+      this.headRules.put(type, new HeadRule(dir.equals("1"), tags));
+    }
+  }
+
 
   public Set<String> getPunctuationTags() {
     return this.punctSet;
@@ -153,10 +154,10 @@ public class PennTreebankHeadRules implements HeadRules, GapLabeler {
       //else return the last word
       return constituents[constituents.length - 1];
     } else if ((hr = this.headRules.get(type)) != null) {
-      final String[] tags = hr.tags;
+      final String[] tags = hr.getTags();
       final int cl = constituents.length;
       final int tl = tags.length;
-      if (hr.leftToRight) {
+      if (hr.isLeftToRight()) {
         for (int ti = 0; ti < tl; ti++) {
           for (int ci = 0; ci < cl; ci++) {
             if (constituents[ci].getType().equals(tags[ti])) {
@@ -180,24 +181,6 @@ public class PennTreebankHeadRules implements HeadRules, GapLabeler {
       }
     }
     return constituents[constituents.length - 1];
-  }
-
-  private void readHeadRules(final BufferedReader str) throws IOException {
-    String line;
-    this.headRules = new HashMap<String, HeadRule>(30);
-    while ((line = str.readLine()) != null) {
-      final StringTokenizer st = new StringTokenizer(line);
-      final String num = st.nextToken();
-      final String type = st.nextToken();
-      final String dir = st.nextToken();
-      final String[] tags = new String[Integer.parseInt(num) - 2];
-      int ti = 0;
-      while (st.hasMoreTokens()) {
-        tags[ti] = st.nextToken();
-        ti++;
-      }
-      this.headRules.put(type, new HeadRule(dir.equals("1"), tags));
-    }
   }
 
   public void labelGaps(final Stack<Constituent> stack) {
@@ -244,19 +227,19 @@ public class PennTreebankHeadRules implements HeadRules, GapLabeler {
     for (final String type : this.headRules.keySet()) {
       final HeadRule headRule = this.headRules.get(type);
       // write num of tags
-      writer.write(Integer.toString(headRule.tags.length + 2));
+      writer.write(Integer.toString(headRule.getTags().length + 2));
       writer.write(' ');
       // write type
       writer.write(type);
       writer.write(' ');
       // write l2r true == 1
-      if (headRule.leftToRight) {
+      if (headRule.isLeftToRight()) {
         writer.write("1");
       } else {
         writer.write("0");
       }
       // write tags
-      for (final String tag : headRule.tags) {
+      for (final String tag : headRule.getTags()) {
         writer.write(' ');
         writer.write(tag);
       }
@@ -283,5 +266,10 @@ public class PennTreebankHeadRules implements HeadRules, GapLabeler {
   public int hashCode() {
     assert false : "hashCode not designed";
     return 42; // any arbitrary constant will do
+  }
+  
+  @Override
+  public Class<?> getArtifactSerializerClass() {
+    return PennTreebankHeadRulesSerializer.class;
   }
 }

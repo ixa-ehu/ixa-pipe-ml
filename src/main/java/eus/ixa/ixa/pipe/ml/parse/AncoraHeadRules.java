@@ -17,9 +17,12 @@ package eus.ixa.ixa.pipe.ml.parse;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,43 +30,28 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.model.ArtifactSerializer;
+import opennlp.tools.util.model.SerializableArtifact;
+
 /**
 * Class for obtaining head rules from Spanish Ancora parse
 * trees.
 * @author ragerri
 * @version 2015-05-06
 */
-public class AncoraHeadRules implements HeadRules, GapLabeler {
+public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtifact {
+  
+  public static class AncoraHeadRulesSerializer implements ArtifactSerializer<AncoraHeadRules> {
 
-  private static class HeadRule {
-    public boolean leftToRight;
-    public String[] tags;
-
-    public HeadRule(final boolean l2r, final String[] tags) {
-      this.leftToRight = l2r;
-
-      for (final String tag : tags) {
-        if (tag == null) {
-          throw new IllegalArgumentException(
-              "tags must not contain null values!");
-        }
-      }
-
-      this.tags = tags;
+    public AncoraHeadRules create(InputStream in) throws IOException,
+        InvalidFormatException {
+      return new AncoraHeadRules(new BufferedReader(new InputStreamReader(in, "UTF-8")));
     }
 
-    @Override
-    public boolean equals(final Object obj) {
-      if (obj == this) {
-        return true;
-      } else if (obj instanceof HeadRule) {
-        final HeadRule rule = (HeadRule) obj;
-
-        return rule.leftToRight == this.leftToRight
-            && Arrays.equals(rule.tags, this.tags);
-      } else {
-        return false;
-      }
+    public void serialize(AncoraHeadRules artifact, OutputStream out)
+        throws IOException {
+      artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
     }
   }
 
@@ -172,10 +160,10 @@ public class AncoraHeadRules implements HeadRules, GapLabeler {
       }
       return constituents[constituents.length - 1];
     } else if ((hr = this.headRules.get(type)) != null) {
-      final String[] tags = hr.tags;
+      final String[] tags = hr.getTags();
       final int cl = constituents.length;
       final int tl = tags.length;
-      if (hr.leftToRight) {
+      if (hr.isLeftToRight()) {
         for (int ti = 0; ti < tl; ti++) {
           for (int ci = 0; ci < cl; ci++) {
             // TODO: Examine this function closely are we infra-heading or
@@ -245,22 +233,21 @@ public class AncoraHeadRules implements HeadRules, GapLabeler {
   public void serialize(final Writer writer) throws IOException {
 
     for (final String type : this.headRules.keySet()) {
-
       final HeadRule headRule = this.headRules.get(type);
       // write num of tags
-      writer.write(Integer.toString(headRule.tags.length + 2));
+      writer.write(Integer.toString(headRule.getTags().length + 2));
       writer.write(' ');
       // write type
       writer.write(type);
       writer.write(' ');
       // write l2r true == 1
-      if (headRule.leftToRight) {
+      if (headRule.isLeftToRight()) {
         writer.write("1");
       } else {
         writer.write("0");
       }
       // write tags
-      for (final String tag : headRule.tags) {
+      for (final String tag : headRule.getTags()) {
         writer.write(' ');
         writer.write(tag);
       }
@@ -287,5 +274,10 @@ public class AncoraHeadRules implements HeadRules, GapLabeler {
   public int hashCode() {
     assert false : "hashCode not designed";
     return 42; // any arbitrary constant will do
+  }
+  
+  @Override
+  public Class<?> getArtifactSerializerClass() {
+    return AncoraHeadRulesSerializer.class;
   }
 }

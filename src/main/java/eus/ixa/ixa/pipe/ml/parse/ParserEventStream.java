@@ -22,10 +22,6 @@ import java.util.List;
 
 import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.ml.model.Event;
-import opennlp.tools.parser.AbstractBottomUpParser;
-import opennlp.tools.parser.AbstractParserEventStream;
-import opennlp.tools.parser.HeadRules;
-import opennlp.tools.parser.Parse;
 import opennlp.tools.parser.ParseSampleStream;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.InvalidFormatException;

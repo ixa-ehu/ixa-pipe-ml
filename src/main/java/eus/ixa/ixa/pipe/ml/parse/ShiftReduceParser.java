@@ -35,16 +35,9 @@ import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.TrainUtil;
 import opennlp.tools.ml.model.TwoPassDataIndexer;
 import opennlp.tools.ngram.NGramModel;
-import opennlp.tools.parser.AbstractBottomUpParser;
-import opennlp.tools.parser.ChunkContextGenerator;
-import opennlp.tools.parser.ChunkSampleStream;
 import opennlp.tools.parser.Parser;
 import opennlp.tools.parser.ParserChunkerSequenceValidator;
 import opennlp.tools.parser.ParserEventTypeEnum;
-import opennlp.tools.parser.PosSampleStream;
-import opennlp.tools.parser.chunking.BuildContextGenerator;
-import opennlp.tools.parser.chunking.CheckContextGenerator;
-import opennlp.tools.parser.chunking.ParserEventStream;
 import opennlp.tools.util.Heap;
 import opennlp.tools.util.ListHeap;
 import opennlp.tools.util.ObjectStream;
@@ -630,8 +623,8 @@ public class ShiftReduceParser {
     parseSamples.reset();
 
     // tag
-    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, new PosSampleStream(parseSamples),
-        mlParams.getParameters("tagger"), null, null);
+    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null, new POSSampleStream(parseSamples),
+        mlParams.getParameters("tagger"), sequenceLabelFactory);
 
     parseSamples.reset();
 

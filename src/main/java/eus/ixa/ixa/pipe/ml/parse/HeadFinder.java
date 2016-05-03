@@ -16,8 +16,6 @@
 
 package eus.ixa.ixa.pipe.ml.parse;
 
-import opennlp.tools.parser.Parse;
-
 /**
  * HeadFinder interface.
  * 

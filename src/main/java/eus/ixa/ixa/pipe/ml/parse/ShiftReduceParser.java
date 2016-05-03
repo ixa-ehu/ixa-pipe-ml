@@ -19,8 +19,10 @@ package eus.ixa.ixa.pipe.ml.parse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 
@@ -33,11 +35,13 @@ import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.ml.model.TrainUtil;
 import opennlp.tools.ml.model.TwoPassDataIndexer;
+import opennlp.tools.ngram.NGramModel;
 import opennlp.tools.parser.AbstractBottomUpParser;
 import opennlp.tools.parser.ChunkContextGenerator;
 import opennlp.tools.parser.ChunkSampleStream;
 import opennlp.tools.parser.HeadRules;
 import opennlp.tools.parser.Parse;
+import opennlp.tools.parser.Parser;
 import opennlp.tools.parser.ParserChunkerSequenceValidator;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.parser.ParserModel;
@@ -49,17 +53,136 @@ import opennlp.tools.parser.chunking.ParserEventStream;
 import opennlp.tools.postag.POSModel;
 import opennlp.tools.postag.POSTagger;
 import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.util.Heap;
+import opennlp.tools.util.ListHeap;
 import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.Sequence;
 import opennlp.tools.util.Span;
+import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
 
 /**
  * Class for a shift reduce style parser based on Adwait Ratnaparkhi's 1998 thesis.
+ * This class is based on opennlp.tools.parser.chunking.Parser.java.
+ * @author ragerri
+ * @version 2016-05-05
  */
-public class ShiftReduceParser extends AbstractBottomUpParser {
+public class ShiftReduceParser {
 
+  /**
+   * The maximum number of parses advanced from all preceding
+   * parses at each derivation step.
+   */
+  private int M;
+
+  /**
+   * The maximum number of parses to advance from a single preceding parse.
+   */
+  private int K;
+
+  /**
+   * The minimum total probability mass of advanced outcomes.
+   */
+  private double Q;
+
+  /**
+   * The default beam size used if no beam size is given.
+   */
+  public static final int defaultBeamSize = 20;
+
+  /**
+   * The default amount of probability mass required of advanced outcomes.
+   */
+  public static final double defaultAdvancePercentage = 0.95;
+
+  /**
+   * Completed parses.
+   */
+  private Heap<Parse> completeParses;
+
+  /**
+   * Incomplete parses which will be advanced.
+   */
+  private Heap<Parse> odh;
+
+  /**
+   * Incomplete parses which have been advanced.
+   */
+  private Heap<Parse> ndh;
+
+  /**
+   * The head rules for the parser.
+   */
+  private HeadRules headRules;
+
+  /**
+   * The set strings which are considered punctuation for the parser.
+   * Punctuation is not attached, but floats to the top of the parse as attachment
+   * decisions are made about its non-punctuation sister nodes.
+   */
+  private Set<String> punctSet;
+
+  /**
+   * The label for the top node.
+   */
+  public static final String TOP_NODE = "TOP";
+
+  /**
+   * The label for the top if an incomplete node.
+   */
+  public static final String INC_NODE = "INC";
+
+  /**
+   * The label for a token node.
+   */
+  public static final String TOK_NODE = "TK";
+
+  /**
+   * The integer 0.
+   */
+  public static final Integer ZERO = 0;
+
+  /**
+   * Prefix for outcomes starting a constituent.
+   */
+  public static final String START = "S-";
+
+  /**
+   * Prefix for outcomes continuing a constituent.
+   */
+  public static final String CONT = "C-";
+
+  /**
+   * Outcome for token which is not contained in a basal constituent.
+   */
+  public static final String OTHER = "O";
+
+  /**
+   * Outcome used when a constituent is complete.
+   */
+  public static final String COMPLETE = "c";
+
+  /**
+   * Outcome used when a constituent is incomplete.
+   */
+  public static final String INCOMPLETE = "i";
+  
+  private SequenceLabelerME tagger;
+  private SequenceLabelerME chunker;
   private MaxentModel buildModel;
   private MaxentModel checkModel;
+  
+  /**
+   * Specifies whether failed parses should be reported to standard error.
+   */
+  private boolean reportFailedParse;
+
+  /**
+   * Specifies whether a derivation string should be created during parsing.
+   * This is useful for debugging.
+   */
+  private boolean createDerivationString = false;
+
 
   private BuildContextGenerator buildContextGenerator;
   private CheckContextGenerator checkContextGenerator;
@@ -74,19 +197,21 @@ public class ShiftReduceParser extends AbstractBottomUpParser {
 
   private int completeIndex;
   private int incompleteIndex;
-
-  public ShiftReduceParser(ParserModel model, int beamSize, double advancePercentage) {
-    this(model.getBuildModel(), model.getCheckModel(),
-        new SequenceLabelerME(model.getParserTaggerModel()),
-        new SequenceLabelerME(model.getParserChunkerModel(),
-            ChunkerME.DEFAULT_BEAM_SIZE,
-            new ParserChunkerSequenceValidator(model.getParserChunkerModel()),
-            new ChunkContextGenerator(ChunkerME.DEFAULT_BEAM_SIZE)),
-            model.getHeadRules(), beamSize, advancePercentage);
-  }
+  
+  /**
+   * Turns debug print on or off.
+   */
+  protected boolean debugOn = false;
 
   public ShiftReduceParser(ParserModel model) {
     this(model, defaultBeamSize, defaultAdvancePercentage);
+  }
+  
+  public ShiftReduceParser(ParserModel model, int beamSize, double advancePercentage) {
+    this(model.getBuildModel(), model.getCheckModel(),
+        new SequenceLabelerME(model),
+        new SequenceLabelerME(model.getParserChunkerModel()),
+            model.getHeadRules(), beamSize, advancePercentage);
   }
 
   /**
@@ -100,10 +225,20 @@ public class ShiftReduceParser extends AbstractBottomUpParser {
    * @param advancePercentage The minimal amount of probability mass which advanced outcomes must represent.
    * Only outcomes which contribute to the top "advancePercentage" will be explored.
    */
-  private ShiftReduceParser(MaxentModel buildModel, MaxentModel checkModel, SequenceLabelerME tagger, SequenceLabelerME chunker, HeadRules headRules, int beamSize, double advancePercentage) {
-    super(tagger, chunker, headRules, beamSize, advancePercentage);
+  public ShiftReduceParser(MaxentModel buildModel, MaxentModel checkModel, SequenceLabelerME tagger, SequenceLabelerME chunker, HeadRules headRules, int beamSize, double advancePercentage) {
+    this.tagger = tagger;
+    this.chunker = chunker;
     this.buildModel = buildModel;
     this.checkModel = checkModel;
+    this.M = beamSize;
+    this.K = beamSize;
+    this.Q = advancePercentage;
+    this.headRules = headRules;
+    this.punctSet = headRules.getPunctuationTags();
+    odh = new ListHeap<Parse>(K);
+    ndh = new ListHeap<Parse>(K);
+    completeParses = new ListHeap<Parse>(K);
+    
     bprobs = new double[buildModel.getNumOutcomes()];
     cprobs = new double[checkModel.getNumOutcomes()];
     this.buildContextGenerator = new BuildContextGenerator();
@@ -125,9 +260,8 @@ public class ShiftReduceParser extends AbstractBottomUpParser {
     completeIndex = checkModel.getIndex(COMPLETE);
     incompleteIndex = checkModel.getIndex(INCOMPLETE);
   }
-
-  @Override
-  protected void advanceTop(Parse p) {
+  
+  private void advanceTop(Parse p) {
     buildModel.eval(buildContextGenerator.getContext(p.getChildren(), 0), bprobs);
     p.addProb(Math.log(bprobs[topStartIndex]));
     checkModel.eval(checkContextGenerator.getContext(p.getChildren(), TOP_NODE, 0, 0), cprobs);
@@ -135,8 +269,7 @@ public class ShiftReduceParser extends AbstractBottomUpParser {
     p.setType(TOP_NODE);
   }
 
-  @Override
-  protected Parse[] advanceParses(final Parse p, double probMass) {
+  private Parse[] advanceParses(final Parse p, double probMass) {
     double q = 1 - probMass;
     /** The closest previous node which has been labeled as a start node. */
     Parse lastStartNode = null;
@@ -251,22 +384,238 @@ public class ShiftReduceParser extends AbstractBottomUpParser {
     newParsesList.toArray(newParses);
     return newParses;
   }
+  
+  public Parse[] parse(Parse tokens, int numParses) {
+    if (createDerivationString) tokens.setDerivation(new StringBuffer(100));
+    odh.clear();
+    ndh.clear();
+    completeParses.clear();
+    int derivationStage = 0; //derivation length
+    int maxDerivationLength = 2 * tokens.getChildCount() + 3;
+    odh.add(tokens);
+    Parse guess = null;
+    double minComplete = 2;
+    double bestComplete = -100000; //approximating -infinity/0 in ln domain
+    while (odh.size() > 0 && (completeParses.size() < M || (odh.first()).getProb() < minComplete) && derivationStage < maxDerivationLength) {
+      ndh = new ListHeap<Parse>(K);
+
+      int derivationRank = 0;
+      for (Iterator<Parse> pi = odh.iterator(); pi.hasNext() && derivationRank < K; derivationRank++) { // forearch derivation
+        Parse tp = pi.next();
+        //TODO: Need to look at this for K-best parsing cases
+        /*
+         if (tp.getProb() < bestComplete) { //this parse and the ones which follow will never win, stop advancing.
+         break;
+         }
+         */
+        if (guess == null && derivationStage == 2) {
+          guess = tp;
+        }
+        if (debugOn) {
+          System.out.print(derivationStage + " " + derivationRank + " "+tp.getProb());
+          tp.show();
+          System.out.println();
+        }
+        Parse[] nd;
+        if (0 == derivationStage) {
+          nd = advanceTags(tp);
+        }
+        else if (1 == derivationStage) {
+          if (ndh.size() < K) {
+            //System.err.println("advancing ts "+j+" "+ndh.size()+" < "+K);
+            nd = advanceChunks(tp,bestComplete);
+          }
+          else {
+            //System.err.println("advancing ts "+j+" prob="+((Parse) ndh.last()).getProb());
+            nd = advanceChunks(tp,(ndh.last()).getProb());
+          }
+        }
+        else { // i > 1
+          nd = advanceParses(tp, Q);
+        }
+        if (nd != null) {
+          for (int k = 0, kl = nd.length; k < kl; k++) {
+            if (nd[k].complete()) {
+              advanceTop(nd[k]);
+              if (nd[k].getProb() > bestComplete) {
+                bestComplete = nd[k].getProb();
+              }
+              if (nd[k].getProb() < minComplete) {
+                minComplete = nd[k].getProb();
+              }
+              completeParses.add(nd[k]);
+            }
+            else {
+              ndh.add(nd[k]);
+            }
+          }
+        }
+        else {
+          if (reportFailedParse) {
+            System.err.println("Couldn't advance parse "+derivationStage+" stage "+derivationRank+"!\n");
+          }
+          advanceTop(tp);
+          completeParses.add(tp);
+        }
+      }
+      derivationStage++;
+      odh = ndh;
+    }
+    if (completeParses.size() == 0) {
+      if (reportFailedParse) System.err.println("Couldn't find parse for: " + tokens);
+      //Parse r = (Parse) odh.first();
+      //r.show();
+      //System.out.println();
+      return new Parse[] {guess};
+    }
+    else if (numParses == 1){
+      return new Parse[] {completeParses.first()};
+    }
+    else {
+      List<Parse> topParses = new ArrayList<Parse>(numParses);
+      while(!completeParses.isEmpty() && topParses.size() < numParses) {
+        Parse tp = completeParses.extract();
+        topParses.add(tp);
+        //parses.remove(tp);
+      }
+      return topParses.toArray(new Parse[topParses.size()]);
+    }
+  }
+  
+  public Parse parse(Parse tokens) {
+
+    if (tokens.getChildCount() > 0) {
+      Parse p = parse(tokens,1)[0];
+      setParents(p);
+      return p;
+    }
+    else {
+      return tokens;
+    }
+  }
+  
 
   /**
-   * @deprecated Please do not use anymore, use the ObjectStream train methods instead! This method
-   * will be removed soon.
+   * Assigns parent references for the specified parse so that they
+   * are consistent with the children references.
+   * @param p The parse whose parent references need to be assigned.
    */
-  @Deprecated
-  public static AbstractModel train(ObjectStream<Event> es, int iterations, int cut) throws java.io.IOException {
-    return opennlp.tools.ml.maxent.GIS.trainModel(iterations, new TwoPassDataIndexer(es, cut));
+  public static void setParents(Parse p) {
+    Parse[] children = p.getChildren();
+    for (int ci = 0; ci < children.length; ci++) {
+      children[ci].setParent(p);
+      setParents(children[ci]);
+    }
+  }
+  
+  /**
+   * Advances the parse by assigning it POS tags and returns multiple tag sequences.
+   * @param p The parse to be tagged.
+   * @return Parses with different POS-tag sequence assignments.
+   */
+  protected Parse[] advanceTags(final Parse p) {
+    Parse[] children = p.getChildren();
+    String[] words = new String[children.length];
+    double[] probs = new double[words.length];
+    for (int i = 0,il = children.length; i < il; i++) {
+      words[i] = children[i].getCoveredText();
+    }
+    Sequence[] ts = tagger.topKSequences(words);
+    if (ts.length == 0) {
+      System.err.println("no tag sequence");
+    }
+    Parse[] newParses = new Parse[ts.length];
+    for (int i = 0; i < ts.length; i++) {
+      String[] tags = ts[i].getOutcomes().toArray(new String[words.length]);
+      ts[i].getProbs(probs);
+      newParses[i] = (Parse) p.clone(); //copies top level
+      if (createDerivationString) newParses[i].getDerivation().append(i).append(".");
+      for (int j = 0; j < words.length; j++) {
+        Parse word = children[j];
+        //System.err.println("inserting tag "+tags[j]);
+        double prob = probs[j];
+        newParses[i].insert(new Parse(word.getText(), word.getSpan(), tags[j], prob,j));
+        newParses[i].addProb(Math.log(prob));
+        //newParses[i].show();
+      }
+    }
+    return newParses;
   }
 
-  public static void mergeReportIntoManifest(Map<String, String> manifest,
-      Map<String, String> report, String namespace) {
-
-    for (Map.Entry<String, String> entry : report.entrySet()) {
-      manifest.put(namespace + "." + entry.getKey(), entry.getValue());
+  /**
+   * Returns the top chunk sequences for the specified parse.
+   * @param p A pos-tag assigned parse.
+   * @param minChunkScore A minimum score below which chunks should not be advanced.
+   * @return The top chunk assignments to the specified parse.
+   */
+  protected Parse[] advanceChunks(final Parse p, double minChunkScore) {
+    // chunk
+    Parse[] children = p.getChildren();
+    String words[] = new String[children.length];
+    String ptags[] = new String[words.length];
+    double probs[] = new double[words.length];
+    Parse sp = null;
+    for (int i = 0, il = children.length; i < il; i++) {
+      sp = children[i];
+      words[i] = sp.getHead().getCoveredText();
+      ptags[i] = sp.getType();
     }
+    //System.err.println("adjusted mcs = "+(minChunkScore-p.getProb()));
+    Sequence[] cs = chunker.topKSequences(words, ptags,minChunkScore-p.getProb());
+    Parse[] newParses = new Parse[cs.length];
+    for (int si = 0, sl = cs.length; si < sl; si++) {
+      newParses[si] = (Parse) p.clone(); //copies top level
+      if (createDerivationString) newParses[si].getDerivation().append(si).append(".");
+      String[] tags = cs[si].getOutcomes().toArray(new String[words.length]);
+      cs[si].getProbs(probs);
+      int start = -1;
+      int end = 0;
+      String type = null;
+      //System.err.print("sequence "+si+" ");
+      for (int j = 0; j <= tags.length; j++) {
+        //if (j != tags.length) {System.err.println(words[j]+" "+ptags[j]+" "+tags[j]+" "+probs.get(j));}
+        if (j != tags.length) {
+          newParses[si].addProb(Math.log(probs[j]));
+        }
+        if (j != tags.length && tags[j].startsWith(CONT)) { // if continue just update end chunking tag don't use contTypeMap
+          end = j;
+        }
+        else { //make previous constituent if it exists
+          if (type != null) {
+            //System.err.println("inserting tag "+tags[j]);
+            Parse p1 = p.getChildren()[start];
+            Parse p2 = p.getChildren()[end];
+            //System.err.println("Putting "+type+" at "+start+","+end+" for "+j+" "+newParses[si].getProb());
+            Parse[] cons = new Parse[end - start + 1];
+            cons[0] = p1;
+            //cons[0].label="Start-"+type;
+            if (end - start != 0) {
+              cons[end - start] = p2;
+              //cons[end-start].label="Cont-"+type;
+              for (int ci = 1; ci < end - start; ci++) {
+                cons[ci] = p.getChildren()[ci + start];
+                //cons[ci].label="Cont-"+type;
+              }
+            }
+            Parse chunk = new Parse(p1.getText(), new Span(p1.getSpan().getStart(), p2.getSpan().getEnd()), type, 1, headRules.getHead(cons, type));
+            chunk.isChunk(true);
+            newParses[si].insert(chunk);
+          }
+          if (j != tags.length) { //update for new constituent
+            if (tags[j].startsWith(START)) { // don't use startTypeMap these are chunk tags
+              type = tags[j].substring(START.length());
+              start = j;
+              end = j;
+            }
+            else { // other
+              type = null;
+            }
+          }
+        }
+      }
+      //newParses[si].show();System.out.println();
+    }
+    return newParses;
   }
 
   public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters mlParams)
@@ -314,6 +663,189 @@ public class ShiftReduceParser extends AbstractBottomUpParser {
         posModel, chunkModel, (opennlp.tools.parser.HeadRules) rules,
         ParserType.CHUNKING, manifestInfoEntries);
   }
+  
+  public static void mergeReportIntoManifest(Map<String, String> manifest,
+      Map<String, String> report, String namespace) {
+
+    for (Map.Entry<String, String> entry : report.entrySet()) {
+      manifest.put(namespace + "." + entry.getKey(), entry.getValue());
+    }
+  }
+  
+  /**
+   * Removes the punctuation from the specified set of chunks, adds it to the parses
+   * adjacent to the punctuation is specified, and returns a new array of parses with the punctuation
+   * removed.
+   * @param chunks A set of parses.
+   * @param punctSet The set of punctuation which is to be removed.
+   * @return An array of parses which is a subset of chunks with punctuation removed.
+   */
+  public static Parse[] collapsePunctuation(Parse[] chunks, Set<String> punctSet) {
+    List<Parse> collapsedParses = new ArrayList<Parse>(chunks.length);
+    int lastNonPunct = -1;
+    int nextNonPunct = -1;
+    for (int ci=0,cn=chunks.length;ci<cn;ci++) {
+      if (punctSet.contains(chunks[ci].getType())) {
+        if (lastNonPunct >= 0) {
+          chunks[lastNonPunct].addNextPunctuation(chunks[ci]);
+        }
+        for (nextNonPunct=ci+1;nextNonPunct<cn;nextNonPunct++) {
+          if (!punctSet.contains(chunks[nextNonPunct].getType())) {
+            break;
+          }
+        }
+        if (nextNonPunct < cn) {
+          chunks[nextNonPunct].addPreviousPunctuation(chunks[ci]);
+        }
+      }
+      else {
+        collapsedParses.add(chunks[ci]);
+        lastNonPunct = ci;
+      }
+    }
+    if (collapsedParses.size() == chunks.length) {
+      return chunks;
+    }
+    //System.err.println("collapsedPunctuation: collapsedParses"+collapsedParses);
+    return collapsedParses.toArray(new Parse[collapsedParses.size()]);
+  }
+  
+  /**
+   * Determines the mapping between the specified index into the specified parses without punctuation to
+   * the corresponding index into the specified parses.
+   * @param index An index into the parses without punctuation.
+   * @param nonPunctParses The parses without punctuation.
+   * @param parses The parses wit punctuation.
+   * @return An index into the specified parses which corresponds to the same node the specified index
+   * into the parses with punctuation.
+   */
+  private int mapParseIndex(int index, Parse[] nonPunctParses, Parse[] parses) {
+    int parseIndex = index;
+    while (parses[parseIndex] != nonPunctParses[index]) {
+      parseIndex++;
+    }
+    return parseIndex;
+  }
+  
+  /**
+   * Creates a n-gram dictionary from the specified data stream using the specified head rule and specified cut-off.
+   *
+   * @param data The data stream of parses.
+   * @param rules The head rules for the parses.
+   * @param cutoff The minimum number of entries required for the n-gram to be saved as part of the dictionary.
+   * @return A dictionary object.
+   */
+  public static Dictionary buildDictionary(ObjectStream<Parse> data, HeadRules rules, int cutoff)
+      throws IOException {
+
+    TrainingParameters params = new TrainingParameters();
+    params.put("dict", TrainingParameters.CUTOFF_PARAM, Integer.toString(cutoff));
+
+    return buildDictionary(data, rules, params);
+  }
+  
+  /**
+   * Creates a n-gram dictionary from the specified data stream using the specified head rule and specified cut-off.
+   *
+   * @param data The data stream of parses.
+   * @param rules The head rules for the parses.
+   * @param params can contain a cutoff, the minimum number of entries required for the
+   *        n-gram to be saved as part of the dictionary.
+   * @return A dictionary object.
+   */
+  public static Dictionary buildDictionary(ObjectStream<Parse> data, HeadRules rules, TrainingParameters params)
+      throws IOException {
+
+    int cutoff = 5;
+
+    String cutoffString = params.getSettings("dict").
+        get(TrainingParameters.CUTOFF_PARAM);
+
+    if (cutoffString != null) {
+      // TODO: Maybe throw illegal argument exception if not parse able
+      cutoff = Integer.parseInt(cutoffString);
+    }
+
+    NGramModel mdict = new NGramModel();
+    Parse p;
+    while((p = data.read()) != null) {
+      p.updateHeads(rules);
+      Parse[] pwords = p.getTagNodes();
+      String[] words = new String[pwords.length];
+      //add all uni-grams
+      for (int wi=0;wi<words.length;wi++) {
+        words[wi] = pwords[wi].getCoveredText();
+      }
+
+      mdict.add(new StringList(words), 1, 1);
+      //add tri-grams and bi-grams for inital sequence
+      Parse[] chunks = collapsePunctuation(ParserEventStream.getInitialChunks(p),rules.getPunctuationTags());
+      String[] cwords = new String[chunks.length];
+      for (int wi=0;wi<cwords.length;wi++) {
+        cwords[wi] = chunks[wi].getHead().getCoveredText();
+      }
+      mdict.add(new StringList(cwords), 2, 3);
+
+      //emulate reductions to produce additional n-grams
+      int ci = 0;
+      while (ci < chunks.length) {
+        //System.err.println("chunks["+ci+"]="+chunks[ci].getHead().getCoveredText()+" chunks.length="+chunks.length + "  " + chunks[ci].getParent());
+
+        if (chunks[ci].getParent() == null) {
+          chunks[ci].show();
+        }
+        if (lastChild(chunks[ci], chunks[ci].getParent(),rules.getPunctuationTags())) {
+          //perform reduce
+          int reduceStart = ci;
+          while (reduceStart >=0 && chunks[reduceStart].getParent() == chunks[ci].getParent()) {
+            reduceStart--;
+          }
+          reduceStart++;
+          chunks = ParserEventStream.reduceChunks(chunks,ci,chunks[ci].getParent());
+          ci = reduceStart;
+          if (chunks.length != 0) {
+            String[] window = new String[5];
+            int wi = 0;
+            if (ci-2 >= 0) window[wi++] = chunks[ci-2].getHead().getCoveredText();
+            if (ci-1 >= 0) window[wi++] = chunks[ci-1].getHead().getCoveredText();
+            window[wi++] = chunks[ci].getHead().getCoveredText();
+            if (ci+1 < chunks.length) window[wi++] = chunks[ci+1].getHead().getCoveredText();
+            if (ci+2 < chunks.length) window[wi++] = chunks[ci+2].getHead().getCoveredText();
+            if (wi < 5) {
+              String[] subWindow = new String[wi];
+              for (int swi=0;swi<wi;swi++) {
+                subWindow[swi]=window[swi];
+              }
+              window = subWindow;
+            }
+            if (window.length >=3) {
+              mdict.add(new StringList(window), 2, 3);
+            }
+            else if (window.length == 2) {
+              mdict.add(new StringList(window), 2, 2);
+            }
+          }
+          ci=reduceStart-1; //ci will be incremented at end of loop
+        }
+        ci++;
+      }
+    }
+    //System.err.println("gas,and="+mdict.getCount((new TokenList(new String[] {"gas","and"}))));
+    mdict.cutoff(cutoff, Integer.MAX_VALUE);
+    return mdict.toDictionary(true);
+  }
+  
+  private static boolean lastChild(Parse child, Parse parent, Set<String> punctSet) {
+    if (parent == null) {
+      return false;
+    }
+
+    Parse[] kids = collapsePunctuation(parent.getChildren(), punctSet);
+    return (kids[kids.length - 1] == child);
+  }
+
+  
+  
 
 }
 

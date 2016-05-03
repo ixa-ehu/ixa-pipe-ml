@@ -29,11 +29,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
-import opennlp.tools.parser.AbstractBottomUpParser;
-import opennlp.tools.parser.Constituent;
-import opennlp.tools.parser.GapLabeler;
-import opennlp.tools.parser.Parse;
-
 /**
  * Class for storing the English head rules associated with parsing. The
  * headrules are specified in $src/main/resources/en-head-rules
@@ -48,8 +43,7 @@ import opennlp.tools.parser.Parse;
  * @author ragerri
  * @version 2015-05-06
  */
-public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
-    GapLabeler {
+public class PennTreebankHeadRules implements HeadRules, GapLabeler {
 
   private static class HeadRule {
     public boolean leftToRight;
@@ -95,7 +89,7 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
    * @throws IOException
    *           if the head rules reader can not be read.
    */
-  public EnglishHeadRules(final Reader rulesReader) throws IOException {
+  public PennTreebankHeadRules(final Reader rulesReader) throws IOException {
     final BufferedReader in = new BufferedReader(rulesReader);
     readHeadRules(in);
 
@@ -112,7 +106,7 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
   }
 
   public Parse getHead(final Parse[] constituents, final String type) {
-    if (constituents[0].getType() == AbstractBottomUpParser.TOK_NODE) {
+    if (constituents[0].getType() == ShiftReduceParser.TOK_NODE) {
       return null;
     }
     HeadRule hr;
@@ -275,8 +269,8 @@ public class EnglishHeadRules implements opennlp.tools.parser.HeadRules,
   public boolean equals(final Object obj) {
     if (obj == this) {
       return true;
-    } else if (obj instanceof EnglishHeadRules) {
-      final EnglishHeadRules rules = (EnglishHeadRules) obj;
+    } else if (obj instanceof PennTreebankHeadRules) {
+      final PennTreebankHeadRules rules = (PennTreebankHeadRules) obj;
 
       return rules.headRules.equals(this.headRules)
           && rules.punctSet.equals(this.punctSet);

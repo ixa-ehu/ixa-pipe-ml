@@ -27,19 +27,13 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.StringTokenizer;
 
-import opennlp.tools.parser.AbstractBottomUpParser;
-import opennlp.tools.parser.Constituent;
-import opennlp.tools.parser.GapLabeler;
-import opennlp.tools.parser.Parse;
-
 /**
 * Class for obtaining head rules from Spanish Ancora parse
 * trees.
 * @author ragerri
 * @version 2015-05-06
 */
-public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
-    GapLabeler {
+public class AncoraHeadRules implements HeadRules, GapLabeler {
 
   private static class HeadRule {
     public boolean leftToRight;
@@ -85,7 +79,7 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
    * @throws IOException
    *           if the head rules reader can not be read.
    */
-  public SpanishHeadRules(final Reader rulesReader) throws IOException {
+  public AncoraHeadRules(final Reader rulesReader) throws IOException {
     final BufferedReader in = new BufferedReader(rulesReader);
     readHeadRules(in);
 
@@ -96,13 +90,31 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
     this.punctSet.add("''");
     // punctSet.add(":");
   }
+  
+  private void readHeadRules(final BufferedReader str) throws IOException {
+    String line;
+    this.headRules = new HashMap<String, HeadRule>(60);
+    while ((line = str.readLine()) != null) {
+      final StringTokenizer st = new StringTokenizer(line);
+      final String num = st.nextToken();
+      final String type = st.nextToken();
+      final String dir = st.nextToken();
+      final String[] tags = new String[Integer.parseInt(num) - 2];
+      int ti = 0;
+      while (st.hasMoreTokens()) {
+        tags[ti] = st.nextToken();
+        ti++;
+      }
+      this.headRules.put(type, new HeadRule(dir.equals("1"), tags));
+    }
+  }
 
   public Set<String> getPunctuationTags() {
     return this.punctSet;
   }
 
   public Parse getHead(final Parse[] constituents, final String type) {
-    if (constituents[0].getType() == AbstractBottomUpParser.TOK_NODE) {
+    if (constituents[0].getType() == ShiftReduceParser.TOK_NODE) {
       return null;
     }
     HeadRule hr;
@@ -190,24 +202,6 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
     return constituents[constituents.length - 1];
   }
 
-  private void readHeadRules(final BufferedReader str) throws IOException {
-    String line;
-    this.headRules = new HashMap<String, HeadRule>(60);
-    while ((line = str.readLine()) != null) {
-      final StringTokenizer st = new StringTokenizer(line);
-      final String num = st.nextToken();
-      final String type = st.nextToken();
-      final String dir = st.nextToken();
-      final String[] tags = new String[Integer.parseInt(num) - 2];
-      int ti = 0;
-      while (st.hasMoreTokens()) {
-        tags[ti] = st.nextToken();
-        ti++;
-      }
-      this.headRules.put(type, new HeadRule(dir.equals("1"), tags));
-    }
-  }
-
   public void labelGaps(final Stack<Constituent> stack) {
     if (stack.size() > 4) {
       // Constituent con0 = (Constituent) stack.get(stack.size()-1);
@@ -279,8 +273,8 @@ public class SpanishHeadRules implements opennlp.tools.parser.HeadRules,
   public boolean equals(final Object obj) {
     if (obj == this) {
       return true;
-    } else if (obj instanceof SpanishHeadRules) {
-      final SpanishHeadRules rules = (SpanishHeadRules) obj;
+    } else if (obj instanceof AncoraHeadRules) {
+      final AncoraHeadRules rules = (AncoraHeadRules) obj;
 
       return rules.headRules.equals(this.headRules)
           && rules.punctSet.equals(this.punctSet);

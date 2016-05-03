@@ -131,7 +131,7 @@ public class SequenceLabelerModel extends BaseModel {
     checkArtifactMap();
   }
 
-  public SequenceClassificationModel<String> getNameFinderSequenceModel() {
+  public SequenceClassificationModel<String> getSequenceLabelerModel() {
 
     Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
 

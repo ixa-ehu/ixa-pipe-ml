@@ -21,10 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
-
-import opennlp.tools.parser.HeadRules;
-import opennlp.tools.parser.Parse;
-
 /**
  * HeadFinder for constituent parse using Collins rules. These rules and the
  * getHead() method in the language specific HeadRules classes (adapted from
@@ -52,10 +48,10 @@ public class CollinsHeadFinder implements HeadFinder {
         final InputStream is = getHeadRulesFile(lang);
         if (lang.equalsIgnoreCase("en")) {
           headRulesMap.put(lang,
-              new EnglishHeadRules(new InputStreamReader(is)));
+              new PennTreebankHeadRules(new InputStreamReader(is)));
         } else if (lang.equalsIgnoreCase("es")) {
           headRulesMap.put(lang,
-              new SpanishHeadRules(new InputStreamReader(is)));
+              new AncoraHeadRules(new InputStreamReader(is)));
         }
         is.close();
       }

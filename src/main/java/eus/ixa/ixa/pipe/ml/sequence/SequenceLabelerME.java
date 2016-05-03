@@ -65,7 +65,7 @@ public class SequenceLabelerME implements SequenceLabeler {
 
     seqCodec = factory.createSequenceCodec();
     sequenceValidator = seqCodec.createSequenceValidator();
-    this.model = model.getNameFinderSequenceModel();
+    this.model = model.getSequenceLabelerModel();
     contextGenerator = factory.createContextGenerator();
 
     // TODO: We should deprecate this. And come up with a better solution!
@@ -141,6 +141,15 @@ public class SequenceLabelerME implements SequenceLabeler {
       tags[i] = spans;
     }
     return tags;
+  }
+  
+  public Sequence[] topKSequences(String[] tokens) {
+    return model.bestSequences(DEFAULT_BEAM_SIZE, tokens, null, contextGenerator, sequenceValidator);
+  }
+  
+  public Sequence[] topKSequences(String[] tokens, String[] tags, double minSequenceScore) {
+    return model.bestSequences(DEFAULT_BEAM_SIZE, tokens, new Object[] { tags }, minSequenceScore,
+        contextGenerator, sequenceValidator);
   }
 
   /**

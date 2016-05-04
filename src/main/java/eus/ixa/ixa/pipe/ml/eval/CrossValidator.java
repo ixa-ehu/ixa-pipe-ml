@@ -26,6 +26,7 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
+import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
@@ -36,8 +37,7 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
-import eus.ixa.ixa.pipe.ml.train.AbstractTrainer;
-import eus.ixa.ixa.pipe.ml.train.DefaultTrainer;
+import eus.ixa.ixa.pipe.ml.train.SequenceLabelerTrainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 /**
@@ -93,7 +93,7 @@ public class CrossValidator {
     String clearFeatures = Flags.getClearTrainingFeatures(params);
     this.corpusFormat = Flags.getCorpusFormat(params);
     this.trainData = params.getSettings().get("TrainSet");
-    trainSamples = AbstractTrainer.getSequenceStream(trainData, clearFeatures, corpusFormat);
+    trainSamples = SequenceLabelerTrainer.getSequenceStream(trainData, clearFeatures, corpusFormat);
     this.beamSize = Flags.getBeamsize(params);
     this.folds = Flags.getFolds(params);
     this.sequenceCodec =  SequenceLabelerFactory.instantiateSequenceCodec(getSequenceCodec(Flags.getSequenceCodec(params)));
@@ -112,7 +112,7 @@ public class CrossValidator {
     System.err.println(featureDescription);
     byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
         .forName("UTF-8"));
-    Map<String, Object> resources = DefaultTrainer.loadResources(params, featureGeneratorBytes);
+    Map<String, Object> resources = LoadModelResources.loadResources(params, featureGeneratorBytes);
     this.nameClassifierFactory = SequenceLabelerFactory.create(
         SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
         resources, sequenceCodec);

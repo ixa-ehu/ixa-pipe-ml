@@ -1,25 +1,8 @@
-/*
- *  Copyright 2015 Rodrigo Agerri
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
- */
-
-package eus.ixa.ixa.pipe.ml.train;
+package eus.ixa.ixa.pipe.ml.resources;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,90 +11,17 @@ import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
 import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
-import eus.ixa.ixa.pipe.ml.resources.BrownCluster;
-import eus.ixa.ixa.pipe.ml.resources.ClarkCluster;
-import eus.ixa.ixa.pipe.ml.resources.Dictionary;
-import eus.ixa.ixa.pipe.ml.resources.MFSResource;
-import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
-import eus.ixa.ixa.pipe.ml.resources.Word2VecCluster;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
-/**
- * Training sequence labeler based on Apache OpenNLP Machine Learning API. This class creates
- * a feature set based on the features activated in the trainParams.properties
- * file:
- * <ol>
- * <li>Window: specify left and right window lengths.
- * <li>TokenFeatures: tokens as features in a window length.
- * <li>TokenClassFeatures: token shape features in a window length.
- * <li>WordShapeSuperSenseFeatures: token shape features from Ciaramita and Altun (2006).
- * <li>OutcomePriorFeatures: take into account previous outcomes.
- * <li>PreviousMapFeatures: add features based on tokens and previous decisions.
- * <li>SentenceFeatures: add beginning and end of sentence words.
- * <li>PrefixFeatures: first 4 characters in current token.
- * <li>SuffixFeatures: last 4 characters in current token.
- * <li>BigramClassFeatures: bigrams of tokens and token class.
- * <li>TrigramClassFeatures: trigrams of token and token class.
- * <li>FourgramClassFeatures: fourgrams of token and token class.
- * <li>FivegramClassFeatures: fivegrams of token and token class.
- * <li>CharNgramFeatures: character ngram features of current token.
- * <li>DictionaryFeatures: check if current token appears in some gazetteer.
- * <li>ClarkClusterFeatures: use the clustering class of a token as a feature.
- * <li>BrownClusterFeatures: use brown clusters as features for each feature
- * containing a token.
- * <li>Word2VecClusterFeatures: use the word2vec clustering class of a token as
- * a feature.
- * <li>POSTagModelFeatures: use pos tags, pos tag class as features.
- * <li>LemmaModelFeatures: use lemma as features.
- * <li>LemmaDictionaryFeatures: use lemma from a dictionary as features.
- * <li>MFSFeatures: Most Frequent sense feature.
- * <li>SuperSenseFeatures: Ciaramita and Altun (2006) features for super sense tagging.
- * </ol>
- * 
- * @author ragerri
- * @version 2015-03-27
- */
-public class DefaultTrainer extends AbstractTrainer {
+public class LoadModelResources {
   
-  /**
-   * Construct a trainer.
-   * @param params the training parameters
-   * @throws IOException if io errors
-   */
-  public DefaultTrainer(final TrainingParameters params) throws IOException {
-    super(params);
-    createTrainer(params);
+  private LoadModelResources() {
   }
-
-  /**
-   * Create {@code TokenNameFinderFactory} with custom features.
-   * 
-   * @param params
-   *          the parameter training file
-   * @throws IOException if io error
-   */
-  public void createTrainer(TrainingParameters params) throws IOException {
-    String seqCodec = getSequenceCodec();
-    SequenceLabelerCodec<String> sequenceCodec = SequenceLabelerFactory
-        .instantiateSequenceCodec(seqCodec);
-    String featureDescription = XMLFeatureDescriptor
-        .createXMLFeatureDescriptor(params);
-    System.err.println(featureDescription);
-    byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
-        .forName("UTF-8"));
-    Map<String, Object> resources = loadResources(params, featureGeneratorBytes);
-    setSequenceLabelerFactory(SequenceLabelerFactory.create(
-        SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
-        resources, sequenceCodec));
-  }
-
+  
   /**
    * Load the external resources such as gazetters and clustering lexicons.
    * @param params the training parameters

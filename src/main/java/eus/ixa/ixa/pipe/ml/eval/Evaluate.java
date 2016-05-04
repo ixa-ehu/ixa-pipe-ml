@@ -33,7 +33,7 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
-import eus.ixa.ixa.pipe.ml.train.AbstractTrainer;
+import eus.ixa.ixa.pipe.ml.train.SequenceLabelerTrainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 /**
@@ -76,7 +76,7 @@ public class Evaluate {
     String corpusFormat = props.getProperty("corpusFormat");
     String seqTypes = props.getProperty("types");
     
-    testSamples = AbstractTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
+    testSamples = SequenceLabelerTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
     if (seqTypes != Flags.DEFAULT_SEQUENCE_TYPES) {
       String[] neTypes = seqTypes.split(",");
       testSamples = new SequenceLabelSampleTypeFilter(neTypes, testSamples);

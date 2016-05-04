@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Rodrigo Agerri
+ *  Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,15 +17,20 @@
 package eus.ixa.ixa.pipe.ml.train;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Map;
 
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
+import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
 import eus.ixa.ixa.pipe.ml.formats.CoNLL02Format;
 import eus.ixa.ixa.pipe.ml.formats.CoNLL03Format;
 import eus.ixa.ixa.pipe.ml.formats.LemmatizerFormat;
 import eus.ixa.ixa.pipe.ml.formats.TabulatedFormat;
+import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
@@ -36,12 +41,40 @@ import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 /**
- * Abstract class for common training functionalities. Every other trainer class
- * needs to extend this class.
+ * Trainer based on Apache OpenNLP Machine Learning API. This class creates
+ * a feature set based on the features activated in the trainParams.properties
+ * file:
+ * <ol>
+ * <li>Window: specify left and right window lengths.
+ * <li>TokenFeatures: tokens as features in a window length.
+ * <li>TokenClassFeatures: token shape features in a window length.
+ * <li>WordShapeSuperSenseFeatures: token shape features from Ciaramita and Altun (2006).
+ * <li>OutcomePriorFeatures: take into account previous outcomes.
+ * <li>PreviousMapFeatures: add features based on tokens and previous decisions.
+ * <li>SentenceFeatures: add beginning and end of sentence words.
+ * <li>PrefixFeatures: first 4 characters in current token.
+ * <li>SuffixFeatures: last 4 characters in current token.
+ * <li>BigramClassFeatures: bigrams of tokens and token class.
+ * <li>TrigramClassFeatures: trigrams of token and token class.
+ * <li>FourgramClassFeatures: fourgrams of token and token class.
+ * <li>FivegramClassFeatures: fivegrams of token and token class.
+ * <li>CharNgramFeatures: character ngram features of current token.
+ * <li>DictionaryFeatures: check if current token appears in some gazetteer.
+ * <li>ClarkClusterFeatures: use the clustering class of a token as a feature.
+ * <li>BrownClusterFeatures: use brown clusters as features for each feature
+ * containing a token.
+ * <li>Word2VecClusterFeatures: use the word2vec clustering class of a token as
+ * a feature.
+ * <li>POSTagModelFeatures: use pos tags, pos tag class as features.
+ * <li>LemmaModelFeatures: use lemma as features.
+ * <li>LemmaDictionaryFeatures: use lemma from a dictionary as features.
+ * <li>MFSFeatures: Most Frequent sense feature.
+ * <li>SuperSenseFeatures: Ciaramita and Altun (2006) features for super sense tagging.
+ * </ol>
  * @author ragerri
- * @version 2015-02-25
+ * @version 2016-05-06
  */
-public abstract class AbstractTrainer implements Trainer {
+public class SequenceLabelerTrainer implements Trainer {
   
   /**
    * The language.
@@ -64,7 +97,7 @@ public abstract class AbstractTrainer implements Trainer {
    */
   private ObjectStream<SequenceLabelSample> testSamples;
   /**
-   * The corpus format: conll02, conll03 and opennlp.
+   * The corpus format: conll02, conll03, lemmatizer, tabulated.
    */
   private String corpusFormat;
   /**
@@ -95,7 +128,7 @@ public abstract class AbstractTrainer implements Trainer {
    * @throws IOException
    *           io exception
    */
-  public AbstractTrainer(final TrainingParameters params) throws IOException {
+  public SequenceLabelerTrainer(final TrainingParameters params) throws IOException {
     
     this.lang = Flags.getLanguage(params);
     this.clearTrainingFeatures = Flags.getClearTrainingFeatures(params);
@@ -113,18 +146,35 @@ public abstract class AbstractTrainer implements Trainer {
       trainSamples = new SequenceLabelSampleTypeFilter(neTypes, trainSamples);
       testSamples = new SequenceLabelSampleTypeFilter(neTypes, testSamples);
     }
+    createSequenceLabelerFactory(params);
+  }
+  
+  /**
+   * Create {@code SequenceLabelerFactory} with custom features.
+   * 
+   * @param params
+   *          the parameter training file
+   * @throws IOException if io error
+   */
+  public void createSequenceLabelerFactory(TrainingParameters params) throws IOException {
+    String seqCodec = getSequenceCodec();
+    SequenceLabelerCodec<String> sequenceCodec = SequenceLabelerFactory
+        .instantiateSequenceCodec(seqCodec);
+    String featureDescription = XMLFeatureDescriptor
+        .createXMLFeatureDescriptor(params);
+    System.err.println(featureDescription);
+    byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
+        .forName("UTF-8"));
+    Map<String, Object> resources = LoadModelResources.loadResources(params, featureGeneratorBytes);
+    setSequenceLabelerFactory(SequenceLabelerFactory.create(
+        SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
+        resources, sequenceCodec));
   }
 
-  /*
-   * (non-Javadoc)
-   * @see
-   * es.ehu.si.ixa.pipe.nerc.train.Trainer#train(opennlp.tools.util
-   * .TrainingParameters)
-   */
   public final SequenceLabelerModel train(final TrainingParameters params) {
     if (getSequenceLabelerFactory() == null) {
       throw new IllegalStateException(
-          "Classes derived from AbstractNameFinderTrainer must create and fill the AdaptiveFeatureGenerator features!");
+          "The SequenceLabelerFactory must be instantiated!!");
     }
     SequenceLabelerModel trainedModel = null;
     SequenceLabelerEvaluator nerEvaluator = null;
@@ -190,24 +240,7 @@ public abstract class AbstractTrainer implements Trainer {
     this.nameClassifierFactory = tokenNameFinderFactory;
     return nameClassifierFactory;
   }
-  
-  /**
-   * Get the language.
-   * @return the language
-   */
-  public final String getLanguage() {
-    return lang;
-  }
-
-  /**
-   * Set the language.
-   * @param aLang
-   *          the language
-   */
-  public final void setLanguage(final String aLang) {
-    this.lang = aLang;
-  }
-  
+    
   /**
    * Get the Sequence codec.
    * @return the sequence codec
@@ -236,3 +269,4 @@ public abstract class AbstractTrainer implements Trainer {
   }
 
 }
+

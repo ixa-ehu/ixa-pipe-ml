@@ -25,7 +25,6 @@ public class LoadModelResources {
   /**
    * Load the external resources such as gazetters and clustering lexicons.
    * @param params the training parameters
-   * @param featureGenDescriptor the feature generator descriptor
    * @return the map contanining and id and the resource
    * @throws IOException if io error
    */
@@ -128,7 +127,6 @@ public class LoadModelResources {
   /**
    * Load the external resources such as gazetters and clustering lexicons.
    * @param params the training parameters
-   * @param featureGenDescriptor the feature generator descriptor
    * @return the map contanining and id and the resource
    * @throws IOException if io error
    */

@@ -30,7 +30,7 @@ public class ParserEvaluator extends Evaluator<Parse> {
 
   /**
    * Construct a parser with some evaluation monitors.
-   * @param aParser
+   * @param aParser the parser
    * @param monitors the evaluation monitors
    */
   public ParserEvaluator(final ShiftReduceParser aParser, final ParserEvaluationMonitor... monitors) {
@@ -102,7 +102,7 @@ public class ParserEvaluator extends Evaluator<Parse> {
   /**
    * Main method to show the example of running the evaluator.
    * Moved to a test case soon, hopefully.
-   * @param args
+   * @param args arguments
    */
   // TODO: Move this to a test case!
   public static void main(final String[] args) {

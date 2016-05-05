@@ -33,19 +33,6 @@ public class ParserEventStream extends AbstractParserEventStream {
   protected BuildContextGenerator bcg;
   protected CheckContextGenerator kcg;
 
-  /**
-   * Create an event stream based on the specified data stream of the specified
-   * type using the specified head rules.
-   * 
-   * @param d
-   *          A 1-parse-per-line Penn Treebank Style parse.
-   * @param rules
-   *          The head rules.
-   * @param etype
-   *          The type of events desired (tag, chunk, build, or check).
-   * @param dict
-   *          A tri-gram dictionary to reduce feature generation.
-   */
   public ParserEventStream(ObjectStream<Parse> samples, HeadRules rules,
       ParserEventTypeEnum etype,
       SequenceLabelerContextGenerator taggerContextGenerator,

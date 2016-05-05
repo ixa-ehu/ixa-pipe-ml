@@ -82,11 +82,16 @@ public class ShiftReduceParserTrainer {
    * 
    * @param params
    *          the training parameters
+   * @param taggerParams
+   *          the tagger parameters
+   * @param chunkerParams
+   *          the chunker parameters
    * @throws IOException
    *           io exception
    */
-  public ShiftReduceParserTrainer(final TrainingParameters params, final TrainingParameters taggerParams, final TrainingParameters chunkerParams)
-      throws IOException {
+  public ShiftReduceParserTrainer(final TrainingParameters params,
+      final TrainingParameters taggerParams,
+      final TrainingParameters chunkerParams) throws IOException {
 
     this.lang = Flags.getLanguage(params);
     this.trainData = params.getSettings().get("TrainSet");
@@ -108,15 +113,9 @@ public class ShiftReduceParserTrainer {
     setParserFactory(ParserFactory.create(ParserFactory.class.getName(),
         autoDict, resources));
   }
-  
-  /**
-   * Create {@code SequenceLabelerFactory} with custom features.
-   * 
-   * @param params
-   *          the parameter training file
-   * @throws IOException if io error
-   */
-  public SequenceLabelerFactory createSequenceLabelerFactory(TrainingParameters params) throws IOException {
+
+  public SequenceLabelerFactory createSequenceLabelerFactory(
+      TrainingParameters params) throws IOException {
     String seqCodec = getSequenceCodec();
     SequenceLabelerCodec<String> sequenceCodec = SequenceLabelerFactory
         .instantiateSequenceCodec(seqCodec);
@@ -125,12 +124,13 @@ public class ShiftReduceParserTrainer {
     System.err.println(featureDescription);
     byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
         .forName("UTF-8"));
-    Map<String, Object> resources = LoadModelResources.loadSequenceResources(params);
+    Map<String, Object> resources = LoadModelResources
+        .loadSequenceResources(params);
     return SequenceLabelerFactory.create(
         SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
         resources, sequenceCodec);
   }
-  
+
   public final ParserModel train(final TrainingParameters params) {
     if (getParserFactory() == null) {
       throw new IllegalStateException(
@@ -142,8 +142,8 @@ public class ShiftReduceParserTrainer {
     ParserModel trainedModel = null;
     ParserEvaluator parserEvaluator = null;
     try {
-      trainedModel = ShiftReduceParser.train(params, lang, trainSamples,
-          rules, parserFactory, taggerFactory, chunkerFactory);
+      trainedModel = ShiftReduceParser.train(params, lang, trainSamples, rules,
+          parserFactory, taggerFactory, chunkerFactory);
       ShiftReduceParser parser = new ShiftReduceParser(trainedModel);
       parserEvaluator = new ParserEvaluator(parser);
       parserEvaluator.evaluate(testSamples);
@@ -161,10 +161,6 @@ public class ShiftReduceParserTrainer {
    * 
    * @param inputData
    *          the input data
-   * @param clearFeatures
-   *          clear the features
-   * @param aCorpusFormat
-   *          the corpus format
    * @return the stream from the several corpus formats
    * @throws IOException
    *           the io exception
@@ -203,31 +199,35 @@ public class ShiftReduceParserTrainer {
   /**
    * Get the features which are implemented in each of the trainers extending
    * this class.
+   * 
    * @return the features
    */
   public final SequenceLabelerFactory getTaggerFactory() {
     return taggerFactory;
   }
 
-  public final SequenceLabelerFactory setTaggerFactory(SequenceLabelerFactory tokenNameFinderFactory) {
+  public final SequenceLabelerFactory setTaggerFactory(
+      SequenceLabelerFactory tokenNameFinderFactory) {
     this.taggerFactory = tokenNameFinderFactory;
     return taggerFactory;
   }
-  
+
   /**
    * Get the features which are implemented in each of the trainers extending
    * this class.
+   * 
    * @return the features
    */
   public final SequenceLabelerFactory getChunkerFactory() {
     return chunkerFactory;
   }
-  
-  public final SequenceLabelerFactory setChunkerFactory(SequenceLabelerFactory tokenNameFinderFactory) {
+
+  public final SequenceLabelerFactory setChunkerFactory(
+      SequenceLabelerFactory tokenNameFinderFactory) {
     this.chunkerFactory = tokenNameFinderFactory;
     return chunkerFactory;
   }
-  
+
   /**
    * Get the features which are implemented in each of the trainers extending
    * this class.
@@ -246,25 +246,27 @@ public class ShiftReduceParserTrainer {
   public final int getBeamSize() {
     return beamSize;
   }
-    
+
   /**
    * Get the Sequence codec.
+   * 
    * @return the sequence codec
    */
   public final String getSequenceCodec() {
     String seqCodec = null;
     if ("BIO".equals(sequenceCodec)) {
       seqCodec = BioCodec.class.getName();
-    }
-    else if ("BILOU".equals(sequenceCodec)) {
+    } else if ("BILOU".equals(sequenceCodec)) {
       seqCodec = BilouCodec.class.getName();
     }
     return seqCodec;
   }
-  
+
   /**
    * Set the sequence codec.
-   * @param aSeqCodec the sequence codec to be set
+   * 
+   * @param aSeqCodec
+   *          the sequence codec to be set
    */
   public final void setSequenceCodec(final String aSeqCodec) {
     this.sequenceCodec = aSeqCodec;

@@ -776,7 +776,7 @@ public class Parse implements Cloneable, Comparable<Parse> {
   /**
    * Prune the specified sentence parse of vacuous productions.
    *
-   * @param parse
+   * @param parse the parse tree
    */
   public static void pruneParse(Parse parse) {
     List<Parse> nodes = new LinkedList<Parse>();
@@ -1092,9 +1092,9 @@ public class Parse implements Cloneable, Comparable<Parse> {
   /**
    * Utility method to inserts named entities.
    *
-   * @param tag
-   * @param names
-   * @param tokens
+   * @param tag the tags
+   * @param names the spans
+   * @param tokens the tokens
    */
   public static void addNames(String tag, Span[] names, Parse[] tokens) {
     for (int ni=0,nn=names.length;ni<nn;ni++) {

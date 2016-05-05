@@ -93,7 +93,7 @@ public class DictionariesNERTagger {
    * 
    * @param tokens
    *          the tokenized sentence
-   * @return a list of detected {@link Sequence} objects
+   * @return a list of detected {@link SequenceLabel} objects
    */
   public final List<SequenceLabel> getNames(final String[] tokens) {
 
@@ -163,13 +163,13 @@ public class DictionariesNERTagger {
   }
 
   /**
-   * Creates a list of {@link Sequence} objects from spans and tokens.
+   * Creates a list of {@link SequenceLabel} objects from spans and tokens.
    * 
    * @param neSpans
    *          the spans of the entities in the sentence
    * @param tokens
    *          the tokenized sentence
-   * @return a list of {@link Sequence} objects
+   * @return a list of {@link SequenceLabel} objects
    */
   public final List<SequenceLabel> getNamesFromSpans(final Span[] neSpans,
       final String[] tokens) {

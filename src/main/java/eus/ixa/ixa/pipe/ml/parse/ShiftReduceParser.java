@@ -754,6 +754,7 @@ public class ShiftReduceParser {
    * @param data The data stream of parses.
    * @param rules The head rules for the parses.
    * @param cutoff The minimum number of entries required for the n-gram to be saved as part of the dictionary.
+   * @throws IOException if io problems
    * @return A dictionary object.
    */
   public static Dictionary buildDictionary(ObjectStream<Parse> data, HeadRules rules, int cutoff)
@@ -770,12 +771,11 @@ public class ShiftReduceParser {
    *
    * @param data The data stream of parses.
    * @param rules The head rules for the parses.
-   * @param params can contain a cutoff, the minimum number of entries required for the
-   *        n-gram to be saved as part of the dictionary.
+   * @param params can contain a cutoff, the minimum number of entries required for the n-gram to be saved as part of the dictionary.
+   * @throws IOException if io problems
    * @return A dictionary object.
    */
-  public static Dictionary buildDictionary(ObjectStream<Parse> data, HeadRules rules, TrainingParameters params)
-      throws IOException {
+  public static Dictionary buildDictionary(ObjectStream<Parse> data, HeadRules rules, TrainingParameters params) throws IOException {
 
     int cutoff = 5;
 

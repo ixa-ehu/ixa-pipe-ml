@@ -600,7 +600,7 @@ public class ShiftReduceParser {
 
   //TODO add a training method loading POS models as resource.
   //TODO should we do the same with the Chunker??? Test it.
-  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters trainParams, SequenceLabelerFactory sequenceLabelerFactory)
+  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters trainParams, SequenceLabelerFactory taggerFactory, SequenceLabelerFactory chunkerFactory)
           throws IOException {
 
     System.err.println("Building dictionary");
@@ -613,12 +613,12 @@ public class ShiftReduceParser {
 
     //TODO tag
     SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null, new POSSampleStream(parseSamples),
-        trainParams.getParameters("tagger"), new SequenceLabelerFactory());
+        trainParams.getParameters("tagger"), taggerFactory);
     parseSamples.reset();
 
     //TODO chunk
     SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, null, new ChunkSampleStream(parseSamples),
-        trainParams.getParameters("chunker"), new SequenceLabelerFactory());
+        trainParams.getParameters("chunker"), chunkerFactory);
     parseSamples.reset();
     
     //TODO build

@@ -74,7 +74,7 @@ import eus.ixa.ixa.pipe.ml.utils.IOUtils;
  * @author ragerri
  * @version 2016-05-06
  */
-public class SequenceLabelerTrainer implements Trainer {
+public class SequenceLabelerTrainer {
   
   /**
    * The language.

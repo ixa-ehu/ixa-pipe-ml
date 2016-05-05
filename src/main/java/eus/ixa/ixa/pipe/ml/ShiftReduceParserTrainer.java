@@ -1,4 +1,4 @@
-package eus.ixa.ixa.pipe.ml.train;
+package eus.ixa.ixa.pipe.ml;
 
 import java.io.FileInputStream;
 import java.io.IOException;

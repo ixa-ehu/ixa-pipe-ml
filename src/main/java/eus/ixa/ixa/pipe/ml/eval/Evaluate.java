@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.EvaluationMonitor;
+import eus.ixa.ixa.pipe.ml.SequenceLabelerTrainer;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabeler;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
@@ -33,7 +34,6 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
-import eus.ixa.ixa.pipe.ml.train.SequenceLabelerTrainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 /**

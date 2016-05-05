@@ -14,7 +14,7 @@
    limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.train;
+package eus.ixa.ixa.pipe.ml;
 
 import java.io.IOException;
 import java.nio.charset.Charset;

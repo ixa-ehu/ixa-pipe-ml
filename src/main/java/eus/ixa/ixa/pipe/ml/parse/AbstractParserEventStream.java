@@ -21,14 +21,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerContextGenerator;
-
 import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.featuregen.AdditionalContextFeatureGenerator;
 import opennlp.tools.util.featuregen.WindowFeatureGenerator;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerContextGenerator;
 
 /**
  * Abstract class extended by parser event streams which perform tagging and chunking.
@@ -47,22 +46,27 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
   protected ParserEventTypeEnum etype;
   protected boolean fixPossesives;
   protected Dictionary dict;
+  protected ParserFactory factory;
 
-  public AbstractParserEventStream(ObjectStream<Parse> dataStream, HeadRules rules, SequenceLabelerContextGenerator taggerContextGenerator, SequenceLabelerContextGenerator chunkerContextGenerator, Dictionary dict) {
+  public AbstractParserEventStream(ObjectStream<Parse> dataStream, HeadRules rules, ParserEventTypeEnum etype, SequenceLabelerContextGenerator taggerContextGenerator, SequenceLabelerContextGenerator chunkerContextGenerator, ParserFactory factory) {
     super(dataStream);
-    this.dict = dict;
-    this.chunkerContextGenerator = chunkerContextGenerator;
-    this.chunkerContextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
-    this.tagContextGenerator = taggerContextGenerator;
-    this.tagContextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
-    
+    //this.dict = dict;
+    if (etype == ParserEventTypeEnum.CHUNK) {
+      this.chunkerContextGenerator = chunkerContextGenerator;
+      this.chunkerContextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
+    }
+    else if (etype == ParserEventTypeEnum.TAG) {
+      this.tagContextGenerator = taggerContextGenerator;
+      this.tagContextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
+    }
     this.rules = rules;
     punctSet = rules.getPunctuationTags();
+    this.factory = factory;
     init();
   }
   
-  public AbstractParserEventStream(ObjectStream<Parse> d, HeadRules rules, SequenceLabelerContextGenerator taggerContextGenerator, SequenceLabelerContextGenerator chunkerContextGenerator) {
-    this(d,rules,taggerContextGenerator,chunkerContextGenerator,null);
+  public AbstractParserEventStream(ObjectStream<Parse> samples, HeadRules rules, ParserEventTypeEnum etype, SequenceLabelerContextGenerator taggerContextGenerator, SequenceLabelerContextGenerator chunkerContextGenerator) {
+    this(samples, rules, etype, taggerContextGenerator,chunkerContextGenerator,null);
   }
 
   @Override
@@ -84,7 +88,6 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
     else {
       addParseEvents(newEvents, ShiftReduceParser.collapsePunctuation(chunks,punctSet));
     }
-
     return newEvents.iterator();
   }
 

@@ -36,7 +36,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
   private String[] trigram;
 
   /**
-   * Creates a new context generator for making decisions about combining constitients togehter.
+   * Creates a new context generator for making decisions about combining constituents together.
    *
    */
   public BuildContextGenerator() {

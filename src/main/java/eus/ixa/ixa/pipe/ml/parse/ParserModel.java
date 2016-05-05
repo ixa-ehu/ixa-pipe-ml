@@ -17,13 +17,10 @@
 
 package eus.ixa.ixa.pipe.ml.parse;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.Map;
 
@@ -37,53 +34,11 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 
 /**
  * ParserModel class. Based on opennlp.tools.parse.ParserModel.java.
+ * 
  * @author ragerri
  * @version 2016-05-03
  */
 public class ParserModel extends BaseModel {
-
-  private static class SequenceLabelerModelSerializer implements
-      ArtifactSerializer<SequenceLabelerModel> {
-
-    public SequenceLabelerModel create(InputStream in) throws IOException,
-        InvalidFormatException {
-      SequenceLabelerModel posModel = new SequenceLabelerModel(
-          new UncloseableInputStream(in));
-      return posModel;
-    }
-    public void serialize(SequenceLabelerModel artifact, OutputStream out)
-        throws IOException {
-      artifact.serialize(out);
-    }
-  }
-
-  public static class PennTreebankHeadRulesSerializer implements
-      ArtifactSerializer<PennTreebankHeadRules> {
-
-    public PennTreebankHeadRules create(InputStream in) throws IOException,
-        InvalidFormatException {
-      return new PennTreebankHeadRules(new BufferedReader(
-          new InputStreamReader(in, "UTF-8")));
-    }
-    public void serialize(PennTreebankHeadRules artifact, OutputStream out)
-        throws IOException {
-      artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
-    }
-  }
-
-  public static class AncoraHeadRulesSerializer implements
-      ArtifactSerializer<AncoraHeadRules> {
-
-    public AncoraHeadRules create(InputStream in) throws IOException,
-        InvalidFormatException {
-      return new AncoraHeadRules(new BufferedReader(new InputStreamReader(in,
-          "UTF-8")));
-    }
-    public void serialize(AncoraHeadRules artifact, OutputStream out)
-        throws IOException {
-      artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
-    }
-  }
 
   private static final String COMPONENT_NAME = "shiftReducedParser";
   private static final String BUILD_MODEL_ENTRY_NAME = "build.model";
@@ -131,9 +86,11 @@ public class ParserModel extends BaseModel {
     super.createArtifactSerializers(serializers);
 
     if (getLanguage().equalsIgnoreCase("es")) {
-      serializers.put("headrules", new AncoraHeadRulesSerializer());
+      serializers.put("headrules",
+          new AncoraHeadRules.AncoraHeadRulesSerializer());
     } else {
-      serializers.put("headrules", new PennTreebankHeadRulesSerializer());
+      serializers.put("headrules",
+          new PennTreebankHeadRules.PennTreebankHeadRulesSerializer());
     }
     serializers.put("postagger", new SequenceLabelerModelSerializer());
     serializers.put("chunker", new SequenceLabelerModelSerializer());
@@ -207,4 +164,21 @@ public class ParserModel extends BaseModel {
       throw new InvalidFormatException("Missing the head rules!");
     }
   }
+
+  private static class SequenceLabelerModelSerializer implements
+      ArtifactSerializer<SequenceLabelerModel> {
+
+    public SequenceLabelerModel create(InputStream in) throws IOException,
+        InvalidFormatException {
+      SequenceLabelerModel posModel = new SequenceLabelerModel(
+          new UncloseableInputStream(in));
+      return posModel;
+    }
+
+    public void serialize(SequenceLabelerModel artifact, OutputStream out)
+        throws IOException {
+      artifact.serialize(out);
+    }
+  }
+
 }

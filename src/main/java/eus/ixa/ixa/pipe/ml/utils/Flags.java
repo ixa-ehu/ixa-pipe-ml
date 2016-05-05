@@ -631,6 +631,16 @@ public class Flags {
 
   }
   
+  public static String getHeadRulesFile(TrainingParameters params) {
+    String headRulesFlag = null;
+    if (params.getSettings().get("HeadRules") != null) {
+      headRulesFlag = params.getSettings().get("HeadRules");
+    } else {
+      System.err.println("Specify head rules file to train the parser!!");
+    }
+    return headRulesFlag; 
+  }
+  
   /**
    * Check if supersense tagger features are active.
    * @param params the parameters

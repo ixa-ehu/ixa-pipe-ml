@@ -23,10 +23,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import opennlp.tools.dictionary.Dictionary;
+import opennlp.tools.ml.EventModelSequenceTrainer;
+import opennlp.tools.ml.EventTrainer;
+import opennlp.tools.ml.SequenceTrainer;
+import opennlp.tools.ml.TrainerFactory;
+import opennlp.tools.ml.TrainerFactory.TrainerType;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
+import opennlp.tools.ml.model.SequenceClassificationModel;
 import opennlp.tools.ml.model.TrainUtil;
 import opennlp.tools.ngram.NGramModel;
 import opennlp.tools.parser.ParserEventTypeEnum;
@@ -36,9 +44,11 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEventStream;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerSequenceStream;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
@@ -49,6 +59,9 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  */
 public class ShiftReduceParser {
 
+  
+  private static Pattern untokenizedParenPattern1 = Pattern.compile("([^ ])([({)}])");
+  private static Pattern untokenizedParenPattern2 = Pattern.compile("([({)}])([^ ])");
   /**
    * The maximum number of parses advanced from all preceding
    * parses at each derivation step.
@@ -365,6 +378,35 @@ public class ShiftReduceParser {
     return newParses;
   }
   
+  public static Parse[] parseLine(String line, ShiftReduceParser parser, int numParses) {
+    line = untokenizedParenPattern1.matcher(line).replaceAll("$1 $2");
+    line = untokenizedParenPattern2.matcher(line).replaceAll("$1 $2");
+    StringTokenizer str = new StringTokenizer(line);
+    StringBuilder sb = new StringBuilder();
+    List<String> tokens = new ArrayList<String>();
+    while (str.hasMoreTokens()) {
+      String tok = str.nextToken();
+      tokens.add(tok);
+      sb.append(tok).append(" ");
+    }
+    String text = sb.substring(0, sb.length() - 1);
+    Parse p = new Parse(text, new Span(0, text.length()), ShiftReduceParser.INC_NODE, 0, 0);
+    int start = 0;
+    int i = 0;
+    for (Iterator<String> ti = tokens.iterator(); ti.hasNext(); i++) {
+      String tok = ti.next();
+      p.insert(new Parse(text, new Span(start, start + tok.length()), ShiftReduceParser.TOK_NODE, 0, i));
+      start += tok.length() + 1;
+    }
+    Parse[] parses;
+    if (numParses == 1) {
+      parses = new Parse[]{parser.parse(p)};
+    } else {
+      parses = parser.parse(p, numParses);
+    }
+    return parses;
+  }
+  
   public Parse[] parse(Parse tokens, int numParses) {
     if (createDerivationString) tokens.setDerivation(new StringBuffer(100));
     odh.clear();
@@ -598,46 +640,49 @@ public class ShiftReduceParser {
     return newParses;
   }
 
-  //TODO add a training method loading POS models as resource.
-  //TODO should we do the same with the Chunker??? Test it.
-  public static ParserModel train(String languageCode, ObjectStream<Parse> parseSamples, HeadRules rules, TrainingParameters trainParams, SequenceLabelerFactory taggerFactory, SequenceLabelerFactory chunkerFactory)
-          throws IOException {
-
-    System.err.println("Building dictionary");
-
-    Dictionary mdict = buildDictionary(parseSamples, rules, trainParams);
+  // TODO add a training method loading POS models as resource.
+  // TODO should we do the same with the Chunker??? Test it.
+  public static ParserModel train(TrainingParameters trainParams, String languageCode,
+      ObjectStream<Parse> parseSamples, HeadRules rules, ParserFactory parserFactory, SequenceLabelerFactory taggerFactory,
+      SequenceLabelerFactory chunkerFactory) throws IOException {
 
     parseSamples.reset();
 
     Map<String, String> manifestInfoEntries = new HashMap<String, String>();
-
-    //TODO tag
-    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null, new POSSampleStream(parseSamples),
-        trainParams.getParameters("tagger"), taggerFactory);
-    parseSamples.reset();
-
-    //TODO chunk
-    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, null, new ChunkSampleStream(parseSamples),
-        trainParams.getParameters("chunker"), chunkerFactory);
-    parseSamples.reset();
     
-    //TODO build
+    // TODO tag
+    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null,
+        new POSSampleStream(parseSamples), trainParams, taggerFactory);
+    parseSamples.reset();
+
+    // TODO chunk
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
+        null, new ChunkSampleStream(parseSamples),
+        trainParams, chunkerFactory);
+    parseSamples.reset();
+
+    // TODO build
     System.err.println("Training builder");
-    ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules, ParserEventTypeEnum.BUILD, mdict);
+    
+    ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
+        ParserEventTypeEnum.BUILD, taggerFactory.createContextGenerator(), chunkerFactory.createContextGenerator(), parserFactory);
     Map<String, String> buildReportMap = new HashMap<String, String>();
-    MaxentModel buildModel = TrainUtil.train(bes, trainParams.getSettings("build"), buildReportMap);
+    EventTrainer trainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), buildReportMap);
+    MaxentModel buildModel = trainer.train(bes);
     mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
     parseSamples.reset();
 
-    //TODO check
+    // TODO check
     System.err.println("Training checker");
-    ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules, ParserEventTypeEnum.CHECK);
+    ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
+        ParserEventTypeEnum.CHECK, taggerFactory.createContextGenerator(), chunkerFactory.createContextGenerator());
     Map<String, String> checkReportMap = new HashMap<String, String>();
-    MaxentModel checkModel = TrainUtil.train(kes, trainParams.getSettings("check"), checkReportMap);
+    EventTrainer buildTrainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), buildReportMap);
+    MaxentModel checkModel = buildTrainer.train(kes);
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
-    
-    return new ParserModel(languageCode, buildModel, checkModel,
-        posModel, chunkModel, rules, manifestInfoEntries);
+
+    return new ParserModel(languageCode, buildModel, checkModel, posModel,
+        chunkModel, rules, manifestInfoEntries);
   }
   
   public static void mergeReportIntoManifest(Map<String, String> manifest,

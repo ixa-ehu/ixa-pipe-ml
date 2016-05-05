@@ -83,9 +83,8 @@ public class ShiftReduceParserTrainer {
     System.err.println(featureDescription);
     HeadRules rules = getHeadRules(params);
     Dictionary autoDict = ShiftReduceParser.buildDictionary(trainSamples, rules, params);
-    
     Map<String, Object> resources = LoadModelResources.loadParseResources(params);
-    setParserFactory(ParserFactory.create(ParserFactory.class.getName(), autoDict, resources));
+    setParserFactory(ParserFactory.create(ParserFactory.class.getName(), rules, autoDict, resources));
   }
   
   /**

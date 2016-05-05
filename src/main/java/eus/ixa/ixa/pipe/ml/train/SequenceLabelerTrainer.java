@@ -165,7 +165,7 @@ public class SequenceLabelerTrainer {
     System.err.println(featureDescription);
     byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
         .forName("UTF-8"));
-    Map<String, Object> resources = LoadModelResources.loadResources(params, featureGeneratorBytes);
+    Map<String, Object> resources = LoadModelResources.loadSequenceResources(params);
     setSequenceLabelerFactory(SequenceLabelerFactory.create(
         SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
         resources, sequenceCodec));

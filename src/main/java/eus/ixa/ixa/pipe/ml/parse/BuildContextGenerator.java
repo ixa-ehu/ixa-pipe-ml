@@ -19,6 +19,7 @@ package eus.ixa.ixa.pipe.ml.parse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.util.StringList;
@@ -28,6 +29,7 @@ import opennlp.tools.util.StringList;
  */
 public class BuildContextGenerator extends AbstractContextGenerator {
 
+  private Map<String, Object> resources;
   private Dictionary dict;
   private String[] unigram;
   private String[] bigram;
@@ -43,9 +45,10 @@ public class BuildContextGenerator extends AbstractContextGenerator {
     useLabel = true;
   }
 
-  public BuildContextGenerator(Dictionary dict) {
+  public BuildContextGenerator(Dictionary dict, Map<String, Object> resources) {
     this();
     this.dict = dict;
+    this.resources = resources;
     unigram = new String[1];
     bigram = new String[2];
     trigram = new String[3];

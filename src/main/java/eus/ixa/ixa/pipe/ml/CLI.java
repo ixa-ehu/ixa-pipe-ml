@@ -35,7 +35,6 @@ import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.Evaluate;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.train.SequenceLabelerTrainer;
-import eus.ixa.ixa.pipe.ml.train.Trainer;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
@@ -159,7 +158,7 @@ public class CLI {
     else {
       outModel = Flags.getModel(params);
     }
-    Trainer nercTrainer = new SequenceLabelerTrainer(params);
+    SequenceLabelerTrainer nercTrainer = new SequenceLabelerTrainer(params);
     SequenceLabelerModel trainedModel = (SequenceLabelerModel) nercTrainer.train(params);
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }

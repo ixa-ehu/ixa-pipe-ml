@@ -33,7 +33,6 @@ public class ClarkFeatureGenerator extends CustomFeatureGenerator implements Art
   private ClarkCluster clarkCluster;
   private Map<String, String> attributes;
   public static String unknownClarkClass = "O";
-
   
   public ClarkFeatureGenerator() {
   }

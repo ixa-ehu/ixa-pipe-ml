@@ -1,5 +1,3 @@
-package eus.ixa.ixa.pipe.ml.parse;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -17,7 +15,99 @@ package eus.ixa.ixa.pipe.ml.parse;
  * limitations under the License.
  */
 
-public class ParserFactory {
+package eus.ixa.ixa.pipe.ml.parse;
+
+import java.util.Map;
+
+import opennlp.tools.dictionary.Dictionary;
+import opennlp.tools.util.BaseToolFactory;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.ext.ExtensionLoader;
+
+public class ParserFactory extends BaseToolFactory {
+  
+  private static final String AUTO_DICTIONARY_ENTRY_NAME = "autodict";
+  private Map<String, Object> resources;
+  private Dictionary autoDict;
+  
+  public ParserFactory() {
+  }
+  
+  public ParserFactory(Dictionary autoDict, Map<String, Object> resources) {
+    this.init(autoDict, resources);
+  }
+  
+  private void init(Dictionary autoDict, Map<String, Object> resources) {
+    this.autoDict = autoDict;
+    this.resources = resources;
+  }
+  
+  public Dictionary getDictionary() {
+    if(this.autoDict == null && artifactProvider != null)
+      this.autoDict = artifactProvider.getArtifact(AUTO_DICTIONARY_ENTRY_NAME);
+    return this.autoDict;
+  }
+  
+  public void setDictionary(Dictionary autoDict) {
+    if (artifactProvider != null) {
+      throw new IllegalStateException(
+          "Can not set ngram dictionary while using artifact provider.");
+    }
+    this.autoDict = autoDict;
+  }
+  
+  protected Map<String, Object> getResources() {
+    return resources;
+  }
+
+  public static ParserFactory create(String subclassName, Dictionary autoDict,
+      final Map<String, Object> resources)
+      throws InvalidFormatException {
+    if (subclassName == null) {
+      // will create the default factory
+      return new ParserFactory();
+    }
+    try {
+      ParserFactory theFactory = ExtensionLoader.instantiateExtension(
+          ParserFactory.class, subclassName);
+      theFactory.init(autoDict, resources);
+      return theFactory;
+    } catch (Exception e) {
+      String msg = "Could not instantiate the " + subclassName
+          + ". The initialization throw an exception.";
+      System.err.println(msg);
+      e.printStackTrace();
+      throw new InvalidFormatException(msg, e);
+    }
+  }
+  
+  public BuildContextGenerator createBuildContextGenerator() {
+    return new BuildContextGenerator(getDictionary(), getResources());
+  }
+  
+  public CheckContextGenerator createCheckContextGenerator() {
+    return new CheckContextGenerator(getResources());
+  }
+  
+  @Override
+  public Map<String, Object> createArtifactMap() {
+    Map<String, Object> artifactMap = super.createArtifactMap();
+
+    if (autoDict != null)
+      artifactMap.put(AUTO_DICTIONARY_ENTRY_NAME, autoDict);
+
+    return artifactMap;
+  }
+  
+  @Override
+  public void validateArtifactMap() throws InvalidFormatException {
+    Object ngramDictEntry = this.artifactProvider
+        .getArtifact(AUTO_DICTIONARY_ENTRY_NAME);
+
+    if (ngramDictEntry != null && !(ngramDictEntry instanceof Dictionary)) {
+      throw new InvalidFormatException("NGram dictionary has wrong type!");
+    }
+  }
 
   
 }

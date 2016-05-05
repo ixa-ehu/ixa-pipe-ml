@@ -112,7 +112,7 @@ public class CrossValidator {
     System.err.println(featureDescription);
     byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
         .forName("UTF-8"));
-    Map<String, Object> resources = LoadModelResources.loadResources(params, featureGeneratorBytes);
+    Map<String, Object> resources = LoadModelResources.loadSequenceResources(params);
     this.nameClassifierFactory = SequenceLabelerFactory.create(
         SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
         resources, sequenceCodec);

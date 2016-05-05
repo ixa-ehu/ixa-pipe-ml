@@ -29,8 +29,7 @@ public class LoadModelResources {
    * @return the map contanining and id and the resource
    * @throws IOException if io error
    */
-  public static Map<String, Object> loadResources(TrainingParameters params,
-      byte[] featureGenDescriptor) throws IOException {
+  public static Map<String, Object> loadSequenceResources(TrainingParameters params) throws IOException {
     Map<String, Object> resources = new HashMap<String, Object>();
     @SuppressWarnings("rawtypes")
     Map<String, ArtifactSerializer> artifactSerializers = SequenceLabelerModel.createArtifactSerializers();
@@ -42,7 +41,7 @@ public class LoadModelResources {
       for (File brownClusterFile : brownClusterFiles) {
         String brownFilePath = brownClusterFile.getCanonicalPath();
         artifactSerializers.put(serializerId, new BrownCluster.BrownClusterSerializer());
-        loadResource(serializerId, artifactSerializers, brownFilePath, featureGenDescriptor, resources);
+        loadResource(serializerId, artifactSerializers, brownFilePath, resources);
       }
     }
     if (Flags.isClarkFeatures(params)) {
@@ -52,7 +51,7 @@ public class LoadModelResources {
       for (File clarkClusterFile: clarkClusterFiles) {
         String clarkFilePath = clarkClusterFile.getCanonicalPath();
         artifactSerializers.put(serializerId, new ClarkCluster.ClarkClusterSerializer());
-        loadResource(serializerId, artifactSerializers, clarkFilePath, featureGenDescriptor, resources);
+        loadResource(serializerId, artifactSerializers, clarkFilePath, resources);
       }
     }
     if (Flags.isWord2VecClusterFeatures(params)) {
@@ -62,7 +61,7 @@ public class LoadModelResources {
       for (File word2vecClusterFile : word2vecClusterFiles) {
         String word2vecFilePath = word2vecClusterFile.getCanonicalPath();
         artifactSerializers.put(serializerId, new Word2VecCluster.Word2VecClusterSerializer());
-        loadResource(serializerId, artifactSerializers, word2vecFilePath, featureGenDescriptor, resources);
+        loadResource(serializerId, artifactSerializers, word2vecFilePath, resources);
       }
     }
     if (Flags.isDictionaryFeatures(params)) {
@@ -72,20 +71,20 @@ public class LoadModelResources {
       for (File dictFile : fileList) {
         String dictionaryPath = dictFile.getCanonicalPath();
         artifactSerializers.put(serializerId, new Dictionary.DictionarySerializer());
-        loadResource(serializerId, artifactSerializers, dictionaryPath, featureGenDescriptor, resources);
+        loadResource(serializerId, artifactSerializers, dictionaryPath, resources);
       }
     }
     if (Flags.isPOSTagModelFeatures(params)) {
       String morphoResourcesPath = Flags.getPOSTagModelFeatures(params);
       String posSerializerId = "seqmodelserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
-      loadResource(posSerializerId, artifactSerializers, morphoResourcesPath, featureGenDescriptor, resources);
+      loadResource(posSerializerId, artifactSerializers, morphoResourcesPath, resources);
     }
     if (Flags.isLemmaModelFeatures(params)) {
       String lemmaModelPath = Flags.getLemmaModelFeatures(params);
       String lemmaSerializerId = "seqmodelserializer";
       artifactSerializers.put(lemmaSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
-      loadResource(lemmaSerializerId, artifactSerializers, lemmaModelPath, featureGenDescriptor, resources);
+      loadResource(lemmaSerializerId, artifactSerializers, lemmaModelPath, resources);
     }
     if (Flags.isLemmaDictionaryFeatures(params)) {
       String lemmaDictPath = Flags.getLemmaDictionaryFeatures(params);
@@ -93,9 +92,9 @@ public class LoadModelResources {
       String posSerializerId = "seqmodelserializer";
       String lemmaDictSerializerId = "lemmadictserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
-      loadResource(posSerializerId, artifactSerializers, lemmaDictResources[0], featureGenDescriptor, resources);
+      loadResource(posSerializerId, artifactSerializers, lemmaDictResources[0], resources);
       artifactSerializers.put(lemmaDictSerializerId, new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
-      loadResource(lemmaDictSerializerId, artifactSerializers, lemmaDictResources[1], featureGenDescriptor, resources);
+      loadResource(lemmaDictSerializerId, artifactSerializers, lemmaDictResources[1], resources);
     }
     if (Flags.isSuperSenseFeatures(params)) {
       String mfsResourcesPath = Flags.getSuperSenseFeatures(params);
@@ -104,11 +103,11 @@ public class LoadModelResources {
       String lemmaSerializerId = "lemmadictserializer";
       String mfsSerializerId = "mfsserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
-      loadResource(posSerializerId, artifactSerializers, mfsResources[0], featureGenDescriptor, resources);
+      loadResource(posSerializerId, artifactSerializers, mfsResources[0], resources);
       artifactSerializers.put(lemmaSerializerId, new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
-      loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], featureGenDescriptor, resources);
+      loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], resources);
       artifactSerializers.put(mfsSerializerId, new MFSResource.MFSResourceSerializer());
-      loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], featureGenDescriptor, resources);
+      loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], resources);
     }
     if (Flags.isMFSFeatures(params)) {
       String mfsResourcesPath = Flags.getMFSFeatures(params);
@@ -117,11 +116,11 @@ public class LoadModelResources {
       String lemmaSerializerId = "lemmadictserializer";
       String mfsSerializerId = "mfsserializer";
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
-      loadResource(posSerializerId, artifactSerializers, mfsResources[0], featureGenDescriptor, resources);
+      loadResource(posSerializerId, artifactSerializers, mfsResources[0], resources);
       artifactSerializers.put(lemmaSerializerId, new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
-      loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], featureGenDescriptor, resources);
+      loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], resources);
       artifactSerializers.put(mfsSerializerId, new MFSResource.MFSResourceSerializer());
-      loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], featureGenDescriptor, resources);
+      loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], resources);
     }
     return resources;
   }
@@ -131,11 +130,9 @@ public class LoadModelResources {
    * @param serializerId the serializer id
    * @param artifactSerializers the serializers in which to put the resource
    * @param resourcePath the canonical path of the resource
-   * @param featureGenDescriptor the feature descriptor
    * @param resources the map in which to put the resource
    */
-  public static void loadResource(String serializerId, @SuppressWarnings("rawtypes") Map<String, ArtifactSerializer> artifactSerializers, String resourcePath,
-      byte[] featureGenDescriptor, Map<String, Object> resources) {
+  public static void loadResource(String serializerId, @SuppressWarnings("rawtypes") Map<String, ArtifactSerializer> artifactSerializers, String resourcePath, Map<String, Object> resources) {
 
     File resourceFile = new File(resourcePath);
     if (resourceFile != null) {

@@ -21,17 +21,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Class for generating predictive context for deciding when a constituent is complete.
  */
 public class CheckContextGenerator extends AbstractContextGenerator {
+  
+  private Map<String, Object> resources;
 
   /**
    * Creates a new context generator for generating predictive context for deciding when a constituent is complete.
    */
   public CheckContextGenerator() {
     super();
+  }
+  
+  public CheckContextGenerator(Map<String, Object> resources) {
+    super();
+    this.resources = resources;
   }
 
   public String[] getContext(Object o) {

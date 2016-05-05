@@ -50,7 +50,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
         "/sequenceLabeler/default-feature-descriptor.xml")) {
       
       if (in == null) {
-        throw new IllegalStateException("Classpath must contain ner-default-features.xml file!");
+        throw new IllegalStateException("Classpath must contain default-feature-descriptor.xml file!");
       }
       
       byte buf[] = new byte[1024];
@@ -60,7 +60,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
       }
     }
     catch (IOException e) {
-      throw new IllegalStateException("Failed reading from ner-default-features.xml file on classpath!");
+      throw new IllegalStateException("Failed reading from default-feature-descriptor.xml file on classpath!");
     }
     
     return bytes.toByteArray();

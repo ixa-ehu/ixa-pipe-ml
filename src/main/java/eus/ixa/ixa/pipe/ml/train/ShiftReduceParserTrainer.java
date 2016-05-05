@@ -12,17 +12,11 @@ import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.ext.ExtensionLoader;
 import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
-import eus.ixa.ixa.pipe.ml.formats.CoNLL02Format;
-import eus.ixa.ixa.pipe.ml.formats.CoNLL03Format;
-import eus.ixa.ixa.pipe.ml.formats.LemmatizerFormat;
-import eus.ixa.ixa.pipe.ml.formats.TabulatedFormat;
-import eus.ixa.ixa.pipe.ml.parse.AncoraHeadRules;
 import eus.ixa.ixa.pipe.ml.parse.AncoraHeadRules.AncoraHeadRulesSerializer;
 import eus.ixa.ixa.pipe.ml.parse.HeadRules;
 import eus.ixa.ixa.pipe.ml.parse.Parse;
 import eus.ixa.ixa.pipe.ml.parse.ParseSampleStream;
 import eus.ixa.ixa.pipe.ml.parse.ParserFactory;
-import eus.ixa.ixa.pipe.ml.parse.PennTreebankHeadRules;
 import eus.ixa.ixa.pipe.ml.parse.PennTreebankHeadRules.PennTreebankHeadRulesSerializer;
 import eus.ixa.ixa.pipe.ml.parse.ShiftReduceParser;
 import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
@@ -90,7 +84,7 @@ public class ShiftReduceParserTrainer {
     HeadRules rules = getHeadRules(params);
     Dictionary autoDict = ShiftReduceParser.buildDictionary(trainSamples, rules, params);
     
-    Map<String, Object> resources = LoadModelResources.loadSequenceResources(params);
+    Map<String, Object> resources = LoadModelResources.loadParseResources(params);
     setParserFactory(ParserFactory.create(ParserFactory.class.getName(), autoDict, resources));
   }
   

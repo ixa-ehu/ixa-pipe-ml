@@ -33,6 +33,7 @@ import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.Evaluate;
+import eus.ixa.ixa.pipe.ml.parse.ParserModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
@@ -61,7 +62,7 @@ public class CLI {
    * Argument parser instance.
    */
   private ArgumentParser argParser = ArgumentParsers.newArgumentParser(
-      "ixa-pipe-ml-" + version + ".jar").description(
+      "ixa-pipe-ml-" + version + "-exec.jar").description(
       "ixa-pipe-ml-" + version
           + " is a Machine Learning component to train and evaluate models for various IXA pipes tasks.\n");
   /**
@@ -70,9 +71,13 @@ public class CLI {
   private Subparsers subParsers = argParser.addSubparsers().help(
       "sub-command help");
   /**
-   * The parser that manages the training sub-command.
+   * The parser that manages the Sequence Labeler training sub-command.
    */
-  private Subparser trainParser;
+  private Subparser seqTrainerParser;
+  /**
+   * The subparser that manages the Constituent Parser training sub-command.
+   */
+  private Subparser parserTrainerParser;
   /**
    * The parser that manages the evaluation sub-command.
    */
@@ -81,18 +86,24 @@ public class CLI {
    * The parser that manages the cross validation sub-command.
    */
   private Subparser crossValidateParser;
-  
+ 
+  public static final String SEQ_TRAINER_NAME = "sequenceTrainer";
+  public static final String PARSE_TRAINER_NAME = "parserTrainer";
+  public static final String EVAL_PARSER_NAME = "eval";
+  public static final String CROSS_PARSER_NAME = "cross";
   /**
    * Construct a CLI object with the sub-parsers to manage the command
    * line parameters.
    */
   public CLI() {
     
-    trainParser = subParsers.addParser("train").help("Training CLI");
-    loadTrainingParameters();
-    evalParser = subParsers.addParser("eval").help("Evaluation CLI");
+    seqTrainerParser = subParsers.addParser(SEQ_TRAINER_NAME).help("Sequence Labeler training CLI");
+    loadSeqLabelerTrainingParameters();
+    parserTrainerParser = subParsers.addParser(PARSE_TRAINER_NAME).help("Constituent Parser training CLI");
+    loadParserTrainingParameters();
+    evalParser = subParsers.addParser(EVAL_PARSER_NAME).help("Evaluation CLI");
     loadEvalParameters();
-    crossValidateParser = subParsers.addParser("cross").help("Cross validation CLI");
+    crossValidateParser = subParsers.addParser(CROSS_PARSER_NAME).help("Cross validation CLI");
     loadCrossValidateParameters();
     }
 
@@ -122,28 +133,30 @@ public class CLI {
     try {
       parsedArguments = argParser.parseArgs(args);
       System.err.println("CLI options: " + parsedArguments);
-      if (args[0].equals("eval")) {
+      if (args[0].equals(EVAL_PARSER_NAME)) {
         eval();
-      } else if (args[0].equals("train")) {
-        train();
-      } else if (args[0].equals("cross")) {
+      } else if (args[0].equals(SEQ_TRAINER_NAME)) {
+        seqTrain();
+      } else if (args[0].equals(PARSE_TRAINER_NAME)) {
+        parserTrain();
+      } else if (args[0].equals("CROSS_PARSER_NAME")) {
         crossValidate();
       }
     } catch (ArgumentParserException e) {
       argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + version
-          + ".jar (train|eval|cross|server|client) -help for details");
+          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|" + "|eval|cross) -help for details");
       System.exit(1);
     }
   }
   
   /**
-   * Main access to the train functionalities.
+   * Main access to the Sequence Labeler train functionalities.
    * 
    * @throws IOException
    *           input output exception if problems with corpora
    */
-  public final void train() throws IOException {
+  public final void seqTrain() throws IOException {
 
     // load training parameters file
     String paramFile = parsedArguments.getString("params");
@@ -159,6 +172,35 @@ public class CLI {
     }
     SequenceLabelerTrainer nercTrainer = new SequenceLabelerTrainer(params);
     SequenceLabelerModel trainedModel = nercTrainer.train(params);
+    CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
+  }
+  
+  /**
+   * Main access to the ShiftReduceParser train functionalities.
+   * 
+   * @throws IOException
+   *           input output exception if problems with corpora
+   */
+  public final void parserTrain() throws IOException {
+
+    // load training parameters file
+    String paramFile = parsedArguments.getString("params");
+    String taggerParamsFile = parsedArguments.getString("taggerParams");
+    String chunkerParamsFile = parsedArguments.getString("chunkerParams");
+    TrainingParameters params = IOUtils
+        .loadTrainingParameters(paramFile);
+    TrainingParameters taggerParams = IOUtils.loadTrainingParameters(taggerParamsFile);
+    TrainingParameters chunkerParams = IOUtils.loadTrainingParameters(chunkerParamsFile);
+    String outModel = null;
+    if (params.getSettings().get("OutputModel") == null || params.getSettings().get("OutputModel").length() == 0) {
+      outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
+      params.put("OutputModel", outModel);
+    }
+    else {
+      outModel = Flags.getModel(params);
+    }
+    ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, taggerParams, chunkerParams);
+    ParserModel trainedModel = parserTrainer.train(params);
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
 
@@ -212,10 +254,25 @@ public class CLI {
   /**
    * Create the main parameters available for training sequence labeling models.
    */
-  private void loadTrainingParameters() {
-    trainParser.addArgument("-p", "--params")
+  private void loadSeqLabelerTrainingParameters() {
+    seqTrainerParser.addArgument("-p", "--params")
         .required(true)
         .help("Load the training parameters file\n");
+  }
+  
+  /**
+   * Create the main parameters available for training ShiftReduceParse models.
+   */
+  private void loadParserTrainingParameters() {
+    parserTrainerParser.addArgument("-p", "--params")
+        .required(true)
+        .help("Load the parsing training parameters file.\n");
+    parserTrainerParser.addArgument("-t", "--taggerParams")
+        .required(false)
+        .help("Load the tagger training parameters file.\n");
+    parserTrainerParser.addArgument("-c", "--chunkerParams")
+        .required(false)
+        .help("Load the chunker training parameters file.\n");
   }
 
   /**

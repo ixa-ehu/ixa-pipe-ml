@@ -27,15 +27,10 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import opennlp.tools.dictionary.Dictionary;
-import opennlp.tools.ml.EventModelSequenceTrainer;
 import opennlp.tools.ml.EventTrainer;
-import opennlp.tools.ml.SequenceTrainer;
 import opennlp.tools.ml.TrainerFactory;
-import opennlp.tools.ml.TrainerFactory.TrainerType;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.ml.model.MaxentModel;
-import opennlp.tools.ml.model.SequenceClassificationModel;
-import opennlp.tools.ml.model.TrainUtil;
 import opennlp.tools.ngram.NGramModel;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.Heap;
@@ -44,11 +39,9 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEventStream;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerSequenceStream;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
@@ -58,7 +51,6 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  * @version 2016-05-05
  */
 public class ShiftReduceParser {
-
   
   private static Pattern untokenizedParenPattern1 = Pattern.compile("([^ ])([({)}])");
   private static Pattern untokenizedParenPattern2 = Pattern.compile("([({)}])([^ ])");
@@ -67,115 +59,94 @@ public class ShiftReduceParser {
    * parses at each derivation step.
    */
   private int M;
-
   /**
    * The maximum number of parses to advance from a single preceding parse.
    */
   private int K;
-
   /**
    * The minimum total probability mass of advanced outcomes.
    */
   private double Q;
-
   /**
    * The default beam size used if no beam size is given.
    */
   public static final int defaultBeamSize = 20;
-
   /**
    * The default amount of probability mass required of advanced outcomes.
    */
   public static final double defaultAdvancePercentage = 0.95;
-
   /**
    * Completed parses.
    */
   private Heap<Parse> completeParses;
-
   /**
    * Incomplete parses which will be advanced.
    */
   private Heap<Parse> odh;
-
   /**
    * Incomplete parses which have been advanced.
    */
   private Heap<Parse> ndh;
-
   /**
    * The head rules for the parser.
    */
   private HeadRules headRules;
-
   /**
    * The set strings which are considered punctuation for the parser.
    * Punctuation is not attached, but floats to the top of the parse as attachment
    * decisions are made about its non-punctuation sister nodes.
    */
   private Set<String> punctSet;
-
   /**
    * The label for the top node.
    */
   public static final String TOP_NODE = "TOP";
-
   /**
    * The label for the top if an incomplete node.
    */
   public static final String INC_NODE = "INC";
-
   /**
    * The label for a token node.
    */
   public static final String TOK_NODE = "TK";
-
   /**
    * The integer 0.
    */
   public static final Integer ZERO = 0;
-
   /**
    * Prefix for outcomes starting a constituent.
    */
   public static final String START = "S-";
-
   /**
    * Prefix for outcomes continuing a constituent.
    */
   public static final String CONT = "C-";
-
   /**
    * Outcome for token which is not contained in a basal constituent.
    */
   public static final String OTHER = "O";
-
   /**
    * Outcome used when a constituent is complete.
    */
   public static final String COMPLETE = "c";
-
   /**
    * Outcome used when a constituent is incomplete.
    */
   public static final String INCOMPLETE = "i";
-  
-  private SequenceLabelerME tagger;
-  private SequenceLabelerME chunker;
-  private MaxentModel buildModel;
-  private MaxentModel checkModel;
-  
   /**
    * Specifies whether failed parses should be reported to standard error.
    */
   private boolean reportFailedParse;
-
   /**
    * Specifies whether a derivation string should be created during parsing.
    * This is useful for debugging.
    */
   private boolean createDerivationString = false;
-
+  
+  private SequenceLabelerME tagger;
+  private SequenceLabelerME chunker;
+  private MaxentModel buildModel;
+  private MaxentModel checkModel;
 
   private BuildContextGenerator buildContextGenerator;
   private CheckContextGenerator checkContextGenerator;
@@ -190,7 +161,6 @@ public class ShiftReduceParser {
 
   private int completeIndex;
   private int incompleteIndex;
-  
   /**
    * Turns debug print on or off.
    */
@@ -515,7 +485,6 @@ public class ShiftReduceParser {
       return tokens;
     }
   }
-  
 
   /**
    * Assigns parent references for the specified parse so that they

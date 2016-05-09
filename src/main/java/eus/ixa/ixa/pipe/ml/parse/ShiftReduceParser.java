@@ -635,7 +635,7 @@ public class ShiftReduceParser {
     // TODO build
     System.err.println("Training builder...");
     ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
-        ParserEventTypeEnum.BUILD, taggerFactory.createContextGenerator(), chunkerFactory.createContextGenerator(), parserFactory);
+        ParserEventTypeEnum.BUILD, parserFactory);
     Map<String, String> buildReportMap = new HashMap<String, String>();
     EventTrainer trainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), buildReportMap);
     MaxentModel buildModel = trainer.train(bes);
@@ -645,7 +645,7 @@ public class ShiftReduceParser {
     // TODO check
     System.err.println("Training checker...");
     ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
-        ParserEventTypeEnum.CHECK, taggerFactory.createContextGenerator(), chunkerFactory.createContextGenerator());
+        ParserEventTypeEnum.CHECK);
     Map<String, String> checkReportMap = new HashMap<String, String>();
     EventTrainer checkTrainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), checkReportMap);
     MaxentModel checkModel = checkTrainer.train(kes);

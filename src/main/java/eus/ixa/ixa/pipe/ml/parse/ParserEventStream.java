@@ -22,7 +22,6 @@ import java.util.List;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.ObjectStream;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerContextGenerator;
 
 /**
  * Wrapper class for one of four parser event streams. The particular event
@@ -34,29 +33,22 @@ public class ParserEventStream extends AbstractParserEventStream {
   protected CheckContextGenerator kcg;
 
   public ParserEventStream(ObjectStream<Parse> samples, HeadRules rules,
-      ParserEventTypeEnum etype,
-      SequenceLabelerContextGenerator taggerContextGenerator,
-      SequenceLabelerContextGenerator chunkerContextGenerator,
-      ParserFactory factory) {
-    super(samples, rules, etype, taggerContextGenerator,
-        chunkerContextGenerator, factory);
+      ParserEventTypeEnum etype, ParserFactory factory) {
+    super(samples, rules, etype);
   }
 
   @Override
   protected void init() {
     if (etype == ParserEventTypeEnum.BUILD) {
-      this.bcg = new BuildContextGenerator(factory.getDictionary(),
-          factory.getResources());
+      this.bcg = new BuildContextGenerator();
     } else if (etype == ParserEventTypeEnum.CHECK) {
-      this.kcg = new CheckContextGenerator(factory.getResources());
+      this.kcg = new CheckContextGenerator();
     }
   }
 
   public ParserEventStream(ObjectStream<Parse> d, HeadRules rules,
-      ParserEventTypeEnum etype,
-      SequenceLabelerContextGenerator taggerContextGenerator,
-      SequenceLabelerContextGenerator chunkerContextGenerator) {
-    this(d, rules, etype, taggerContextGenerator, chunkerContextGenerator, null);
+      ParserEventTypeEnum etype) {
+    this(d, rules, etype, null);
   }
 
   /**
@@ -124,7 +116,7 @@ public class ParserEventStream extends AbstractParserEventStream {
   protected void addParseEvents(List<Event> parseEvents, Parse[] chunks) {
     int ci = 0;
     while (ci < chunks.length) {
-      // System.err.println("parserEventStream.addParseEvents: chunks="+Arrays.asList(chunks));
+       //System.err.println("parserEventStream.addParseEvents: chunks=" + Arrays.asList(chunks));
       Parse c = chunks[ci];
       Parse parent = c.getParent();
       if (parent != null) {
@@ -135,7 +127,7 @@ public class ParserEventStream extends AbstractParserEventStream {
         } else {
           outcome = ShiftReduceParser.CONT + type;
         }
-        // System.err.println("parserEventStream.addParseEvents: chunks["+ci+"]="+c+" label="+outcome+" bcg="+bcg);
+         //System.err.println("parserEventStream.addParseEvents: chunks["+ci+"]="+c+" label=" +outcome + " bcg=" + bcg);
         c.setLabel(outcome);
         if (etype == ParserEventTypeEnum.BUILD) {
           parseEvents.add(new Event(outcome, bcg.getContext(chunks, ci)));

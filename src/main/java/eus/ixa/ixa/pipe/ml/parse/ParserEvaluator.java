@@ -84,6 +84,7 @@ public class ParserEvaluator extends Evaluator<Parse> {
     Parse prediction = null;
     if (predictions.length > 0) {
       prediction = predictions[0];
+      //System.err.println("-> Prediction: " + prediction.getType());
     }
 
     fmeasure.updateScores(getConstituencySpans(reference), getConstituencySpans(prediction));

@@ -18,43 +18,62 @@ package eus.ixa.ixa.pipe.ml.parse;
  */
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
-
-public class POSSampleStream extends FilterObjectStream<Parse, SequenceLabelSample> {
-
+public class POSSampleStream extends
+    FilterObjectStream<Parse, SequenceLabelSample> {
+  
   public POSSampleStream(ObjectStream<Parse> in) {
     super(in);
   }
 
   public SequenceLabelSample read() throws IOException {
 
-    Parse parse = samples.read();
+    List<String> tokens = new ArrayList<>();
+    List<String> seqTypes = new ArrayList<>();
     boolean isClearAdaptiveData = false;
-    
+    Parse parse = samples.read();
+
     if (parse != null) {
-      isClearAdaptiveData = true;
-
       Parse[] nodes = parse.getTagNodes();
-
-      String toks[] = new String[nodes.length];
-      Span[] preds = new Span[nodes.length];
-
-      for (int ti=0; ti < nodes.length; ti++) {
-        Parse tok = nodes[ti];
-        toks[ti] = tok.getCoveredText();
-        preds[ti] = tok.getSpan();
+      for (int i = 0; i < nodes.length; i++) {
+        Parse tok = nodes[i];
+        tokens.add(tok.getCoveredText());
+        seqTypes.add(tok.getType());
       }
-
-      return new SequenceLabelSample(toks, preds, isClearAdaptiveData);
     }
-    else {
+    // check if we need to clear features every sentence
+    //isClearAdaptiveData = true;
+    if (tokens.size() > 0) {
+      // convert sequence tags into spans
+      List<Span> sequences = new ArrayList<Span>();
+      int beginIndex = -1;
+      int endIndex = -1;
+      for (int i = 0; i < seqTypes.size(); i++) {
+        if (beginIndex != -1) {
+          sequences
+              .add(new Span(beginIndex, endIndex, seqTypes.get(beginIndex)));
+          beginIndex = -1;
+          endIndex = -1;
+        }
+        beginIndex = i;
+        endIndex = i + 1;
+      }
+      // if one span remains, create it here
+      if (beginIndex != -1)
+        sequences.add(new Span(beginIndex, endIndex, seqTypes.get(beginIndex)));
+
+      return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
+          sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
+    } else {
+      // source stream is not returning anymore lines
       return null;
     }
   }
 }
-

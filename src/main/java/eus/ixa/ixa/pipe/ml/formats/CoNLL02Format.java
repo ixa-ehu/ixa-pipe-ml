@@ -159,7 +159,7 @@ public class CoNLL02Format implements ObjectStream<SequenceLabelSample> {
     }
   }
 
-  static final Span extract(int begin, int end, String beginTag)
+  public static final Span extract(int begin, int end, String beginTag)
       throws InvalidFormatException {
 
     String type = beginTag.substring(2);

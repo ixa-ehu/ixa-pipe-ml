@@ -620,19 +620,20 @@ public class ShiftReduceParser {
     Map<String, String> manifestInfoEntries = new HashMap<String, String>();
     
     // TODO tag
+    System.err.println("Training POS tagger...");
     SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null,
         new POSSampleStream(parseSamples), trainParams, taggerFactory);
     parseSamples.reset();
 
     // TODO chunk
+    System.err.println("Training chunker...");
     SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
         null, new ChunkSampleStream(parseSamples),
         trainParams, chunkerFactory);
     parseSamples.reset();
 
     // TODO build
-    System.err.println("Training builder");
-    
+    System.err.println("Training builder...");
     ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.BUILD, taggerFactory.createContextGenerator(), chunkerFactory.createContextGenerator(), parserFactory);
     Map<String, String> buildReportMap = new HashMap<String, String>();
@@ -642,12 +643,12 @@ public class ShiftReduceParser {
     parseSamples.reset();
 
     // TODO check
-    System.err.println("Training checker");
+    System.err.println("Training checker...");
     ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.CHECK, taggerFactory.createContextGenerator(), chunkerFactory.createContextGenerator());
     Map<String, String> checkReportMap = new HashMap<String, String>();
-    EventTrainer buildTrainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), buildReportMap);
-    MaxentModel checkModel = buildTrainer.train(kes);
+    EventTrainer checkTrainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), checkReportMap);
+    MaxentModel checkModel = checkTrainer.train(kes);
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 
     return new ParserModel(languageCode, buildModel, checkModel, posModel,
@@ -746,6 +747,7 @@ public class ShiftReduceParser {
    */
   public static Dictionary buildDictionary(ObjectStream<Parse> data, HeadRules rules, TrainingParameters params) throws IOException {
 
+    System.err.println("Building automatic ngram dictionary...");
     int cutoff = 5;
 
     String cutoffString = params.getSettings("dict").
@@ -822,6 +824,7 @@ public class ShiftReduceParser {
     }
     //System.err.println("gas,and="+mdict.getCount((new TokenList(new String[] {"gas","and"}))));
     mdict.cutoff(cutoff, Integer.MAX_VALUE);
+    System.err.println("Automatic dictionary created!");
     return mdict.toDictionary(true);
   }
   

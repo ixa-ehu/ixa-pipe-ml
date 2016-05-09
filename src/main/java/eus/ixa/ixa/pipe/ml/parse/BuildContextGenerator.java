@@ -21,6 +21,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+
 import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.util.StringList;
 
@@ -239,7 +241,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
           features.add("bracketsmatch");
           break;
         }
-        if (p.getLabel().startsWith(ShiftReduceParser.START)) {
+        if (p.getLabel().endsWith(BioCodec.START)) {
           break;
         }
       }
@@ -251,7 +253,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
           features.add("bracketsmatch");
           break;
         }
-        if (p.getLabel().startsWith(ShiftReduceParser.START)) {
+        if (p.getLabel().endsWith(BioCodec.START)) {
           break;
         }
       }
@@ -263,7 +265,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
           features.add("quotesmatch");
           break;
         }
-        if (p.getLabel().startsWith(ShiftReduceParser.START)) {
+        if (p.getLabel().endsWith(BioCodec.START)) {
           break;
         }
       }
@@ -275,7 +277,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
           features.add("quotesmatch");
           break;
         }
-        if (p.getLabel().startsWith(ShiftReduceParser.START)) {
+        if (p.getLabel().endsWith(BioCodec.START)) {
           break;
         }
       }
@@ -287,7 +289,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
           features.add("iscomma");
           break;
         }
-        if (p.getLabel().startsWith(ShiftReduceParser.START)) {
+        if (p.getLabel().endsWith(BioCodec.START)) {
           break;
         }
       }
@@ -295,7 +297,7 @@ public class BuildContextGenerator extends AbstractContextGenerator {
     if (p0Tag.equals(".") && index == ps - 1) {
       for (int pi = index - 1; pi >= 0; pi--) {
         Parse p = constituents[pi];
-        if (p.getLabel().startsWith(ShiftReduceParser.START)) {
+        if (p.getLabel().endsWith(BioCodec.START)) {
           if (pi == 0) {
             features.add("endofsentence");
           }

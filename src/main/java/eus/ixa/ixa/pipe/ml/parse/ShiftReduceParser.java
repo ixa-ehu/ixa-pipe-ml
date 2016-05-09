@@ -39,6 +39,7 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
+import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
@@ -114,18 +115,6 @@ public class ShiftReduceParser {
    */
   public static final Integer ZERO = 0;
   /**
-   * Prefix for outcomes starting a constituent.
-   */
-  public static final String START = "B-";
-  /**
-   * Prefix for outcomes continuing a constituent.
-   */
-  public static final String CONT = "I-";
-  /**
-   * Outcome for token which is not contained in a basal constituent.
-   */
-  public static final String OTHER = "O";
-  /**
    * Outcome used when a constituent is complete.
    */
   public static final String COMPLETE = "c";
@@ -154,7 +143,7 @@ public class ShiftReduceParser {
   private double[] bprobs;
   private double[] cprobs;
 
-  private static final String TOP_START = START + TOP_NODE;
+  private static final String TOP_START = TOP_NODE + "-" + BioCodec.START;
   private int topStartIndex;
   private Map<String, String> startTypeMap;
   private Map<String, String> contTypeMap;
@@ -164,7 +153,7 @@ public class ShiftReduceParser {
   /**
    * Turns debug print on or off.
    */
-  protected boolean debugOn = true;
+  protected boolean debugOn = false;
 
   public ShiftReduceParser(ParserModel model) {
     this(model, defaultBeamSize, defaultAdvancePercentage);
@@ -210,13 +199,13 @@ public class ShiftReduceParser {
     contTypeMap = new HashMap<String, String>();
     for (int boi = 0, bon = buildModel.getNumOutcomes(); boi < bon; boi++) {
       String outcome = buildModel.getOutcome(boi);
-      if (outcome.startsWith(START)) {
-        //System.err.println("startMap "+outcome+"->"+outcome.substring(START.length()));
-        startTypeMap.put(outcome, outcome.substring(START.length()));
+      if (outcome.endsWith(BioCodec.START)) {
+        //System.err.println("startMap "+outcome+"->" + BioCodec.extractSequenceType(outcome));
+        startTypeMap.put(outcome, BioCodec.extractSequenceType(outcome));
       }
-      else if (outcome.startsWith(CONT)) {
-        //System.err.println("contMap "+outcome+"->"+outcome.substring(CONT.length()));
-        contTypeMap.put(outcome, outcome.substring(CONT.length()));
+      else if (outcome.endsWith(BioCodec.CONTINUE)) {
+        //System.err.println("contMap "+outcome+"->"+ BioCodec.extractSequenceType(outcome));
+        contTypeMap.put(outcome, BioCodec.extractSequenceType(outcome));
       }
     }
     topStartIndex = buildModel.getIndex(TOP_START);
@@ -525,7 +514,7 @@ public class ShiftReduceParser {
         Parse word = children[j];
         //System.err.println("inserting tag "+tags[j]);
         double prob = probs[j];
-        newParses[i].insert(new Parse(word.getText(), word.getSpan(), tags[j].replaceAll("-start", ""), prob,j));
+        newParses[i].insert(new Parse(word.getText(), word.getSpan(), tags[j].replaceAll("-" + BioCodec.START, ""), prob,j));
         newParses[i].addProb(Math.log(prob));
         //newParses[i].show();
       }
@@ -568,7 +557,7 @@ public class ShiftReduceParser {
         if (j != tags.length) {
           newParses[si].addProb(Math.log(probs[j]));
         }
-        if (j != tags.length && tags[j].startsWith(CONT)) { // if continue just update end chunking tag don't use contTypeMap
+        if (j != tags.length && tags[j].endsWith(BioCodec.CONTINUE)) { // if continue just update end chunking tag don't use contTypeMap
           end = j;
         }
         else { //make previous constituent if it exists
@@ -593,8 +582,8 @@ public class ShiftReduceParser {
             newParses[si].insert(chunk);
           }
           if (j != tags.length) { //update for new constituent
-            if (tags[j].startsWith(START)) { // don't use startTypeMap these are chunk tags
-              type = tags[j].substring(START.length());
+            if (tags[j].endsWith(BioCodec.START)) { // don't use startTypeMap these are chunk tags
+              type = tags[j].replaceAll("-" + BioCodec.START, "");
               start = j;
               end = j;
             }

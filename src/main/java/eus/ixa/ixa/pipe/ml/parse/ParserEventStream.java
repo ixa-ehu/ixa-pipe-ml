@@ -19,6 +19,8 @@ package eus.ixa.ixa.pipe.ml.parse;
 
 import java.util.List;
 
+import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.ObjectStream;
@@ -123,9 +125,9 @@ public class ParserEventStream extends AbstractParserEventStream {
         String type = parent.getType();
         String outcome;
         if (firstChild(c, parent)) {
-          outcome = ShiftReduceParser.START + type;
+          outcome = type + "-" + BioCodec.START;
         } else {
-          outcome = ShiftReduceParser.CONT + type;
+          outcome = type + "-" + BioCodec.CONTINUE;
         }
         //System.err.println("parserEventStream.addParseEvents: chunks["+ci+"]="+c+" label=" +outcome + " bcg=" + bcg);
         c.setLabel(outcome);

@@ -13,9 +13,9 @@ public class BioCodec implements SequenceLabelerCodec<String> {
   public static final String CONTINUE = "cont";
   public static final String OTHER = "other";
 
-  private static final Pattern typedOutcomePattern = Pattern.compile("(.+)-\\w+");
+  private static final Pattern typedOutcomePattern = Pattern.compile("(.+)-\\S+");
 
-  static final String extractSequenceType(String outcome) {
+  public static final String extractSequenceType(String outcome) {
     Matcher matcher = typedOutcomePattern.matcher(outcome);
     if(matcher.matches()) {
       String seqType = matcher.group(1);

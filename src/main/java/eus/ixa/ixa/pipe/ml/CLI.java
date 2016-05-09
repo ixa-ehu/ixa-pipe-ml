@@ -145,7 +145,7 @@ public class CLI {
     } catch (ArgumentParserException e) {
       argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + version
-          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|" + "|eval|cross) -help for details");
+          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|eval|cross) -help for details");
       System.exit(1);
     }
   }

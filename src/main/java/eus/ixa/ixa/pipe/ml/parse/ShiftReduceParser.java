@@ -116,11 +116,11 @@ public class ShiftReduceParser {
   /**
    * Prefix for outcomes starting a constituent.
    */
-  public static final String START = "S-";
+  public static final String START = "B-";
   /**
    * Prefix for outcomes continuing a constituent.
    */
-  public static final String CONT = "C-";
+  public static final String CONT = "I-";
   /**
    * Outcome for token which is not contained in a basal constituent.
    */
@@ -164,7 +164,7 @@ public class ShiftReduceParser {
   /**
    * Turns debug print on or off.
    */
-  protected boolean debugOn = false;
+  protected boolean debugOn = true;
 
   public ShiftReduceParser(ParserModel model) {
     this(model, defaultBeamSize, defaultAdvancePercentage);
@@ -525,7 +525,7 @@ public class ShiftReduceParser {
         Parse word = children[j];
         //System.err.println("inserting tag "+tags[j]);
         double prob = probs[j];
-        newParses[i].insert(new Parse(word.getText(), word.getSpan(), tags[j], prob,j));
+        newParses[i].insert(new Parse(word.getText(), word.getSpan(), tags[j].replaceAll("-start", ""), prob,j));
         newParses[i].addProb(Math.log(prob));
         //newParses[i].show();
       }

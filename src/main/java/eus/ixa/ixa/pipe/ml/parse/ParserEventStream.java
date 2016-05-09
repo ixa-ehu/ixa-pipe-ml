@@ -127,7 +127,7 @@ public class ParserEventStream extends AbstractParserEventStream {
         } else {
           outcome = ShiftReduceParser.CONT + type;
         }
-         //System.err.println("parserEventStream.addParseEvents: chunks["+ci+"]="+c+" label=" +outcome + " bcg=" + bcg);
+        //System.err.println("parserEventStream.addParseEvents: chunks["+ci+"]="+c+" label=" +outcome + " bcg=" + bcg);
         c.setLabel(outcome);
         if (etype == ParserEventTypeEnum.BUILD) {
           parseEvents.add(new Event(outcome, bcg.getContext(chunks, ci)));

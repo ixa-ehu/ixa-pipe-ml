@@ -17,7 +17,6 @@
 
 package eus.ixa.ixa.pipe.ml.parse;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;

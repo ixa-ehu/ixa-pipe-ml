@@ -131,7 +131,7 @@ public class ShiftReduceParserTrainer {
         resources, sequenceCodec);
   }
 
-  public final ParserModel train(final TrainingParameters params) {
+  public final ParserModel train(final TrainingParameters params, final TrainingParameters taggerParams, final TrainingParameters chunkerParams) {
     if (getParserFactory() == null) {
       throw new IllegalStateException(
           "The ParserFactory must be instantiated!!");
@@ -142,8 +142,8 @@ public class ShiftReduceParserTrainer {
     ParserModel trainedModel = null;
     ParserEvaluator parserEvaluator = null;
     try {
-      trainedModel = ShiftReduceParser.train(params, lang, trainSamples, rules,
-          parserFactory, taggerFactory, chunkerFactory);
+      trainedModel = ShiftReduceParser.train(lang, trainSamples, rules,
+          params, parserFactory, taggerParams, taggerFactory, chunkerParams, chunkerFactory);
       ShiftReduceParser parser = new ShiftReduceParser(trainedModel);
       parserEvaluator = new ParserEvaluator(parser);
       parserEvaluator.evaluate(testSamples);

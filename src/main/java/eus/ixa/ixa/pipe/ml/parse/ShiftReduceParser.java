@@ -39,6 +39,8 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.StringList;
 import opennlp.tools.util.TrainingParameters;
+import eus.ixa.ixa.pipe.ml.formats.ParseToCoNLL02Format;
+import eus.ixa.ixa.pipe.ml.formats.ParseToTabulatedFormat;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
@@ -598,27 +600,28 @@ public class ShiftReduceParser {
     return newParses;
   }
 
-  // TODO add a training method loading POS models as resource.
-  // TODO should we do the same with the Chunker??? Test it.
-  public static ParserModel train(TrainingParameters trainParams, String languageCode,
-      ObjectStream<Parse> parseSamples, HeadRules rules, ParserFactory parserFactory, SequenceLabelerFactory taggerFactory,
+  public static ParserModel train(String languageCode,
+      ObjectStream<Parse> parseSamples, HeadRules rules,
+      TrainingParameters trainParams, ParserFactory parserFactory,
+      TrainingParameters taggerParams,
+      SequenceLabelerFactory taggerFactory,
+      TrainingParameters chunkerParams,
       SequenceLabelerFactory chunkerFactory) throws IOException {
 
     parseSamples.reset();
 
     Map<String, String> manifestInfoEntries = new HashMap<String, String>();
-    
+
     // TODO tag
     System.err.println("Training POS tagger...");
     SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null,
-        new POSSampleStream(parseSamples), trainParams, taggerFactory);
+        new ParseToTabulatedFormat(parseSamples), taggerParams, taggerFactory);
     parseSamples.reset();
 
     // TODO chunk
     System.err.println("Training chunker...");
     SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
-        null, new ChunkSampleStream(parseSamples),
-        trainParams, chunkerFactory);
+        null, new ParseToCoNLL02Format(parseSamples), chunkerParams, chunkerFactory);
     parseSamples.reset();
 
     // TODO build
@@ -626,7 +629,8 @@ public class ShiftReduceParser {
     ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.BUILD, parserFactory);
     Map<String, String> buildReportMap = new HashMap<String, String>();
-    EventTrainer trainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), buildReportMap);
+    EventTrainer trainer = TrainerFactory.getEventTrainer(
+        trainParams.getSettings(), buildReportMap);
     MaxentModel buildModel = trainer.train(bes);
     mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
     parseSamples.reset();
@@ -636,7 +640,8 @@ public class ShiftReduceParser {
     ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.CHECK);
     Map<String, String> checkReportMap = new HashMap<String, String>();
-    EventTrainer checkTrainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), checkReportMap);
+    EventTrainer checkTrainer = TrainerFactory.getEventTrainer(
+        trainParams.getSettings(), checkReportMap);
     MaxentModel checkModel = checkTrainer.train(kes);
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 

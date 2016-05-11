@@ -70,6 +70,7 @@ import eus.ixa.ixa.pipe.ml.utils.IOUtils;
  * <li>LemmaDictionaryFeatures: use lemma from a dictionary as features.
  * <li>MFSFeatures: Most Frequent sense feature.
  * <li>SuperSenseFeatures: Ciaramita and Altun (2006) features for super sense tagging.
+ * <li>POSBaselineFeatures: train a baseline POS tagger.
  * </ol>
  * @author ragerri
  * @version 2016-05-06

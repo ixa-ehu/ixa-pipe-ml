@@ -546,6 +546,16 @@ public class Flags {
     return mfsFlag;
   }
   
+  public static String getPOSBaselineFeatures(TrainingParameters params) {
+    String posFlag = null;
+    if (params.getSettings().get("POSBaselineFeatures") != null) {
+      posFlag = params.getSettings().get("POSBaselineFeatures");
+    } else {
+      posFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return posFlag;
+  }
+  
   public static String getMFSFeatures(TrainingParameters params) {
     String mfsFlag = null;
     if (params.getSettings().get("MFSFeatures") != null) {
@@ -639,6 +649,16 @@ public class Flags {
       System.err.println("Specify head rules file to train the parser!!");
     }
     return headRulesFlag; 
+  }
+  
+  /**
+   * Check if supersense tagger features are active.
+   * @param params the parameters
+   * @return whether the supersense features are activated or not
+   */
+  public static boolean isPOSBaselineFeatures(TrainingParameters params) {
+    String posFeatures = getPOSBaselineFeatures(params);
+    return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
   /**

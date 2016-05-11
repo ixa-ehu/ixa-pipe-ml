@@ -377,6 +377,12 @@ public final class XMLFeatureDescriptor {
       generators.addContent(mfsClassFeatureElement);
       System.err.println("-> SuperSense Features added!");
       }
+    if (Flags.isPOSBaselineFeatures(params)) {
+      Element posFeatureElement = new Element("custom");
+      posFeatureElement.setAttribute("class", POSBaselineContextGenerator.class.getName());
+      generators.addContent(posFeatureElement);
+      System.err.println("-> POS Baseline Context Generator added!");
+    }
     
     aggGenerators.addContent(cached);
     cached.addContent(generators);

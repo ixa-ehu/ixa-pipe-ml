@@ -95,6 +95,7 @@ ArtifactToSerializerMapper {
     this(0, aDict);
   }
 
+  //TODO add automatically built dictionary?
   /**
    * Initializes the current instance.
    * @param cacheSize

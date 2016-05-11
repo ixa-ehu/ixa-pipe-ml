@@ -50,6 +50,8 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
   private Span[] currentTags;
   private List<String> currentLemmas;
   private List<String> currentMFSList;
+  private String startSymbol = null;
+  private String endSymbol = null;
   private Boolean isBio = true;
 
   public SuperSenseFeatureGenerator() {
@@ -75,21 +77,21 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     String curPOS = currentTags[index].getType();
     String curShape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index]);
     String firstSense = currentMFSList.get(index);
-    String prevLabel = null;
+    String prevLabel = startSymbol;
 
-    String prevShape = null;
-    String prevPOS = null;
-    String prevLemma = null;
-    String nextShape = null;
-    String nextPOS = null;
-    String nextLemma = null;
+    String prevShape = startSymbol;
+    String prevPOS = startSymbol;
+    String prevLemma = startSymbol;
+    String nextShape = startSymbol;
+    String nextPOS = endSymbol;
+    String nextLemma = endSymbol;
 
-    String prev2Shape = null;
-    String prev2POS = null;
-    String prev2Lemma = null;
-    String next2Shape = null;
-    String next2POS = null;
-    String next2Lemma = null;
+    String prev2Shape = startSymbol;
+    String prev2POS = startSymbol;
+    String prev2Lemma = startSymbol;
+    String next2Shape = startSymbol;
+    String next2POS = endSymbol;
+    String next2Lemma = endSymbol;
 
     if (index - 2 >= 0) {
       prev2Shape = WordShapeSuperSenseFeatureGenerator.normalize(tokens[index - 2]);
@@ -121,7 +123,7 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     features.add("firstSense=" + firstSense);
     features.add("firstSense,curTok=" + firstSense + "," + curLemma);
 
-    if (prevLabel != null) {
+    if (prevLabel != startSymbol) {
       features.add("prevLabel=" + prevLabel);
     }
 
@@ -135,40 +137,40 @@ public class SuperSenseFeatureGenerator extends CustomFeatureGenerator implement
     features.add("curPOS=" + curPOS);
     features.add("curPOS_0" + curPOS.charAt(0));
 
-    if (prevPOS != null) {
+    if (prevPOS != startSymbol) {
       features.add("prevTok=" + prevLemma);
       features.add("prevPOS=" + prevPOS);
       features.add("prevPOS_0=" + prevPOS.charAt(0));
     }
 
-    if (nextPOS != null) {
+    if (nextPOS != endSymbol) {
       features.add("nextTok=" + nextLemma);
       features.add("nextPOS=" + nextPOS);
       features.add("nextPOS_0" + nextPOS.charAt(0));
     }
 
-    if (prev2POS != null) {
+    if (prev2POS != startSymbol) {
       features.add("prev2Tok=" + prev2Lemma);
       features.add("prev2POS=" + prev2POS);
       features.add("prev2POS_0=" + prev2POS.charAt(0));
     }
-    if (next2POS != null) {
+    if (next2POS != startSymbol) {
       features.add("next2Tok=" + next2Lemma);
       features.add("next2POS=" + next2POS);
       features.add("next2POS_0=" + next2POS.charAt(0));
     }
 
     features.add("curShape=" + curShape);
-    if (prevPOS != null) {
+    if (prevPOS != startSymbol) {
       features.add("prevShape=" + prevShape);
     }
-    if (nextPOS != null) {
+    if (nextPOS != endSymbol) {
       features.add("nextShape=" + nextShape);
     }
-    if (prev2POS != null) {
+    if (prev2POS != startSymbol) {
       features.add("prev2Shape=" + prev2Shape);
     }
-    if (next2POS != null) {
+    if (next2POS != endSymbol) {
       features.add("next2Shape=" + next2Shape);
     }
 

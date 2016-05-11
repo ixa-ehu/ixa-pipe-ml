@@ -200,7 +200,7 @@ public class CLI {
       outModel = Flags.getModel(params);
     }
     ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, taggerParams, chunkerParams);
-    ParserModel trainedModel = parserTrainer.train(params);
+    ParserModel trainedModel = parserTrainer.train(params, taggerParams, chunkerParams);
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
 

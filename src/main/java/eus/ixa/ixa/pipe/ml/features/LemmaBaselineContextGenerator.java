@@ -81,6 +81,7 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     if (isPosClass) {
       String posTagClass = posTag.substring(0, 1);
       features.add("posTagClass=" + posTagClass);
+      features.add(p_1 + "posTagClass=" + posTagClass);
     }
     
     //adding features

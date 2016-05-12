@@ -596,6 +596,16 @@ public class Flags {
     return mfsFlagArray;
   }
   
+  public static String getChunkBaselineFeatures(TrainingParameters params) {
+    String lemmaFlag = null;
+    if (params.getSettings().get("ChunkBaselineFeatures") != null) {
+      lemmaFlag = params.getSettings().get("ChunkBaselineFeatures");
+    } else {
+      lemmaFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return lemmaFlag;
+  }
+  
   public static String[] getSuperSenseResources(String mfsFlag) {
     String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 3) {
@@ -679,6 +689,11 @@ public class Flags {
       System.err.println("Specify head rules file to train the parser!!");
     }
     return headRulesFlag; 
+  }
+  
+  public static boolean isChunkBaselineFeatures(TrainingParameters params) {
+    String posFeatures = getChunkBaselineFeatures(params);
+    return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
   public static boolean isLemmaBaselineFeatures(TrainingParameters params) {

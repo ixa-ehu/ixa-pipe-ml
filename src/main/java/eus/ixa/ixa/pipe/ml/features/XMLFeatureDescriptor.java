@@ -393,6 +393,14 @@ public final class XMLFeatureDescriptor {
       generators.addContent(lemmaFeatureElement);
       System.err.println("-> Lemma Baseline Context Generator added!");
     }
+    if (Flags.isChunkBaselineFeatures(params)) {
+      String posModel = Flags.getChunkBaselineFeatures(params);
+      Element chunkFeatureElement = new Element("custom");
+      chunkFeatureElement.setAttribute("class", ChunkBaselineContextGenerator.class.getName());
+      chunkFeatureElement.setAttribute("model", IOUtils.normalizeLexiconName(new File(posModel).getName()));
+      generators.addContent(chunkFeatureElement);
+      System.err.println("-> Chunk Baseline Context Generator added!");
+    }
     
     aggGenerators.addContent(cached);
     cached.addContent(generators);

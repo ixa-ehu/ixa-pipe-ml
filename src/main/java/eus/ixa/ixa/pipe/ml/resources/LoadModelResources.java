@@ -12,6 +12,7 @@ import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
+import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource.SequenceModelResourceSerializer;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
@@ -120,6 +121,12 @@ public class LoadModelResources {
       loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1], resources);
       artifactSerializers.put(mfsSerializerId, new MFSResource.MFSResourceSerializer());
       loadResource(mfsSerializerId, artifactSerializers, mfsResources[2], resources);
+    }
+    if (Flags.isLemmaBaselineFeatures(params)) {
+      String lemmaBaselineFeatures = Flags.getLemmaBaselineFeatures(params);
+      String posSerializerId = "seqmodelserializer";
+      artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
+      loadResource(posSerializerId, artifactSerializers, lemmaBaselineFeatures, resources);
     }
     return resources;
   }

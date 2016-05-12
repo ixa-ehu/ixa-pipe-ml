@@ -50,12 +50,10 @@ public class POSTagModelFeatureGenerator extends CustomFeatureGenerator implemen
   
   @Override
   public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
   }
 
   @Override
   public void clearAdaptiveData() {
-    
   }
 
   @Override

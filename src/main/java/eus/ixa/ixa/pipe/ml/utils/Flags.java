@@ -572,7 +572,7 @@ public class Flags {
     if (params.getSettings().get("LemmaBaselineFeatures") != null) {
       lemmaFlag = params.getSettings().get("LemmaBaselineFeatures");
     } else {
-      lemmaFlag = Flags.DEFAULT_POSTAG_RANGE;
+      lemmaFlag = Flags.DEFAULT_FEATURE_FLAG;
     }
     return lemmaFlag;
   }
@@ -580,11 +580,20 @@ public class Flags {
   public static String getLemmaBaselineFeaturesRange(TrainingParameters params) {
     String mfsRangeFlag = null;
     if (params.getSettings().get("LemmaBaselineFeaturesRange") != null) {
-      mfsRangeFlag = params.getSettings().get("SuperSenseFeaturesRange");
+      mfsRangeFlag = params.getSettings().get("LemmaBaselineFeaturesRange");
     } else {
-      mfsRangeFlag = Flags.DEFAULT_SUPERSENSE_RANGE;
+      mfsRangeFlag = Flags.DEFAULT_POSTAG_RANGE;
     }
     return mfsRangeFlag;
+  }
+  
+  public static String[] processLemmaBaselineFeaturesRange(String mfsFlag) {
+    String[] mfsFlagArray = mfsFlag.split(",");
+    if (mfsFlagArray.length != 2) {
+      System.err.println("LemmaBaselineFeaturesRange requires two fields but got " + mfsFlagArray.length);
+      System.exit(1);
+    }
+    return mfsFlagArray;
   }
   
   public static String[] getSuperSenseResources(String mfsFlag) {

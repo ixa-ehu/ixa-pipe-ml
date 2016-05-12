@@ -12,6 +12,7 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
@@ -29,6 +30,8 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
 
   private static Pattern hasCap = Pattern.compile("[A-Z]");
   private static Pattern hasNum = Pattern.compile("[0-9]");
+  private boolean isPos;
+  private boolean isPosClass;
   
   public LemmaBaselineContextGenerator() {
   }
@@ -61,32 +64,39 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     // Word
     String w0;
     // Tag
-    String t0;
+    String t0 = null;
     // Previous prediction
     String p_1;
-
     String lex = tokens[index].toString();
+    String posTag = currentTags[index].getType();
     if (index < 1) {
       p_1 = "p_1=bos";
-    }
-    else {
+    } else {
       p_1 = "p_1=" + previousOutcomes[index - 1];
     }
     w0 = "w0=" + tokens[index];
-    t0 = "t0=" + currentTags[index].getType();
+    if (isPos) {
+      t0 = "t0=" + posTag;
+    }
+    if (isPosClass) {
+      String posTagClass = posTag.substring(0, 1);
+      features.add("posTagClass=" + posTagClass);
+    }
     
+    //adding features
     features.add(w0);
     features.add(t0);
     features.add(p_1);
     features.add(p_1 + t0);
     features.add(p_1 + w0);
-    
-    // do some basic suffix analysis
+    addTokenShapeFeatures(features, lex);
+  }
+  
+  private void addTokenShapeFeatures(List<String> features, String lex) {
     String[] suffs = getSuffixes(lex);
     for (int i = 0; i < suffs.length; i++) {
       features.add("suf=" + suffs[i]);
     }
-
     String[] prefs = getPrefixes(lex);
     for (int i = 0; i < prefs.length; i++) {
       features.add("pre=" + prefs[i]);
@@ -95,11 +105,9 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     if (lex.indexOf('-') != -1) {
       features.add("h");
     }
-
     if (hasCap.matcher(lex).find()) {
       features.add("c");
     }
-
     if (hasNum.matcher(lex).find()) {
       features.add("d");
     }
@@ -112,19 +120,40 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
   @Override
   public void clearAdaptiveData() {
   }
-
+  
   @Override
   public void init(Map<String, String> properties,
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
+    Object posResource = resourceProvider.getResource(properties.get("model"));
+    if (!(posResource instanceof SequenceModelResource)) {
+      throw new InvalidFormatException("Not a SequenceModelResource for key: " + properties.get("model"));
+    }
+    this.posModelResource = (SequenceModelResource) posResource;
+    processRangeOptions(properties);
   }
-
+  
+  /**
+   * Process the options of which kind of features are to be generated.
+   * @param properties the properties map
+   */
+  private void processRangeOptions(Map<String, String> properties) {
+    String featuresRange = properties.get("range");
+    String[] rangeArray = Flags.processLemmaBaselineFeaturesRange(featuresRange);
+    if (rangeArray[0].equalsIgnoreCase("pos")) {
+      isPos = true;
+    }
+    if (rangeArray[1].equalsIgnoreCase("posclass")) {
+      isPosClass = true;
+    }
+  }
+  
+  
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("posmodelserializer",
-        new SequenceModelResource.SequenceModelResourceSerializer());
-    return  Collections.unmodifiableMap(mapping);
+    mapping.put("seqmodelserializer", new SequenceModelResource.SequenceModelResourceSerializer());
+    return Collections.unmodifiableMap(mapping);
   }
 
 }

@@ -68,7 +68,7 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
    *          the current word
    * @return the prefixes
    */
-  protected static String[] getPrefixes(final String lex) {
+  private static String[] getPrefixes(final String lex) {
     String[] prefs = new String[PREFIX_LENGTH];
     for (int li = 2, ll = PREFIX_LENGTH; li < ll; li++) {
       prefs[li] = lex.substring(0, Math.min(li + 1, lex.length()));
@@ -82,7 +82,7 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
    *          the word
    * @return the suffixes
    */
-  protected static String[] getSuffixes(final String lex) {
+  private static String[] getSuffixes(final String lex) {
     String[] suffs = new String[SUFFIX_LENGTH];
     for (int li = 0, ll = SUFFIX_LENGTH; li < ll; li++) {
       suffs[li] = lex.substring(Math.max(lex.length() - li - 1, 0));

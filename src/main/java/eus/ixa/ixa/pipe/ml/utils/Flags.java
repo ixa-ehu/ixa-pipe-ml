@@ -566,6 +566,27 @@ public class Flags {
     return mfsFlag;
   }
   
+  
+  public static String getLemmaBaselineFeatures(TrainingParameters params) {
+    String lemmaFlag = null;
+    if (params.getSettings().get("LemmaBaselineFeatures") != null) {
+      lemmaFlag = params.getSettings().get("LemmaBaselineFeatures");
+    } else {
+      lemmaFlag = Flags.DEFAULT_POSTAG_RANGE;
+    }
+    return lemmaFlag;
+  }
+  
+  public static String getLemmaBaselineFeaturesRange(TrainingParameters params) {
+    String mfsRangeFlag = null;
+    if (params.getSettings().get("LemmaBaselineFeaturesRange") != null) {
+      mfsRangeFlag = params.getSettings().get("SuperSenseFeaturesRange");
+    } else {
+      mfsRangeFlag = Flags.DEFAULT_SUPERSENSE_RANGE;
+    }
+    return mfsRangeFlag;
+  }
+  
   public static String[] getSuperSenseResources(String mfsFlag) {
     String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 3) {
@@ -651,10 +672,15 @@ public class Flags {
     return headRulesFlag; 
   }
   
+  public static boolean isLemmaBaselineFeatures(TrainingParameters params) {
+    String posFeatures = getLemmaBaselineFeatures(params);
+    return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
   /**
-   * Check if supersense tagger features are active.
+   * Check if POS Baseline features are active.
    * @param params the parameters
-   * @return whether the supersense features are activated or not
+   * @return whether the pos baseline features are activated or not
    */
   public static boolean isPOSBaselineFeatures(TrainingParameters params) {
     String posFeatures = getPOSBaselineFeatures(params);

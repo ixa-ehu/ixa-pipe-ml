@@ -383,6 +383,15 @@ public final class XMLFeatureDescriptor {
       generators.addContent(posFeatureElement);
       System.err.println("-> POS Baseline Context Generator added!");
     }
+    if (Flags.isLemmaBaselineFeatures(params)) {
+      String posModel = Flags.getLemmaBaselineFeatures(params);
+      String lemmaRange = Flags.getLemmBaselineFeaturesRange(params);
+      Element lemmaFeatureElement = new Element("custom");
+      lemmaFeatureElement.setAttribute("class", LemmaBaselineContextGenerator.class.getName());
+      lemmaFeatureElement.setAttribute("model", IOUtils.normalizeLexiconName(new File(posModel).getName()));
+      lemmaFeatureElement.setAttribute("range", lemmaRange);
+      generators.addContent(lemmaFeatureElement);
+    }
     
     aggGenerators.addContent(cached);
     cached.addContent(generators);

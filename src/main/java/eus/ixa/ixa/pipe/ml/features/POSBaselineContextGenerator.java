@@ -115,7 +115,6 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
     features.add("p_1,p_2=" + p_1 + "," + p_2);
     
     addTokenShapeFeatures(features, w0);
-    
   }
   
   private void addTokenShapeFeatures(List<String> features, String lex) {

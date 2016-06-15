@@ -114,7 +114,6 @@ public class TokenClassFeatureGenerator extends CustomFeatureGenerator {
     } else {
       feat = "other";
     }
-
     return (feat);
   }
   

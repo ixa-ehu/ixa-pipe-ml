@@ -24,24 +24,12 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
- * A baseline context generator for the POS Tagger. This baseline generator
- * provides more contextual features such as bigrams to the
- * {@code @DefaultPOSContextGenerator}. These extra features require at least
- * 2GB memory to train, more if training data is large.
- *
+ * A baseline context generator for the POS Tagger.
  * @author ragerri
  * @version 2016-05-12
  */
 public class POSBaselineContextGenerator extends CustomFeatureGenerator {
 
-  /**
-   * The ending string.
-   */
-  private final String SE = "*SE*";
-  /**
-   * The starting string.
-   */
-  private final String SB = "*SB*";
   /**
    * Default prefix length.
    */
@@ -49,7 +37,7 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
   /**
    * Default suffix length.
    */
-  private static final int SUFFIX_LENGTH = 4;
+  private static final int SUFFIX_LENGTH = 7;
   /**
    * Has capital regexp.
    */
@@ -93,64 +81,41 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] previousOutcomes) {
     
-    String next, nextnext, lex, prev, prevprev;
-    String tagprev, tagprevprev;
-    tagprev = tagprevprev = null;
-    next = nextnext = lex = prev = prevprev = null;
-
-    lex = tokens[index].toString();
-    if (tokens.length > index + 1) {
-      next = tokens[index + 1].toString();
-      if (tokens.length > index + 2) {
-        nextnext = tokens[index + 2].toString();
-      } else {
-        nextnext = SE; // Sentence End
-      }
+    //words in a five word window
+    String w_1, w0, w1;
+    //previous predictions
+    String p_2, p_1;
+    
+    if (index < 2) {
+      p_2 = "bos";
     } else {
-      next = SE; // Sentence End
+      p_2 = previousOutcomes[index - 2];
     }
-    if (index - 1 >= 0) {
-      prev = tokens[index - 1].toString();
-      tagprev = previousOutcomes[index - 1];
-
-      if (index - 2 >= 0) {
-        prevprev = tokens[index - 2].toString();
-        tagprevprev = previousOutcomes[index - 2];
-      } else {
-        prevprev = SB; // Sentence Beginning
-      }
+    if (index < 1) {
+      w_1 = "bos";
+      p_1 = "bos";
     } else {
-      prev = SB; // Sentence Beginning
+      w_1 = tokens[index - 1];
+      p_1 = previousOutcomes[index - 1];
     }
-    features.add("default");
-    // add the word itself
-    features.add("w=" + lex);
-    addTokenShapeFeatures(features, lex);
-    // add the words and pos's of the surrounding context
-    if (prev != null) {
-      features.add("pw=" + prev);
-      // bigram w-1,w
-      features.add("pw,w=" + prev + "," + lex);
-      if (tagprev != null) {
-        features.add("pt=" + tagprev);
-        // bigram tag-1, w
-        features.add("pt,w=" + tagprev + "," + lex);
-      }
-      if (prevprev != null) {
-        features.add("ppw=" + prevprev);
-        if (tagprevprev != null) {
-          // bigram tag-2,tag-1
-          features.add("pt2,pt1=" + tagprevprev + "," + tagprev);
-        }
-      }
+    
+    w0 = tokens[index];
+    
+    if (index + 1 >= tokens.length) {
+      w1 = "eos";
+    } else {
+      w1 = tokens[index + 1];
     }
-    if (next != null) {
-      features.add("nw=" + next);
-      if (nextnext != null) {
-        features.add("nnw=" + nextnext);
-
-      }
-    }
+    
+    features.add("w_1=" + w_1);
+    features.add("w0=" + w0);
+    features.add("w1=" + w1);
+    features.add("w1,w0=" + w1 + "," + w0);
+    features.add("w0,w1=" + w0 + "," + w1);
+    features.add("p_1,p_2=" + p_1 + "," + p_2);
+    
+    addTokenShapeFeatures(features, w0);
+    
   }
   
   private void addTokenShapeFeatures(List<String> features, String lex) {

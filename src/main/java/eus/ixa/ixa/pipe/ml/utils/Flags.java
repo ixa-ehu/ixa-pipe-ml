@@ -52,6 +52,7 @@ public class Flags {
   public static final String DEFAULT_EVALUATE_MODEL = "off";
   public static final String DEFAULT_SEQUENCE_TYPES = "off";
   public static final String DEFAULT_LEXER = "off";
+  public static final int DEFAULT_DICT_CUTOFF = -1;
   public static final String DEFAULT_DICT_OPTION = "off";
   public static final String DEFAULT_DICT_PATH = "off";
   public static final String DEFAULT_OUTPUT_FORMAT = "naf";

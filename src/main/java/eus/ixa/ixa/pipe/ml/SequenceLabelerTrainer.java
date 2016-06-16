@@ -20,6 +20,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
+import opennlp.tools.cmdline.TerminateToolException;
+import opennlp.tools.postag.MutableTagDictionary;
+import opennlp.tools.postag.POSSample;
+import opennlp.tools.postag.POSTaggerME;
+import opennlp.tools.postag.TagDictionary;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
@@ -267,6 +272,40 @@ public class SequenceLabelerTrainer {
   
   public final int getBeamSize() {
     return beamSize;
+  }
+  
+
+  /**
+   * Automatically create a tag dictionary from training data.
+   * 
+   * @param aDictSamples
+   *          the dictSamples created from training data
+   * @param aDictCutOff
+   *          the cutoff to create the dictionary
+   */
+  protected final void createAutomaticDictionary(
+      final ObjectStream<POSSample> aDictSamples, final int aDictCutOff) {
+    if (aDictCutOff != Flags.DEFAULT_DICT_CUTOFF) {
+      try {
+        TagDictionary dict = getSequenceLabelerFactory().getTagDictionary();
+        if (dict == null) {
+          dict = getSequenceLabelerFactory().createEmptyTagDictionary();
+          getSequenceLabelerFactory().setTagDictionary(dict);
+        }
+        if (dict instanceof MutableTagDictionary) {
+          POSTaggerME.populatePOSDictionary(aDictSamples,
+              (MutableTagDictionary) dict, aDictCutOff);
+        } else {
+          throw new IllegalArgumentException("Can't extend a POSDictionary"
+              + " that does not implement MutableTagDictionary.");
+        }
+        this.dictSamples.reset();
+      } catch (final IOException e) {
+        throw new TerminateToolException(-1,
+            "IO error while creating/extending POS Dictionary: "
+                + e.getMessage(), e);
+      }
+    }
   }
 
 }

@@ -41,13 +41,13 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
   /**
    * Has capital regexp.
    */
-  private static Pattern hasCap = Pattern.compile("[A-Z]");
+  private static Pattern hasCap = Pattern.compile("\\p{Upper}", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Has number regexp.
    */
-  private static Pattern hasNum = Pattern.compile("[0-9]");
-
-  public POSBaselineContextGenerator() {
+  private static Pattern hasNum = Pattern.compile("\\p{Digit}", Pattern.UNICODE_CHARACTER_CLASS);
+  
+  public POSBaselineContextGenerator() {  
   }
   
   /**
@@ -58,7 +58,7 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
    */
   private static String[] getPrefixes(final String lex) {
     String[] prefs = new String[PREFIX_LENGTH];
-    for (int li = 2, ll = PREFIX_LENGTH; li < ll; li++) {
+    for (int li = 1, ll = PREFIX_LENGTH; li < ll; li++) {
       prefs[li] = lex.substring(0, Math.min(li + 1, lex.length()));
     }
     return prefs;
@@ -123,7 +123,9 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
     for (int i = 0; i < suffs.length; i++) {
       features.add("suf=" + suffs[i]);
     }
+    
     String[] prefs = getPrefixes(lex);
+    
     for (int i = 0; i < prefs.length; i++) {
       features.add("pre=" + prefs[i]);
     }

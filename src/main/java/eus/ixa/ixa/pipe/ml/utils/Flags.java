@@ -753,7 +753,7 @@ public class Flags {
   }
   
   public static boolean isPOSDictionaryFeatures(TrainingParameters params) {
-    String dictFeatures = getDictionaryFeatures(params);
+    String dictFeatures = getPOSDictionaryFeatures(params);
     return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   

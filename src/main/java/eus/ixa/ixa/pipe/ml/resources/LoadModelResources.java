@@ -79,6 +79,12 @@ public class LoadModelResources {
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
       loadResource(posSerializerId, artifactSerializers, morphoResourcesPath, resources);
     }
+    if (Flags.isPOSDictionaryFeatures(params)) {
+      String posDictPath = Flags.getPOSDictionaryFeatures(params);
+      String posSerializerId = "posdictserializer";
+      artifactSerializers.put(posSerializerId, new POSDictionary.POSDictionarySerializer());
+      loadResource(posSerializerId, artifactSerializers, posDictPath, resources);
+    }
     if (Flags.isLemmaModelFeatures(params)) {
       String lemmaModelPath = Flags.getLemmaModelFeatures(params);
       String lemmaSerializerId = "seqmodelserializer";

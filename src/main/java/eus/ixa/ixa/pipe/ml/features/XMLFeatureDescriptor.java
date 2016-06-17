@@ -314,6 +314,19 @@ public final class XMLFeatureDescriptor {
       generators.addContent(posTagClassFeatureWindow);
       System.err.println("-> POSTagModel Features added!");
     }
+    if (Flags.isPOSDictionaryFeatures(params)) {
+      setWindow(params);
+      String posDictPath = Flags.getPOSDictionaryFeatures(params);
+      Element posDictFeatures = new Element("custom");
+      posDictFeatures.setAttribute("class", POSDictionaryFeatureGenerator.class.getName());
+      posDictFeatures.setAttribute("dict", IOUtils.normalizeLexiconName(new File(posDictPath).getName()));
+      Element posDictWindow = new Element("window");
+      posDictWindow.setAttribute("prevLength", Integer.toString(leftWindow));
+      posDictWindow.setAttribute("nextLength", Integer.toString(rightWindow));
+      posDictWindow.addContent(posDictFeatures);
+      generators.addContent(posDictWindow);
+      System.err.println("-> POSDictionary Features added!");
+    }
     if (Flags.isLemmaModelFeatures(params)) {
       setWindow(params);
       String lemmaModelPath = Flags.getLemmaModelFeatures(params);

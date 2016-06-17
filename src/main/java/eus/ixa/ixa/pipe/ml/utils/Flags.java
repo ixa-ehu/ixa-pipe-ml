@@ -469,6 +469,16 @@ public class Flags {
     return brownFlag;
   }
   
+  public static String getPOSDictionaryFeatures(TrainingParameters params) {
+    String dictionaryFlag = null;
+    if (params.getSettings().get("POSDictionaryFeatures") != null) {
+      dictionaryFlag = params.getSettings().get("POSDictionaryFeatures");
+    } else {
+      dictionaryFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return dictionaryFlag;
+  }
+  
   public static String getPOSTagModelFeatures(TrainingParameters params) {
     String morphoFlag = null;
     if (params.getSettings().get("POSTagModelFeatures") != null) {
@@ -740,6 +750,11 @@ public class Flags {
   public static boolean isLemmaModelFeatures(TrainingParameters params) {
     String morphoFeatures = getLemmaModelFeatures(params);
     return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isPOSDictionaryFeatures(TrainingParameters params) {
+    String dictFeatures = getDictionaryFeatures(params);
+    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
   public static boolean isPOSTagModelFeatures(TrainingParameters params) {

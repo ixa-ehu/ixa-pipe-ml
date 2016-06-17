@@ -45,7 +45,7 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator implem
       features.add(attributes.get("dict") + "=" + unknownPOSclass);
     } else {
       for (String tag : tagList) {
-        features.add(attributes.get("dict") + "=" + tag); 
+        features.add(attributes.get("dict") + "=" + tag);
       } 
     }
   }

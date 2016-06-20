@@ -15,7 +15,7 @@
  */
 package eus.ixa.ixa.pipe.ml.features;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,14 +40,12 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator implem
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] preds) {
 
-    Collection<String> tagList = posDictionary.getTags(tokens[index]);
-    if (tagList == null) {
+    List<String> tagList = new ArrayList<>(posDictionary.getTags(tokens[index]));
+    /*if (tagList.isEmpty()) {
       features.add(attributes.get("dict") + "=" + unknownPOSclass);
     } else {
-      for (String tag : tagList) {
-        features.add(attributes.get("dict") + "=" + tag); 
-      } 
-    }
+      features.add(attributes.get("dict") + "=" + tagList.get(0));
+    }*/
   }
   
   @Override

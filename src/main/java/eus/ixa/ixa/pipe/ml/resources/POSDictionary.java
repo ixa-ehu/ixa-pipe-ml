@@ -72,6 +72,7 @@ public class POSDictionary implements SerializableArtifact {
 
     BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
     String line;
+	System.err.println("Creating POS Dictionary...");
     while ((line = breader.readLine()) != null) {
       String[] lineArray = tabPattern.split(line);
       if (lineArray.length == 2) {
@@ -79,6 +80,8 @@ public class POSDictionary implements SerializableArtifact {
         dictMultiMap.put(normalizedToken, lineArray[1].intern());
       }
     }
+    System.err.println(dictMultiMap.size());
+System.err.println("POS Dictionary done!");
   }
 
   public Collection<String> getTags(String string) {

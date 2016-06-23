@@ -1,5 +1,3 @@
-package eus.ixa.ixa.pipe.ml.resources;
-
 /*
  *  Copyright 2016 Rodrigo Agerri
 
@@ -16,6 +14,8 @@ package eus.ixa.ixa.pipe.ml.resources;
    limitations under the License.
  */
 
+package eus.ixa.ixa.pipe.ml.resources;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -25,16 +25,20 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.StringUtil;
+import opennlp.tools.util.featuregen.StringPattern;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
 
 
 /**
@@ -65,31 +69,66 @@ public class POSDictionary implements SerializableArtifact {
       artifact.serialize(out);
     }
   }
-  
-  private Multimap<String, String> dictMultiMap = ArrayListMultimap.create();
+
+  private Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
 
   public POSDictionary(InputStream in) throws IOException {
 
     BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
     String line;
-	System.err.println("Creating POS Dictionary...");
     while ((line = breader.readLine()) != null) {
       String[] lineArray = tabPattern.split(line);
-      if (lineArray.length == 2) {
-        String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
-        dictMultiMap.put(normalizedToken, lineArray[1].intern());
-      }
+      populateMap(lineArray);
     }
-    System.err.println(dictMultiMap.size());
-System.err.println("POS Dictionary done!");
-  }
-
-  public Collection<String> getTags(String string) {
-    return dictMultiMap.get(string);
   }
   
-  public Multimap<String, String> getMap() {
-    return dictMultiMap;
+  private void populateMap(String[] lineArray) {
+    if (lineArray.length == 2) {
+      String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
+      // only store words
+      if (!StringPattern.recognize(normalizedToken).containsDigit()) {
+        
+        String word = StringUtil.toLowerCase(normalizedToken);
+        if (!newEntries.containsKey(word)) {
+          newEntries.put(word, new HashMap<String, AtomicInteger>());
+        }
+        if (!newEntries.get(word).containsKey(lineArray[1])) {
+          newEntries.get(word).put(lineArray[1], new AtomicInteger(1));
+        } else {
+          newEntries.get(word).get(lineArray[1]).incrementAndGet();
+        }
+      }
+    }
+  }
+  
+  public String getMostFrequentTag(String word) {
+    TreeMultimap<Integer, String> mfTagMap = getOrderedMap(word);
+    String mfTag = null;
+    if (!mfTagMap.isEmpty()) {
+    SortedSet<String> mfTagSet = mfTagMap.get(mfTagMap.keySet().first());
+    mfTag = mfTagSet.first();
+    } else {
+      mfTag = "O";
+    }
+    return mfTag;
+  }
+  
+  public TreeMultimap<Integer, String> getOrderedMap(String word) {
+    Map<String, AtomicInteger> tagFreqsMap = newEntries.get(word);
+    TreeMultimap<Integer, String> mfTagMap = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
+    if (tagFreqsMap != null) {
+      getOrderedTags(tagFreqsMap, mfTagMap);
+    }
+    return mfTagMap;
+  }
+  
+  private void getOrderedTags(Map<String, AtomicInteger> tagFreqsMap, TreeMultimap<Integer, String> mfTagMap) {
+   
+    if (!tagFreqsMap.isEmpty() || tagFreqsMap != null) {
+      for (Map.Entry<String, AtomicInteger> entry: tagFreqsMap.entrySet()) {
+        mfTagMap.put(entry.getValue().intValue(), entry.getKey());
+      }
+    }
   }
 
   /**
@@ -100,10 +139,9 @@ System.err.println("POS Dictionary done!");
   public void serialize(OutputStream out) throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out));
 
-    for (Map.Entry<String, String> entry : dictMultiMap.entries()) {
-      writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
+    for (Map.Entry<String, Map<String, AtomicInteger>> entry : newEntries.entrySet()) {
+      writer.write(entry.getKey() + "\t" + entry.getValue().get(entry.getKey()) + "\n");
     }
-
     writer.flush();
   }
 

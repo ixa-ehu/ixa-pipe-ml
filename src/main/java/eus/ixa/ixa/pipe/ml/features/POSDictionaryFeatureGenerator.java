@@ -15,7 +15,6 @@
  */
 package eus.ixa.ixa.pipe.ml.features;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +31,6 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator implem
 
   private POSDictionary posDictionary;
   private Map<String, String> attributes;
-  public static String unknownPOSclass = "O";
   
   public POSDictionaryFeatureGenerator() {
   }
@@ -40,12 +38,8 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator implem
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] preds) {
 
-    List<String> tagList = new ArrayList<>(posDictionary.getTags(tokens[index]));
-    /*if (tagList.isEmpty()) {
-      features.add(attributes.get("dict") + "=" + unknownPOSclass);
-    } else {
-      features.add(attributes.get("dict") + "=" + tagList.get(0));
-    }*/
+    String posTag = posDictionary.getMostFrequentTag(tokens[index].toLowerCase());
+    features.add(attributes.get("dict") + "=" + posTag);
   }
   
   @Override

@@ -30,14 +30,7 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
  */
 public class POSBaselineContextGenerator extends CustomFeatureGenerator {
 
-  /**
-   * Default prefix length.
-   */
-  private static final int PREFIX_LENGTH = 4;
-  /**
-   * Default suffix length.
-   */
-  private static final int SUFFIX_LENGTH = 7;
+  private Map<String, String> attributes;
   /**
    * Has capital regexp.
    */
@@ -56,9 +49,11 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
    *          the current word
    * @return the prefixes
    */
-  private static String[] getPrefixes(final String lex) {
-    String[] prefs = new String[PREFIX_LENGTH];
-    for (int li = 1, ll = PREFIX_LENGTH; li < ll; li++) {
+  private String[] getPrefixes(final String lex) {
+    Integer start = Integer.parseInt(attributes.get("prefBegin"));
+    Integer end = Integer.parseInt(attributes.get("prefEnd"));
+    String[] prefs = new String[end];
+    for (int li = start, ll = end; li < ll; li++) {
       prefs[li] = lex.substring(0, Math.min(li + 1, lex.length()));
     }
     return prefs;
@@ -70,9 +65,11 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
    *          the word
    * @return the suffixes
    */
-  private static String[] getSuffixes(final String lex) {
-    String[] suffs = new String[SUFFIX_LENGTH];
-    for (int li = 0, ll = SUFFIX_LENGTH; li < ll; li++) {
+  private String[] getSuffixes(final String lex) {
+    Integer start = Integer.parseInt(attributes.get("sufBegin"));
+    Integer end = Integer.parseInt(attributes.get("sufEnd"));
+    String[] suffs = new String[end];
+    for (int li = start, ll = end; li < ll; li++) {
       suffs[li] = lex.substring(Math.max(lex.length() - li - 1, 0));
     }
     return suffs;
@@ -113,7 +110,6 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
     features.add("w1,w0=" + w1 + "," + w0);
     features.add("w0,w1=" + w0 + "," + w1);
     features.add("p_1,p_2=" + p_1 + "," + p_2);
-    
     addTokenShapeFeatures(features, w0);
   }
   
@@ -155,6 +151,7 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
   public void init(Map<String, String> properties,
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
+    attributes = properties;
   }
 
 }

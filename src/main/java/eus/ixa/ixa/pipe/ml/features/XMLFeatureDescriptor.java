@@ -391,8 +391,16 @@ public final class XMLFeatureDescriptor {
       System.err.println("-> SuperSense Features added!");
       }
     if (Flags.isPOSBaselineFeatures(params)) {
+      String beginPrefix = Flags.getPrefixBegin(params);
+      String endPrefix = Flags.getPrefixEnd(params);
+      String beginSuffix = Flags.getSuffixBegin(params);
+      String endSuffix = Flags.getSuffixEnd(params);
       Element posFeatureElement = new Element("custom");
       posFeatureElement.setAttribute("class", POSBaselineContextGenerator.class.getName());
+      posFeatureElement.setAttribute("prefBegin", beginPrefix);
+      posFeatureElement.setAttribute("prefEnd", endPrefix);
+      posFeatureElement.setAttribute("sufBegin", beginSuffix);
+      posFeatureElement.setAttribute("sufEnd", endSuffix);
       generators.addContent(posFeatureElement);
       System.err.println("-> POS Baseline Context Generator added!");
     }

@@ -567,6 +567,46 @@ public class Flags {
     return posFlag;
   }
   
+  public static String getPrefixBegin(TrainingParameters params) {
+    String beginFlag = null;
+    if (params.getSettings().get("PrefixBegin") != null) {
+      beginFlag = params.getSettings().get("PrefixBegin");
+    } else {
+      beginFlag = Flags.DEFAULT_PREFIX_BEGIN;
+    }
+    return beginFlag;
+  }
+  
+  public static String getPrefixEnd(TrainingParameters params) {
+    String endFlag = null;
+    if (params.getSettings().get("PrefixEnd") != null) {
+      endFlag = params.getSettings().get("PrefixEnd");
+    } else {
+      endFlag = Flags.DEFAULT_PREFIX_END;
+    }
+    return endFlag;
+  }
+  
+  public static String getSuffixBegin(TrainingParameters params) {
+    String beginFlag = null;
+    if (params.getSettings().get("SuffixBegin") != null) {
+      beginFlag = params.getSettings().get("SuffixBegin");
+    } else {
+      beginFlag = Flags.DEFAULT_SUFFIX_BEGIN;
+    }
+    return beginFlag;
+  }
+  
+  public static String getSuffixEnd(TrainingParameters params) {
+    String endFlag = null;
+    if (params.getSettings().get("SuffixEnd") != null) {
+      endFlag = params.getSettings().get("SuffixEnd");
+    } else {
+      endFlag = Flags.DEFAULT_SUFFIX_END;
+    }
+    return endFlag;
+  }
+  
   public static String getMFSFeatures(TrainingParameters params) {
     String mfsFlag = null;
     if (params.getSettings().get("MFSFeatures") != null) {

@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
@@ -20,9 +21,50 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  */
 public class ChunkBaselineContextGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
 
+  private Map<String, String> attributes;
+  /**
+   * Has capital regexp.
+   */
+  private static Pattern hasCap = Pattern.compile("\\p{Upper}", Pattern.UNICODE_CHARACTER_CLASS);
+  /**
+   * Has number regexp.
+   */
+  private static Pattern hasNum = Pattern.compile("\\p{Digit}", Pattern.UNICODE_CHARACTER_CLASS);
   private SequenceModelResource posModelResource;
   private String[] currentSentence;
   private Span[] currentTags;
+  
+  /**
+   * Obtain prefixes for each token.
+   * @param lex
+   *          the current word
+   * @return the prefixes
+   */
+  private String[] getPrefixes(final String lex) {
+    Integer start = Integer.parseInt(attributes.get("prefBegin"));
+    Integer end = Integer.parseInt(attributes.get("prefEnd"));
+    String[] prefs = new String[end];
+    for (int li = start, ll = end; li < ll; li++) {
+      prefs[li] = lex.substring(0, Math.min(li + 1, lex.length()));
+    }
+    return prefs;
+  }
+
+  /**
+   * Obtain suffixes for each token.
+   * @param lex
+   *          the word
+   * @return the suffixes
+   */
+  private String[] getSuffixes(final String lex) {
+    Integer start = Integer.parseInt(attributes.get("sufBegin"));
+    Integer end = Integer.parseInt(attributes.get("sufEnd"));
+    String[] suffs = new String[end];
+    for (int li = start, ll = end; li < ll; li++) {
+      suffs[li] = lex.substring(Math.max(lex.length() - li - 1, 0));
+    }
+    return suffs;
+  }
   
   @Override
   public void createFeatures(List<String> features, String[] tokens, int index,
@@ -122,6 +164,31 @@ public class ChunkBaselineContextGenerator extends CustomFeatureGenerator implem
     features.add("p_1,w2=" + p_1 + "," + w2);
     features.add("p_1,w_1,w0=" + p_1 + "," + w_1 + "," + w0);
     features.add("p_1,w0,w1=" + p_1 + "," + w0 + "," + w1);
+    addTokenShapeFeatures(features, w0);
+  }
+  
+  private void addTokenShapeFeatures(List<String> features, String lex) {
+    // do some basic suffix analysis
+    String[] suffs = getSuffixes(lex);
+    for (int i = 0; i < suffs.length; i++) {
+      features.add("suf=" + suffs[i]);
+    }
+    
+    String[] prefs = getPrefixes(lex);
+    
+    for (int i = 0; i < prefs.length; i++) {
+      features.add("pre=" + prefs[i]);
+    }
+    // see if the word has any special characters
+    if (lex.indexOf('-') != -1) {
+      features.add("h");
+    }
+    if (hasCap.matcher(lex).find()) {
+      features.add("c");
+    }
+    if (hasNum.matcher(lex).find()) {
+      features.add("d");
+    }
   }
 
   @Override

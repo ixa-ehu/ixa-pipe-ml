@@ -22,31 +22,40 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  */
 public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
 
+  private Map<String, String> attributes;
   private SequenceModelResource posModelResource;
   private Span[] currentTags;
   private String[] currentSentence;
-  private static final int PREFIX_LENGTH = 5;
-  private static final int SUFFIX_LENGTH = 7;
 
-  private static Pattern hasCap = Pattern.compile("[A-Z]");
-  private static Pattern hasNum = Pattern.compile("[0-9]");
+  /**
+   * Has capital regexp.
+   */
+  private static Pattern hasCap = Pattern.compile("\\p{Upper}", Pattern.UNICODE_CHARACTER_CLASS);
+  /**
+   * Has number regexp.
+   */
+  private static Pattern hasNum = Pattern.compile("\\p{Digit}", Pattern.UNICODE_CHARACTER_CLASS);
   private boolean isPos;
   private boolean isPosClass;
   
   public LemmaBaselineContextGenerator() {
   }
   
-  private static String[] getPrefixes(String lex) {
-    String[] prefs = new String[PREFIX_LENGTH];
-    for (int li = 1, ll = PREFIX_LENGTH; li < ll; li++) {
+  private String[] getPrefixes(String lex) {
+    Integer start = Integer.parseInt(attributes.get("prefBegin"));
+    Integer end = Integer.parseInt(attributes.get("prefEnd"));
+    String[] prefs = new String[end];
+    for (int li = start, ll = end; li < ll; li++) {
       prefs[li] = lex.substring(0, Math.min(li + 1, lex.length()));
     }
     return prefs;
   }
 
-  private static String[] getSuffixes(String lex) {
-    String[] suffs = new String[SUFFIX_LENGTH];
-    for (int li = 1, ll = SUFFIX_LENGTH; li < ll; li++) {
+  private String[] getSuffixes(String lex) {
+    Integer start = Integer.parseInt(attributes.get("sufBegin"));
+    Integer end = Integer.parseInt(attributes.get("sufEnd"));
+    String[] suffs = new String[end];
+    for (int li = start, ll = end; li < ll; li++) {
       suffs[li] = lex.substring(Math.max(lex.length() - li - 1, 0));
     }
     return suffs;
@@ -63,34 +72,34 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     }
     // Word
     String w0;
-    // Tag
-    String t0 = null;
     // Previous prediction
     String p_1;
-    String lex = tokens[index].toString();
+    // pos tags
     String posTag = currentTags[index].getType();
+    String posTagClass = posTag.substring(0, 1);
+    
     if (index < 1) {
-      p_1 = "p_1=bos";
+      p_1 = "bos";
     } else {
-      p_1 = "p_1=" + previousOutcomes[index - 1];
-    }
-    w0 = "w0=" + tokens[index];
-    if (isPos) {
-      t0 = "t0=" + posTag;
-    }
-    if (isPosClass) {
-      String posTagClass = posTag.substring(0, 1);
-      features.add("posTagClass=" + posTagClass);
-      features.add(p_1 + "posTagClass=" + posTagClass);
+      p_1 = previousOutcomes[index - 1];
     }
     
+    w0 = tokens[index];
+        
     //adding features
-    features.add(w0);
-    features.add(t0);
-    features.add(p_1);
-    features.add(p_1 + t0);
-    features.add(p_1 + w0);
-    addTokenShapeFeatures(features, lex);
+    features.add("p_1=" + p_1);
+    features.add("w0=" + w0);
+    features.add("p_1,w0=" + p_1 + "," + w0);
+    addTokenShapeFeatures(features, w0);
+    
+    if (isPos) {
+      features.add("t0=" + posTag);
+      features.add("p_1,t0=" + p_1 + "," + posTag);
+    }
+    if (isPosClass) {
+      features.add("posTagClass=" + posTagClass);
+      features.add("p_1,posTagClass=" + p_1 + "," + posTagClass);
+    }
   }
   
   private void addTokenShapeFeatures(List<String> features, String lex) {
@@ -147,6 +156,7 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     if (rangeArray[1].equalsIgnoreCase("posclass")) {
       isPosClass = true;
     }
+    attributes = properties;
   }
   
   

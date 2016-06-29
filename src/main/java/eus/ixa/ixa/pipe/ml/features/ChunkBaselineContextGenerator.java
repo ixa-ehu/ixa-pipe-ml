@@ -106,12 +106,12 @@ public class ChunkBaselineContextGenerator extends CustomFeatureGenerator implem
     features.add("p_1,t_1=" + p_1 + "," + t_1);
     features.add("p_1,t0=" + p_1 + "," + t0);
     features.add("p_1,t1=" + p_1 + "," + t1);
-    features.add("p_1,t2=" + p_1 + "," + t2);
-    features.add("p_1,t_2,t_1=" + p_1 + "," + t_2 + "," + t_1);
+    //features.add("p_1,t2=" + p_1 + "," + t2);
+    //features.add("p_1,t_2,t_1=" + p_1 + "," + t_2 + "," + t_1);
     features.add("p_1,t_1,t0=" + p_1 + "," + t_1 + "," + t0);
     features.add("p_1,t0,t1=" + p_1 + "," + t0 + "," + t1);
     features.add("p_1,t1,t2=" + p_1 + "," + t1 + "," + t2);
-    //features.add("p_1,t_2,t_1,t0=" + p_1 + "," + t_2 + "," + t_1 + "," + t0);
+    features.add("p_1,t_2,t_1,t0=" + p_1 + "," + t_2 + "," + t_1 + "," + t0);
     features.add("p_1,t_1,t0,t1=" + p_1 + "," + t_1 + "," + t0 + "," + t1);
     //features.add("p_1,t0,t1,t2=" + p_1 + "," + t0 + "," + t1 + "," + t2);
     //add pred and word

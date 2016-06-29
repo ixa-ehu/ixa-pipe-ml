@@ -96,14 +96,10 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     features.add("p_1=" + p_1);
     features.add("w0=" + w0);
     features.add("w1=" + w1);
-    features.add("w1,w0=" + w1 + "," + w0);
-    features.add("w0,w1=" + w0 + "," + w1);
-    features.add("p_1,w0=" + p_1 + "," + w0);
     addTokenShapeFeatures(features, w0);
     
     if (isPos) {
       features.add("t0=" + posTag);
-      features.add("p_1,t0=" + p_1 + "," + posTag);
     }
     if (isPosClass) {
       features.add("posTagClass=" + posTagClass);

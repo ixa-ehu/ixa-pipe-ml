@@ -70,10 +70,10 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
       currentSentence = tokens;
       currentTags = posModelResource.seqToSpans(tokens);
     }
-    // Word
-    String w0;
-    // Previous prediction
+    //previous prediction
     String p_1;
+    //words
+    String w0, w1;
     // pos tags
     String posTag = currentTags[index].getType();
     String posTagClass = posTag.substring(0, 1);
@@ -85,10 +85,19 @@ public class LemmaBaselineContextGenerator extends CustomFeatureGenerator implem
     }
     
     w0 = tokens[index];
-        
+    
+    if (index + 1 >= tokens.length) {
+      w1 = "eos";
+    } else {
+      w1 = tokens[index + 1];
+    }
+    
     //adding features
     features.add("p_1=" + p_1);
     features.add("w0=" + w0);
+    features.add("w1=" + w1);
+    features.add("w1,w0=" + w1 + "," + w0);
+    features.add("w0,w1=" + w0 + "," + w1);
     features.add("p_1,w0=" + p_1 + "," + w0);
     addTokenShapeFeatures(features, w0);
     

@@ -1,7 +1,24 @@
+/*
+ *Copyright 2016 Rodrigo Agerri
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+
 package eus.ixa.ixa.pipe.ml;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
 
@@ -25,6 +42,7 @@ import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
@@ -55,11 +73,7 @@ public class ShiftReduceParserTrainer {
    */
   private HeadRules rules;
   /**
-   * beamsize value needs to be established in any class extending this one.
-   */
-  private int beamSize;
-  /**
-   * features needs to be implemented by any class extending this one.
+   * The parser factory.
    */
   private ParserFactory parserFactory;
   /**
@@ -99,9 +113,32 @@ public class ShiftReduceParserTrainer {
     trainSamples = getParseStream(trainData);
     testSamples = getParseStream(testData);
     rules = getHeadRules(params);
-    this.beamSize = Flags.getBeamsize(params);
     createParserFactory(params);
     setTaggerFactory(createSequenceLabelerFactory(taggerParams));
+    setChunkerFactory(createSequenceLabelerFactory(chunkerParams));
+  }
+  
+  /**
+   * Construct a trainer with training and test data, and with options for
+   * language, beamsize for decoding, sequence codec and corpus format (conll or
+   * opennlp).
+   * 
+   * @param params
+   *          the training parameters
+   * @param chunkerParams
+   *          the chunker parameters
+   * @throws IOException
+   *           io exception
+   */
+  public ShiftReduceParserTrainer(final TrainingParameters params, final TrainingParameters chunkerParams) throws IOException {
+
+    this.lang = Flags.getLanguage(params);
+    this.trainData = params.getSettings().get("TrainSet");
+    this.testData = params.getSettings().get("TestSet");
+    trainSamples = getParseStream(trainData);
+    testSamples = getParseStream(testData);
+    rules = getHeadRules(params);
+    createParserFactory(params);
     setChunkerFactory(createSequenceLabelerFactory(chunkerParams));
   }
 
@@ -131,6 +168,13 @@ public class ShiftReduceParserTrainer {
         resources, sequenceCodec);
   }
 
+  /**
+   * Train a parser model from the Treebank data.
+   * @param params the parser parameters
+   * @param taggerParams the pos tagger parameters
+   * @param chunkerParams the chunker parameters
+   * @return a parser model
+   */
   public final ParserModel train(final TrainingParameters params, final TrainingParameters taggerParams, final TrainingParameters chunkerParams) {
     if (getParserFactory() == null) {
       throw new IllegalStateException(
@@ -148,13 +192,49 @@ public class ShiftReduceParserTrainer {
       parserEvaluator = new ParserEvaluator(parser);
       parserEvaluator.evaluate(testSamples);
     } catch (IOException e) {
-      System.err.println("IO error while loading traing and test sets!");
+      System.err.println("IO error while loading training and test sets!");
       e.printStackTrace();
       System.exit(1);
     }
     System.out.println("Final Result: \n" + parserEvaluator.getFMeasure());
     return trainedModel;
   }
+  
+  /**
+   * Train a parser model providing an already trained POS tagger.
+   * @param params the parser parameters
+   * @param taggerModel the POS tagger model
+   * @param chunkerParams the chunker parameters
+   * @return the parser model
+   */
+  public final ParserModel train(final TrainingParameters params, final InputStream taggerModel, final TrainingParameters chunkerParams) {
+    if (getParserFactory() == null) {
+      throw new IllegalStateException(
+          "The ParserFactory must be instantiated!!");
+    }
+    SequenceLabelerModel posModel = null;
+    try {
+      posModel = new SequenceLabelerModel(taggerModel);
+    } catch (IOException e1) {
+      e1.printStackTrace();
+    }
+    ParserModel trainedModel = null;
+    ParserEvaluator parserEvaluator = null;
+    try {
+      trainedModel = ShiftReduceParser.train(lang, trainSamples, rules,
+          params, parserFactory, posModel, chunkerParams, chunkerFactory);
+      ShiftReduceParser parser = new ShiftReduceParser(trainedModel);
+      parserEvaluator = new ParserEvaluator(parser);
+      parserEvaluator.evaluate(testSamples);
+    } catch (IOException e) {
+      System.err.println("IO error while loading training and test sets!");
+      e.printStackTrace();
+      System.exit(1);
+    }
+    System.out.println("Final Result: \n" + parserEvaluator.getFMeasure());
+    return trainedModel;
+  }
+
 
   /**
    * Getting the stream with the right corpus format.
@@ -242,11 +322,6 @@ public class ShiftReduceParserTrainer {
     this.parserFactory = parserFactory;
     return parserFactory;
   }
-
-  public final int getBeamSize() {
-    return beamSize;
-  }
-
   /**
    * Get the Sequence codec.
    * 

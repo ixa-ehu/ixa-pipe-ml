@@ -17,7 +17,9 @@
 package eus.ixa.ixa.pipe.ml;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -187,10 +189,9 @@ public class CLI {
     String paramFile = parsedArguments.getString("params");
     String taggerParamsFile = parsedArguments.getString("taggerParams");
     String chunkerParamsFile = parsedArguments.getString("chunkerParams");
-    TrainingParameters params = IOUtils
-        .loadTrainingParameters(paramFile);
-    TrainingParameters taggerParams = IOUtils.loadTrainingParameters(taggerParamsFile);
+    TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
     TrainingParameters chunkerParams = IOUtils.loadTrainingParameters(chunkerParamsFile);
+    ParserModel trainedModel;
     String outModel = null;
     if (params.getSettings().get("OutputModel") == null || params.getSettings().get("OutputModel").length() == 0) {
       outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
@@ -199,8 +200,15 @@ public class CLI {
     else {
       outModel = Flags.getModel(params);
     }
-    ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, taggerParams, chunkerParams);
-    ParserModel trainedModel = parserTrainer.train(params, taggerParams, chunkerParams);
+    if (taggerParamsFile.endsWith(".bin")) {
+      InputStream posModel = new FileInputStream(taggerParamsFile);
+      ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, chunkerParams);
+      trainedModel = parserTrainer.train(params, posModel, chunkerParams);
+    } else {
+      TrainingParameters taggerParams = IOUtils.loadTrainingParameters(taggerParamsFile);
+      ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, taggerParams, chunkerParams);
+      trainedModel = parserTrainer.train(params, taggerParams, chunkerParams);
+    }
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
 

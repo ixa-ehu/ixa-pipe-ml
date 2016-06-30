@@ -40,7 +40,7 @@ public class ParseToTabulatedFormat extends
       }
     }
     // check if we need to clear features every sentence
-    //isClearAdaptiveData = true;
+    isClearAdaptiveData = true;
     if (tokens.size() > 0) {
       // convert sequence tags into spans
       List<Span> sequences = new ArrayList<Span>();

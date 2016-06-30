@@ -27,6 +27,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 
 import opennlp.tools.dictionary.Dictionary;
+import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventTrainer;
 import opennlp.tools.ml.TrainerFactory;
 import opennlp.tools.ml.model.Event;
@@ -73,7 +74,7 @@ public class ShiftReduceParser {
   /**
    * The default beam size used if no beam size is given.
    */
-  public static final int defaultBeamSize = 20;
+  public static final int DEFAULT_BEAMSIZE = 20;
   /**
    * The default amount of probability mass required of advanced outcomes.
    */
@@ -158,7 +159,7 @@ public class ShiftReduceParser {
   protected boolean debugOn = false;
 
   public ShiftReduceParser(ParserModel model) {
-    this(model, defaultBeamSize, defaultAdvancePercentage);
+    this(model, model.getBeamSize(), defaultAdvancePercentage);
   }
   
   public ShiftReduceParser(ParserModel model, int beamSize, double advancePercentage) {
@@ -608,6 +609,11 @@ public class ShiftReduceParser {
       TrainingParameters chunkerParams,
       SequenceLabelerFactory chunkerFactory) throws IOException {
 
+    String beamSizeString = trainParams.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
+    int beamSize = DEFAULT_BEAMSIZE;
+    if (beamSizeString != null) {
+      beamSize = Integer.parseInt(beamSizeString);
+    }
     parseSamples.reset();
 
     Map<String, String> manifestInfoEntries = new HashMap<String, String>();
@@ -646,7 +652,54 @@ public class ShiftReduceParser {
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 
     return new ParserModel(languageCode, buildModel, checkModel, posModel,
-        chunkModel, rules, manifestInfoEntries);
+        chunkModel, beamSize, rules, manifestInfoEntries);
+  }
+  
+  public static ParserModel train(String languageCode,
+      ObjectStream<Parse> parseSamples, HeadRules rules,
+      TrainingParameters trainParams, ParserFactory parserFactory,
+      SequenceLabelerModel posModel,
+      TrainingParameters chunkerParams,
+      SequenceLabelerFactory chunkerFactory) throws IOException {
+
+    String beamSizeString = trainParams.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
+    int beamSize = DEFAULT_BEAMSIZE;
+    if (beamSizeString != null) {
+      beamSize = Integer.parseInt(beamSizeString);
+    }
+    parseSamples.reset();
+
+    Map<String, String> manifestInfoEntries = new HashMap<String, String>();
+
+    // TODO chunk
+    System.err.println("Training chunker...");
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
+        null, new ParseToCoNLL02Format(parseSamples), chunkerParams, chunkerFactory);
+    parseSamples.reset();
+
+    // TODO build
+    System.err.println("Training builder...");
+    ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
+        ParserEventTypeEnum.BUILD, parserFactory);
+    Map<String, String> buildReportMap = new HashMap<String, String>();
+    EventTrainer trainer = TrainerFactory.getEventTrainer(
+        trainParams.getSettings(), buildReportMap);
+    MaxentModel buildModel = trainer.train(bes);
+    mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
+    parseSamples.reset();
+
+    // TODO check
+    System.err.println("Training checker...");
+    ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
+        ParserEventTypeEnum.CHECK);
+    Map<String, String> checkReportMap = new HashMap<String, String>();
+    EventTrainer checkTrainer = TrainerFactory.getEventTrainer(
+        trainParams.getSettings(), checkReportMap);
+    MaxentModel checkModel = checkTrainer.train(kes);
+    mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
+
+    return new ParserModel(languageCode, buildModel, checkModel, posModel,
+        chunkModel, beamSize, rules, manifestInfoEntries);
   }
   
   public static void mergeReportIntoManifest(Map<String, String> manifest,

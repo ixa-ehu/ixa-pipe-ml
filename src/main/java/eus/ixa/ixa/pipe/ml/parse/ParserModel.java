@@ -23,7 +23,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
+import java.util.Properties;
 
+import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.util.InvalidFormatException;
@@ -49,10 +51,15 @@ public class ParserModel extends BaseModel {
 
   public ParserModel(String languageCode, MaxentModel buildModel,
       MaxentModel checkModel, SequenceLabelerModel parserTagger,
-      SequenceLabelerModel chunkerTagger, HeadRules headRules,
+      SequenceLabelerModel chunkerTagger, int beamSize, HeadRules headRules,
       Map<String, String> manifestInfoEntries) {
 
     super(COMPONENT_NAME, languageCode, manifestInfoEntries);
+    
+    //adding beamsize to manifest
+    Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
+    manifest.put(BeamSearch.BEAM_SIZE_PARAMETER, Integer.toString(beamSize));
+    
     artifactMap.put(BUILD_MODEL_ENTRY_NAME, buildModel);
     artifactMap.put(CHECK_MODEL_ENTRY_NAME, checkModel);
     artifactMap.put(PARSER_TAGGER_MODEL_ENTRY_NAME, parserTagger);
@@ -63,8 +70,8 @@ public class ParserModel extends BaseModel {
 
   public ParserModel(String languageCode, MaxentModel buildModel,
       MaxentModel checkModel, SequenceLabelerModel parserTagger,
-      SequenceLabelerModel chunkerTagger, HeadRules headRules) {
-    this(languageCode, buildModel, checkModel, parserTagger, chunkerTagger,
+      SequenceLabelerModel chunkerTagger, int beamSize, HeadRules headRules) {
+    this(languageCode, buildModel, checkModel, parserTagger, chunkerTagger, beamSize,
         headRules, null);
   }
 
@@ -117,27 +124,38 @@ public class ParserModel extends BaseModel {
   public HeadRules getHeadRules() {
     return (HeadRules) artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME);
   }
+  
+  public int getBeamSize() {
+    Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
+    String beamSizeString = manifest.getProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+
+    int beamSize = ShiftReduceParser.DEFAULT_BEAMSIZE;
+    if (beamSizeString != null) {
+      beamSize = Integer.parseInt(beamSizeString);
+    }
+    return beamSize;
+  }
 
   // TODO: Update model methods should make sure properties are copied correctly
   // ...
   public ParserModel updateBuildModel(MaxentModel buildModel) {
     return new ParserModel(getLanguage(), buildModel, getCheckModel(),
-        getParserTaggerModel(), getParserChunkerModel(), getHeadRules());
+        getParserTaggerModel(), getParserChunkerModel(), getBeamSize(), getHeadRules());
   }
 
   public ParserModel updateCheckModel(MaxentModel checkModel) {
     return new ParserModel(getLanguage(), getBuildModel(), checkModel,
-        getParserTaggerModel(), getParserChunkerModel(), getHeadRules());
+        getParserTaggerModel(), getParserChunkerModel(), getBeamSize(), getHeadRules());
   }
 
   public ParserModel updateTaggerModel(SequenceLabelerModel taggerModel) {
     return new ParserModel(getLanguage(), getBuildModel(), getCheckModel(),
-        taggerModel, getParserChunkerModel(), getHeadRules());
+        taggerModel, getParserChunkerModel(), getBeamSize(), getHeadRules());
   }
 
   public ParserModel updateChunkerModel(SequenceLabelerModel chunkModel) {
     return new ParserModel(getLanguage(), getBuildModel(), getCheckModel(),
-        getParserTaggerModel(), chunkModel, getHeadRules());
+        getParserTaggerModel(), chunkModel, getBeamSize(), getHeadRules());
   }
 
   @Override

@@ -20,11 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 
-import opennlp.tools.cmdline.TerminateToolException;
-import opennlp.tools.postag.MutableTagDictionary;
-import opennlp.tools.postag.POSSample;
-import opennlp.tools.postag.POSTaggerME;
-import opennlp.tools.postag.TagDictionary;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
@@ -35,13 +30,13 @@ import eus.ixa.ixa.pipe.ml.formats.TabulatedFormat;
 import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
@@ -107,10 +102,6 @@ public class SequenceLabelerTrainer {
    */
   private String corpusFormat;
   /**
-   * beamsize value needs to be established in any class extending this one.
-   */
-  private int beamSize;
-  /**
    * The sequence encoding of the named entity spans, e.g., BIO or BILOU.
    */
   private String sequenceCodec;
@@ -144,7 +135,6 @@ public class SequenceLabelerTrainer {
     this.testData = params.getSettings().get("TestSet");
     trainSamples = getSequenceStream(trainData, clearTrainingFeatures, corpusFormat);
     testSamples = getSequenceStream(testData, clearEvaluationFeatures, corpusFormat);
-    this.beamSize = Flags.getBeamsize(params);
     this.sequenceCodec = Flags.getSequenceCodec(params);
     if (params.getSettings().get("Types") != null) {
       String netypes = params.getSettings().get("Types");
@@ -268,10 +258,6 @@ public class SequenceLabelerTrainer {
    */
   public final void setSequenceCodec(final String aSeqCodec) {
     this.sequenceCodec = aSeqCodec;
-  }
-  
-  public final int getBeamSize() {
-    return beamSize;
   }
 }
 

@@ -97,7 +97,7 @@ public class CLI {
   public static final String SEQ_TRAINER_NAME = "sequenceTrainer";
   public static final String PARSE_TRAINER_NAME = "parserTrainer";
   public static final String EVAL_PARSER_NAME = "eval";
-  public static final String PARSEVAL_PARSER_NAME = "parseEval";
+  public static final String PARSEVAL_PARSER_NAME = "parseval";
   public static final String CROSS_PARSER_NAME = "cross";
   /**
    * Construct a CLI object with the sub-parsers to manage the command
@@ -111,7 +111,7 @@ public class CLI {
     loadParserTrainingParameters();
     evalParser = subParsers.addParser(EVAL_PARSER_NAME).help("Evaluation CLI");
     loadEvalParameters();
-    parsevalParser = subParsers.addParser(PARSEVAL_PARSER_NAME).help("ParsEval CLI");
+    parsevalParser = subParsers.addParser(PARSEVAL_PARSER_NAME).help("Parseval CLI");
     loadParsevalParameters();
     crossValidateParser = subParsers.addParser(CROSS_PARSER_NAME).help("Cross validation CLI");
     loadCrossValidateParameters();

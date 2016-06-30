@@ -20,6 +20,7 @@ package eus.ixa.ixa.pipe.ml.parse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
@@ -30,6 +31,7 @@ import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.BaseModel;
+import opennlp.tools.util.model.UncloseableInputStream;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 
 /**
@@ -53,11 +55,11 @@ public class ParserModel extends BaseModel {
       Map<String, String> manifestInfoEntries) {
 
     super(COMPONENT_NAME, languageCode, manifestInfoEntries);
-    
-    //adding beamsize to manifest
+
+    // adding beamsize to manifest
     Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
     manifest.put(BeamSearch.BEAM_SIZE_PARAMETER, Integer.toString(beamSize));
-    
+
     artifactMap.put(BUILD_MODEL_ENTRY_NAME, buildModel);
     artifactMap.put(CHECK_MODEL_ENTRY_NAME, checkModel);
     artifactMap.put(PARSER_TAGGER_MODEL_ENTRY_NAME, parserTagger);
@@ -69,8 +71,8 @@ public class ParserModel extends BaseModel {
   public ParserModel(String languageCode, MaxentModel buildModel,
       MaxentModel checkModel, SequenceLabelerModel parserTagger,
       SequenceLabelerModel chunkerTagger, int beamSize, HeadRules headRules) {
-    this(languageCode, buildModel, checkModel, parserTagger, chunkerTagger, beamSize,
-        headRules, null);
+    this(languageCode, buildModel, checkModel, parserTagger, chunkerTagger,
+        beamSize, headRules, null);
   }
 
   public ParserModel(InputStream in) throws IOException, InvalidFormatException {
@@ -97,6 +99,8 @@ public class ParserModel extends BaseModel {
       serializers.put("headrules",
           new PennTreebankHeadRules.PennTreebankHeadRulesSerializer());
     }
+    serializers.put("postagger", new SequenceLabelerModelSerializer());
+    serializers.put("chunker", new SequenceLabelerModelSerializer());
   }
 
   public MaxentModel getBuildModel() {
@@ -120,10 +124,11 @@ public class ParserModel extends BaseModel {
   public HeadRules getHeadRules() {
     return (HeadRules) artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME);
   }
-  
+
   public int getBeamSize() {
     Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
-    String beamSizeString = manifest.getProperty(BeamSearch.BEAM_SIZE_PARAMETER);
+    String beamSizeString = manifest
+        .getProperty(BeamSearch.BEAM_SIZE_PARAMETER);
 
     int beamSize = ShiftReduceParser.DEFAULT_BEAMSIZE;
     if (beamSizeString != null) {
@@ -136,12 +141,14 @@ public class ParserModel extends BaseModel {
   // ...
   public ParserModel updateBuildModel(MaxentModel buildModel) {
     return new ParserModel(getLanguage(), buildModel, getCheckModel(),
-        getParserTaggerModel(), getParserChunkerModel(), getBeamSize(), getHeadRules());
+        getParserTaggerModel(), getParserChunkerModel(), getBeamSize(),
+        getHeadRules());
   }
 
   public ParserModel updateCheckModel(MaxentModel checkModel) {
     return new ParserModel(getLanguage(), getBuildModel(), checkModel,
-        getParserTaggerModel(), getParserChunkerModel(), getBeamSize(), getHeadRules());
+        getParserTaggerModel(), getParserChunkerModel(), getBeamSize(),
+        getHeadRules());
   }
 
   public ParserModel updateTaggerModel(SequenceLabelerModel taggerModel) {
@@ -176,6 +183,22 @@ public class ParserModel extends BaseModel {
 
     if (!(artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME) instanceof HeadRules)) {
       throw new InvalidFormatException("Missing the head rules!");
+    }
+  }
+
+  private static class SequenceLabelerModelSerializer implements
+      ArtifactSerializer<SequenceLabelerModel> {
+
+    public SequenceLabelerModel create(InputStream in) throws IOException,
+        InvalidFormatException {
+      SequenceLabelerModel posModel = new SequenceLabelerModel(
+          new UncloseableInputStream(in));
+      return posModel;
+    }
+
+    public void serialize(SequenceLabelerModel artifact, OutputStream out)
+        throws IOException {
+      artifact.serialize(out);
     }
   }
 

@@ -35,6 +35,7 @@ import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.Evaluate;
+import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
 import eus.ixa.ixa.pipe.ml.parse.ParserModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
@@ -73,7 +74,7 @@ public class CLI {
   private Subparsers subParsers = argParser.addSubparsers().help(
       "sub-command help");
   /**
-   * The parser that manages the Sequence Labeler training sub-command.
+   * The parser that manages the SequenceLabeler training sub-command.
    */
   private Subparser seqTrainerParser;
   /**
@@ -81,9 +82,13 @@ public class CLI {
    */
   private Subparser parserTrainerParser;
   /**
-   * The parser that manages the evaluation sub-command.
+   * The parser that manages the SequenceLabeler evaluation sub-command.
    */
   private Subparser evalParser;
+  /**
+   * The parser to manage the parsing evaluation.
+   */
+  private Subparser parsevalParser;
   /**
    * The parser that manages the cross validation sub-command.
    */
@@ -92,6 +97,7 @@ public class CLI {
   public static final String SEQ_TRAINER_NAME = "sequenceTrainer";
   public static final String PARSE_TRAINER_NAME = "parserTrainer";
   public static final String EVAL_PARSER_NAME = "eval";
+  public static final String PARSEVAL_PARSER_NAME = "parseEval";
   public static final String CROSS_PARSER_NAME = "cross";
   /**
    * Construct a CLI object with the sub-parsers to manage the command
@@ -105,6 +111,8 @@ public class CLI {
     loadParserTrainingParameters();
     evalParser = subParsers.addParser(EVAL_PARSER_NAME).help("Evaluation CLI");
     loadEvalParameters();
+    parsevalParser = subParsers.addParser(PARSEVAL_PARSER_NAME).help("ParsEval CLI");
+    loadParsevalParameters();
     crossValidateParser = subParsers.addParser(CROSS_PARSER_NAME).help("Cross validation CLI");
     loadCrossValidateParameters();
     }
@@ -137,6 +145,8 @@ public class CLI {
       System.err.println("CLI options: " + parsedArguments);
       if (args[0].equals(EVAL_PARSER_NAME)) {
         eval();
+      } else if (args[0].equals(PARSEVAL_PARSER_NAME)) {
+        parseval();
       } else if (args[0].equals(SEQ_TRAINER_NAME)) {
         seqTrain();
       } else if (args[0].equals(PARSE_TRAINER_NAME)) {
@@ -147,7 +157,7 @@ public class CLI {
     } catch (ArgumentParserException e) {
       argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + version
-          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|eval|cross) -help for details");
+          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|eval|parseval|cross) -help for details");
       System.exit(1);
     }
   }
@@ -228,7 +238,7 @@ public class CLI {
     String clearFeatures = parsedArguments.getString("clearFeatures");
     Properties props = setEvalProperties(lang, model, testset, corpusFormat, netypes, clearFeatures);
     
-      Evaluate evaluator = new Evaluate(props);
+    Evaluate evaluator = new Evaluate(props);
       if (parsedArguments.getString("evalReport") != null) {
         if (parsedArguments.getString("evalReport").equalsIgnoreCase("brief")) {
           evaluator.evaluate();
@@ -242,6 +252,24 @@ public class CLI {
       } else {
         evaluator.detailEvaluate();
       }
+  }
+  
+  /**
+   * Main evaluation entry point.
+   * 
+   * @throws IOException
+   *           throws exception if test set not available
+   */
+  public final void parseval() throws IOException {
+
+    String lang = parsedArguments.getString("language");
+    String model = parsedArguments.getString("model");
+    String testset = parsedArguments.getString("testset");
+    Properties props = setParsevalProperties(lang, model, testset);
+    
+    ParserEvaluate parserEvaluator = new ParserEvaluate(props);
+    parserEvaluator.evaluate();
+      
   }
   
   /**
@@ -321,6 +349,28 @@ public class CLI {
   }
   
   /**
+   * Create the parameters available for evaluation.
+   */
+  private void loadParsevalParameters() {
+    parsevalParser.addArgument("-l", "--language")
+        .required(true)
+        .choices("ca", "de", "en", "es", "eu", "fr", "it")
+        .help("Choose language.\n");
+    parsevalParser.addArgument("-m", "--model")
+        .required(false)
+        .setDefault(Flags.DEFAULT_EVALUATE_MODEL)
+        .help("Pass the model to evaluate as a parameter.\n");
+    parsevalParser.addArgument("-t", "--testset")
+        .required(true)
+        .help("The test or reference corpus.\n");
+    parsevalParser.addArgument("--clearFeatures")
+        .required(false)
+        .choices("yes", "no", "docstart")
+        .setDefault(Flags.DEFAULT_FEATURE_FLAG)
+        .help("Reset the adaptive features; defaults to 'no'.\n");
+  }
+  
+  /**
    * Create the main parameters available for training NERC models.
    */
   private void loadCrossValidateParameters() {
@@ -347,5 +397,22 @@ public class CLI {
     evalProperties.setProperty("clearFeatures", clearFeatures);
     return evalProperties;
   }
+  
+  /**
+   * Set a Properties object with the CLI parameters for evaluation.
+   * @param model the model parameter
+   * @param testset the reference set
+   * @param corpusFormat the format of the testset
+   * @param netypes the ne types to use in the evaluation
+   * @return the properties object
+   */
+  private Properties setParsevalProperties(String language, String model, String testset) {
+    Properties parsevalProperties = new Properties();
+    parsevalProperties.setProperty("language", language);
+    parsevalProperties.setProperty("model", model);
+    parsevalProperties.setProperty("testset", testset);
+    return parsevalProperties;
+  }
+
 
 }

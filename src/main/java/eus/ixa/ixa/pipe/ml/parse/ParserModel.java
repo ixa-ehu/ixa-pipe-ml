@@ -20,7 +20,6 @@ package eus.ixa.ixa.pipe.ml.parse;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
@@ -31,7 +30,6 @@ import opennlp.tools.ml.model.MaxentModel;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.BaseModel;
-import opennlp.tools.util.model.UncloseableInputStream;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 
 /**
@@ -99,8 +97,6 @@ public class ParserModel extends BaseModel {
       serializers.put("headrules",
           new PennTreebankHeadRules.PennTreebankHeadRulesSerializer());
     }
-    serializers.put("postagger", new SequenceLabelerModelSerializer());
-    serializers.put("chunker", new SequenceLabelerModelSerializer());
   }
 
   public MaxentModel getBuildModel() {
@@ -180,22 +176,6 @@ public class ParserModel extends BaseModel {
 
     if (!(artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME) instanceof HeadRules)) {
       throw new InvalidFormatException("Missing the head rules!");
-    }
-  }
-
-  private static class SequenceLabelerModelSerializer implements
-      ArtifactSerializer<SequenceLabelerModel> {
-
-    public SequenceLabelerModel create(InputStream in) throws IOException,
-        InvalidFormatException {
-      SequenceLabelerModel posModel = new SequenceLabelerModel(
-          new UncloseableInputStream(in));
-      return posModel;
-    }
-
-    public void serialize(SequenceLabelerModel artifact, OutputStream out)
-        throws IOException {
-      artifact.serialize(out);
     }
   }
 

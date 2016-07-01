@@ -93,8 +93,13 @@ public class Evaluate {
     SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
     evaluator.evaluate(testSamples);
     System.out.println(evaluator.getFMeasure());
-    //TODO split F-measure and wordAccuracy
-    //System.out.println(evaluator.getWordAccuracy());
+  }
+  
+  public final void evaluateAccuracy() throws IOException {
+    SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
+    evaluator.evaluate(testSamples);
+    System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
+    System.out.println("Sentence accuracy: " + evaluator.getSentenceAccuracy());
   }
   /**
    * Evaluate and print the precision, recall and F measure per

@@ -55,8 +55,7 @@ public class CLI {
    * Get dynamically the version of ixa-pipe-ml by looking at the MANIFEST
    * file.
    */
-  private final String version = CLI.class.getPackage()
-      .getImplementationVersion();
+  private final String version = CLI.class.getPackage().getImplementationVersion();
   /**
    * Name space of the arguments provided at the CLI.
    */
@@ -71,8 +70,7 @@ public class CLI {
   /**
    * Sub parser instance.
    */
-  private Subparsers subParsers = argParser.addSubparsers().help(
-      "sub-command help");
+  private Subparsers subParsers = argParser.addSubparsers().help("sub-command help");
   /**
    * The parser that manages the SequenceLabeler training sub-command.
    */
@@ -230,6 +228,7 @@ public class CLI {
    */
   public final void eval() throws IOException {
 
+    String metric = parsedArguments.getString("metric");
     String lang = parsedArguments.getString("language");
     String model = parsedArguments.getString("model");
     String testset = parsedArguments.getString("testset");
@@ -237,8 +236,11 @@ public class CLI {
     String netypes = parsedArguments.getString("types");
     String clearFeatures = parsedArguments.getString("clearFeatures");
     Properties props = setEvalProperties(lang, model, testset, corpusFormat, netypes, clearFeatures);
-    
     Evaluate evaluator = new Evaluate(props);
+    
+    if (metric.equalsIgnoreCase("accuracy")) {
+      evaluator.evaluateAccuracy();
+    } else {
       if (parsedArguments.getString("evalReport") != null) {
         if (parsedArguments.getString("evalReport").equalsIgnoreCase("brief")) {
           evaluator.evaluate();
@@ -252,6 +254,7 @@ public class CLI {
       } else {
         evaluator.detailEvaluate();
       }
+    }
   }
   
   /**
@@ -315,6 +318,11 @@ public class CLI {
    * Create the parameters available for evaluation.
    */
   private void loadEvalParameters() {
+    evalParser.addArgument("--metric")
+        .required(false)
+        .choices("accuracy", "fmeasure")
+        .setDefault("fmeasure")
+        .help("Choose evaluation metric for Sequence Labeler; it defaults to fmeasure.\n");
     evalParser.addArgument("-l", "--language")
         .required(true)
         .choices("de", "en", "es", "eu", "it", "nl")
@@ -345,7 +353,6 @@ public class CLI {
         .setDefault(Flags.DEFAULT_SEQUENCE_TYPES)
         .help("Choose which Sequence types used for evaluation; the argument must be a comma separated" +
         		" string; e.g., 'person,organization'.\n");
-            
   }
   
   /**

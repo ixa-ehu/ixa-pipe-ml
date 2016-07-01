@@ -16,13 +16,13 @@
  */
 
 package eus.ixa.ixa.pipe.ml.sequence;
-import eus.ixa.ixa.pipe.ml.utils.Span;
 import opennlp.tools.util.eval.Evaluator;
 import opennlp.tools.util.eval.FMeasure;
-import opennlp.tools.util.eval.Mean;
+import eus.ixa.ixa.pipe.ml.eval.Accuracy;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
- * The {@link SequenceLabelerEvaluator} measures the performance
+ * The {@link SequenceLabelerEvaluator} measures the F1 performance
  * of the given {@link SequenceLabeler} with the provided
  * reference {@link SequenceLabelSample}s.
  *
@@ -33,7 +33,7 @@ import opennlp.tools.util.eval.Mean;
 public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
 
   private FMeasure fmeasure = new FMeasure();
-  private Mean wordAccuracy = new Mean();
+  private Accuracy wordAccuracy = new Accuracy();
 
 
   /**
@@ -57,7 +57,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
   /**
    * Evaluates the given reference {@link SequenceLabelSample} object.
    *
-   * This is done by finding the sequneces with the
+   * This is done by finding the sequences with the
    * {@link SequenceLabeler} in the sentence from the reference
    * {@link SequenceLabelSample}. The found sequences are then used to
    * calculate and update the scores.
@@ -72,20 +72,9 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     if (reference.isClearAdaptiveDataSet()) {
       sequenceLabeler.clearAdaptiveData();
     }
-
-    Span[] predictedNames = sequenceLabeler.tag(reference.getTokens());
+    String[] referenceTokens = reference.getTokens();
+    Span[] predictedNames = sequenceLabeler.tag(referenceTokens);
     Span[] references = reference.getSequences();
-    /*String[] predictedTags = StringUtils.getTagsFromSpan(predictedNames, reference.getTokens());
-    String[] referenceTags = StringUtils.getTagsFromSpan(references, reference.getTokens());
-    //TODO split word accuracy and F-measure depending on the task?
-    for (int i = 0; i < referenceTags.length; i++) {
-      if (referenceTags[i].equals(predictedTags[i])) {
-        wordAccuracy.add(1);
-      }
-      else {
-        wordAccuracy.add(0);
-      }
-    }*/
     // OPENNLP-396 When evaluating with a file in the old format
     // the type of the span is null, but must be set to default to match
     // the output of the name finder.
@@ -94,6 +83,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
         references[i] = new Span(references[i].getStart(), references[i].getEnd(), "default");
       }
     }
+    wordAccuracy.updateScores(references, predictedNames);
     fmeasure.updateScores(references, predictedNames);
     return new SequenceLabelSample(reference.getTokens(), predictedNames, reference.isClearAdaptiveDataSet());
   }
@@ -112,6 +102,10 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
    */
   public double getWordAccuracy() {
     return wordAccuracy.mean();
+  }
+  
+  public double getSentenceAccuracy() {
+    return wordAccuracy.sentMean();
   }
   
   /**

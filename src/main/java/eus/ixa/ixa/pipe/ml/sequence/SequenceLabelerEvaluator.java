@@ -34,6 +34,9 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
 
   private FMeasure fmeasure = new FMeasure();
   private Accuracy wordAccuracy = new Accuracy();
+  private Accuracy sentenceAccuracy = new Accuracy();
+  private Accuracy unknownWords = new Accuracy();
+  private Accuracy knownWords = new Accuracy();
 
 
   /**
@@ -83,11 +86,14 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
         references[i] = new Span(references[i].getStart(), references[i].getEnd(), "default");
       }
     }
-    wordAccuracy.updateScores(references, predictedNames);
+    //TODO add here training data, use two methods or the same one with a boolean?
+    //if trainingData != null... then evaluate known/unknown
+    //otherwise do not go there in the updateScores method
+    updateScores(references, predictedNames);
     fmeasure.updateScores(references, predictedNames);
     return new SequenceLabelSample(reference.getTokens(), predictedNames, reference.isClearAdaptiveDataSet());
   }
-
+  
   public FMeasure getFMeasure() {
     return fmeasure;
   }  
@@ -105,7 +111,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
   }
   
   public double getSentenceAccuracy() {
-    return wordAccuracy.sentMean();
+    return sentenceAccuracy.mean();
   }
   
   /**
@@ -117,5 +123,24 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
   public long getWordCount() {
     return wordAccuracy.count();
   }
+  
+  public void updateScores(final Object[] references, final Object[] predictions) {
+    int fails = 0;
+    for (int i = 0; i < references.length; i++) {
+      if (references[i].equals(predictions[i])) {
+        wordAccuracy.add(1);
+      }
+      else {
+        wordAccuracy.add(0);
+        fails++;
+      }
+    }
+    if (fails > 0) {
+      sentenceAccuracy.add(0);
+    } else {
+      sentenceAccuracy.add(1);
+    }
+  }
+
 }
 

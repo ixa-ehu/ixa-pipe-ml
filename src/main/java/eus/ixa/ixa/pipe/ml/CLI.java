@@ -34,7 +34,7 @@ import opennlp.tools.util.TrainingParameters;
 import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
-import eus.ixa.ixa.pipe.ml.eval.Evaluate;
+import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
 import eus.ixa.ixa.pipe.ml.parse.ParserModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
@@ -235,11 +235,15 @@ public class CLI {
     String corpusFormat = parsedArguments.getString("corpusFormat");
     String netypes = parsedArguments.getString("types");
     String clearFeatures = parsedArguments.getString("clearFeatures");
+    String unknownAccuracy = parsedArguments.getString("unknownAccuracy");
     Properties props = setEvalProperties(lang, model, testset, corpusFormat, netypes, clearFeatures);
-    Evaluate evaluator = new Evaluate(props);
+    SequenceLabelerEvaluate evaluator = new SequenceLabelerEvaluate(props);
     
     if (metric.equalsIgnoreCase("accuracy")) {
       evaluator.evaluateAccuracy();
+      if (unknownAccuracy.equalsIgnoreCase("unknownAccuracy")) {
+        
+      }
     } else {
       if (parsedArguments.getString("evalReport") != null) {
         if (parsedArguments.getString("evalReport").equalsIgnoreCase("brief")) {
@@ -353,6 +357,10 @@ public class CLI {
         .setDefault(Flags.DEFAULT_SEQUENCE_TYPES)
         .help("Choose which Sequence types used for evaluation; the argument must be a comma separated" +
         		" string; e.g., 'person,organization'.\n");
+    evalParser.addArgument("-u","--unknownAccuracy")
+        .required(false)
+        .setDefault(Flags.DEFAULT_FEATURE_FLAG)
+        .help("Pass the model training set to evaluate unknown and known word accuracy.\n");
   }
   
   /**

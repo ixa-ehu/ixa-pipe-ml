@@ -25,15 +25,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.SequenceLabelerTrainer;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabeler;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 /**
@@ -42,7 +42,7 @@ import eus.ixa.ixa.pipe.ml.utils.Flags;
  * @author ragerri
  * @version 2015-02-24
  */
-public class Evaluate {
+public class SequenceLabelerEvaluate {
 
   /**
    * The reference corpus to evaluate against.
@@ -58,7 +58,7 @@ public class Evaluate {
    */
   private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels =
       new ConcurrentHashMap<String, SequenceLabelerModel>();
- 
+
   /**
    * Construct an evaluator. It takes from the properties a model,
    * a testset and the format of the testset. Every other parameter
@@ -67,7 +67,7 @@ public class Evaluate {
    * @param props the properties parameter
    * @throws IOException the io exception
    */
-  public Evaluate(final Properties props) throws IOException {
+  public SequenceLabelerEvaluate(final Properties props) throws IOException {
     
     String lang = props.getProperty("language");
     String clearFeatures = props.getProperty("clearFeatures");
@@ -75,7 +75,6 @@ public class Evaluate {
     String testSet = props.getProperty("testset");
     String corpusFormat = props.getProperty("corpusFormat");
     String seqTypes = props.getProperty("types");
-    
     testSamples = SequenceLabelerTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
     if (seqTypes != Flags.DEFAULT_SEQUENCE_TYPES) {
       String[] neTypes = seqTypes.split(",");

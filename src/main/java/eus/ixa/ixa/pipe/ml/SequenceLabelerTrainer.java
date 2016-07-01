@@ -71,6 +71,8 @@ import eus.ixa.ixa.pipe.ml.utils.IOUtils;
  * <li>MFSFeatures: Most Frequent sense feature.
  * <li>SuperSenseFeatures: Ciaramita and Altun (2006) features for super sense tagging.
  * <li>POSBaselineFeatures: train a baseline POS tagger.
+ * <li>LemmaBaselineFeatures: train a baseline Lemmatizer.
+ * <li>ChunkBaselineFeatures: train a baseline chunker.
  * </ol>
  * @author ragerri
  * @version 2016-05-06

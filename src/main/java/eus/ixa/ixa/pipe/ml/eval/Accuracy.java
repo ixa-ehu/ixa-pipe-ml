@@ -17,8 +17,6 @@
 
 package eus.ixa.ixa.pipe.ml.eval;
 
-import java.util.Arrays;
-
 
 /**
  * Calculates the arithmetic mean of values
@@ -30,15 +28,10 @@ public class Accuracy {
    * The sum of all added values.
    */
   private double sum;
-
   /**
    * The number of times a value was added.
    */
   private long count;
-  
-  private double sentSum;
-  private double sentCount;
-
   /**
    * Adds a value to the arithmetic mean.
    *
@@ -81,62 +74,11 @@ public class Accuracy {
   public long count() {
     return count;
   }
-  
-  /**
-   * Adds a value to the arithmetic mean.
-   *
-   * @param value the value which should be added
-   * to the arithmetic mean.
-   */
-  public void addSent(double value) {
-    addSent(value, 1);
-  }
-
-  /**
-   * Adds a value count times to the arithmetic mean.
-   *
-   * @param value the value which should be added
-   * to the arithmetic mean.
-   *
-   * @param count number of times the value should be added to
-   * arithmetic mean.
-   */
-  public void addSent(double value, long count) {
-    sentSum += value * count;
-    this.sentCount += count;
-  }
-
-  /**
-   * Retrieves the mean of all values added with
-   * {@link #add(double)} or 0 if there are zero added
-   * values.
-   * @return the accuracy
-   */
-  public double sentMean() {
-    return sentCount > 0 ? sentSum / sentCount : 0;
-  }
-  
-  public void updateScores(final Object[] references, final Object[] predictions) {
-    int fails = 0;
-    for (int i = 0; i < references.length; i++) {
-      if (references[i].equals(predictions[i])) {
-        add(1);
-      }
-      else {
-        add(0);
-        fails++;
-      }
-    }
-    if (fails > 0) {
-      addSent(0);
-    } else {
-      addSent(1);
-    }
-  }
 
   @Override
   public String toString() {
     return Double.toString(mean());
   }
+
 }
 

@@ -236,14 +236,11 @@ public class CLI {
     String netypes = parsedArguments.getString("types");
     String clearFeatures = parsedArguments.getString("clearFeatures");
     String unknownAccuracy = parsedArguments.getString("unknownAccuracy");
-    Properties props = setEvalProperties(lang, model, testset, corpusFormat, netypes, clearFeatures);
+    Properties props = setEvalProperties(lang, model, testset, corpusFormat, netypes, clearFeatures, unknownAccuracy);
     SequenceLabelerEvaluate evaluator = new SequenceLabelerEvaluate(props);
     
     if (metric.equalsIgnoreCase("accuracy")) {
       evaluator.evaluateAccuracy();
-      if (unknownAccuracy.equalsIgnoreCase("unknownAccuracy")) {
-        
-      }
     } else {
       if (parsedArguments.getString("evalReport") != null) {
         if (parsedArguments.getString("evalReport").equalsIgnoreCase("brief")) {
@@ -402,7 +399,7 @@ public class CLI {
    * @param netypes the ne types to use in the evaluation
    * @return the properties object
    */
-  private Properties setEvalProperties(String language, String model, String testset, String corpusFormat, String netypes, String clearFeatures) {
+  private Properties setEvalProperties(String language, String model, String testset, String corpusFormat, String netypes, String clearFeatures, String unknownAccuracy) {
     Properties evalProperties = new Properties();
     evalProperties.setProperty("language", language);
     evalProperties.setProperty("model", model);
@@ -410,6 +407,7 @@ public class CLI {
     evalProperties.setProperty("corpusFormat", corpusFormat);
     evalProperties.setProperty("types", netypes);
     evalProperties.setProperty("clearFeatures", clearFeatures);
+    evalProperties.setProperty("unknownAccuracy", unknownAccuracy);
     return evalProperties;
   }
   

@@ -48,6 +48,8 @@ public class SequenceLabelerEvaluate {
    * The reference corpus to evaluate against.
    */
   private ObjectStream<SequenceLabelSample> testSamples;
+  private ObjectStream<SequenceLabelSample> trainSamples;
+  private boolean unknownAccuracy = false;
   /**
    * An instance of the probabilistic {@link SequenceLabelerME}.
    */
@@ -75,7 +77,12 @@ public class SequenceLabelerEvaluate {
     String testSet = props.getProperty("testset");
     String corpusFormat = props.getProperty("corpusFormat");
     String seqTypes = props.getProperty("types");
+    String trainSet = props.getProperty("unknownAccuracy");
     testSamples = SequenceLabelerTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
+    if (trainSet.equalsIgnoreCase("unknownAccuracy")) {
+      unknownAccuracy = true;
+      trainSamples = SequenceLabelerTrainer.getSequenceStream(trainSet, clearFeatures, corpusFormat);
+    }
     if (seqTypes != Flags.DEFAULT_SEQUENCE_TYPES) {
       String[] neTypes = seqTypes.split(",");
       testSamples = new SequenceLabelSampleTypeFilter(neTypes, testSamples);
@@ -95,10 +102,20 @@ public class SequenceLabelerEvaluate {
   }
   
   public final void evaluateAccuracy() throws IOException {
-    SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
-    evaluator.evaluate(testSamples);
-    System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
-    System.out.println("Sentence accuracy: " + evaluator.getSentenceAccuracy());
+    if (unknownAccuracy) {
+      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(trainSamples, sequenceLabeler);
+      evaluator.evaluate(testSamples);
+      System.out.println("WordAccuracy: " + evaluator.getWordAccuracy());
+      System.out.println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
+      System.out.println("Uknown Word Accuracy: " + evaluator.getUknownWordAccuracy());
+      System.out.println("Known Word Accuracy: " + evaluator.getKnownAccuracy());
+    } else {
+      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
+      evaluator.evaluate(testSamples);
+      System.out.println();
+      System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
+      System.out.println("Sentence accuracy: " + evaluator.getSentenceAccuracy());
+    }
   }
   /**
    * Evaluate and print the precision, recall and F measure per

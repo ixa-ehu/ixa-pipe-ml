@@ -17,8 +17,8 @@
 
 package eus.ixa.ixa.pipe.ml.sequence;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.Evaluator;
@@ -42,7 +42,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
   private Accuracy sentenceAccuracy = new Accuracy();
   private Accuracy unknownAccuracy = new Accuracy();
   private Accuracy knownAccuracy = new Accuracy();
-  private List<String> knownWords = new ArrayList<>();
+  private Set<String> knownWords = new HashSet<>();
 
   /**
    * The {@link SequenceLabeler} used to create the predicted
@@ -50,13 +50,6 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
    */
   private SequenceLabeler sequenceLabeler;
 
-  /**
-   * Initializes the current instance with the given
-   * {@link SequenceLabeler}.
-   *
-   * @param nameFinder the {@link SequenceLabeler} to evaluate.
-   * @param listeners evaluation sample listeners
-   */
   public SequenceLabelerEvaluator(SequenceLabeler seqLabeler, SequenceLabelerEvaluationMonitor ... listeners) {
     super(listeners);
     this.sequenceLabeler = seqLabeler;
@@ -66,7 +59,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     super(listeners);
     this.sequenceLabeler = seqLabeler;
     if (trainSamples != null) {
-      knownWords = getKnownWords(trainSamples);
+      getKnownWords(trainSamples);
     }
   }
 
@@ -99,10 +92,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
         references[i] = new Span(references[i].getStart(), references[i].getEnd(), "default");
       }
     }
-    //TODO add here training data, use two methods or the same one with a boolean?
-    //if trainingData != null... then evaluate known/unknown
-    //otherwise do not go there in the updateScores method
-    updateScores(referenceTokens, references, predictedNames);
+    updateAccuracyScores(referenceTokens, references, predictedNames);
     fmeasure.updateScores(references, predictedNames);
     return new SequenceLabelSample(reference.getTokens(), predictedNames, reference.isClearAdaptiveDataSet());
   }
@@ -127,7 +117,7 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     return sentenceAccuracy.mean();
   }
   
-  public double getUknownWordAccuracy() {
+  public double getUnknownWordAccuracy() {
     return unknownAccuracy.mean();
   }
   
@@ -145,29 +135,28 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     return wordAccuracy.count();
   }
   
-  public void updateScores(final String[] referenceTokens, final Object[] references, final Object[] predictions) {
+  public void updateAccuracyScores(final String[] referenceTokens, final Object[] references, final Object[] predictions) {
     
     int fails = 0;
     for (int i = 0; i < references.length; i++) {
+      boolean isKnown = checkWordInSeenData(referenceTokens[i]);
       if (references[i].equals(predictions[i])) {
-        wordAccuracy.add(1);
-        if (!knownWords.isEmpty() || knownWords != null) {
-          if (knownWords.contains(referenceTokens[i])) {
+        wordAccuracy.add(1);        
+          if (isKnown) {
             knownAccuracy.add(1);
           } else {
             unknownAccuracy.add(1);
           }
-        }
       } else {
         wordAccuracy.add(0);
         fails++;
-        if (!knownWords.isEmpty() || knownWords != null) {
-          knownAccuracy.add(0);
-        } else {
+          if (isKnown) {
+            knownAccuracy.add(0);
+          } else {
           unknownAccuracy.add(0);
         }
-      }
     }
+  }
     if (fails > 0) {
       sentenceAccuracy.add(0);
     } else {
@@ -175,11 +164,22 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     }
   }
   
-  private List<String> getKnownWords(ObjectStream<SequenceLabelSample> trainSamples) {
-    List<String> knownWords = new ArrayList<>();
+  private boolean checkWordInSeenData(String referenceToken) {
+    boolean isKnown = false;
+    if (!knownWords.isEmpty()) {
+      if (knownWords.contains(referenceToken)) {
+        isKnown = true;
+      } else {
+        isKnown = false;
+      }
+    }
+    return isKnown;
+  }
+  
+  private void getKnownWords(ObjectStream<SequenceLabelSample> trainSamples) {
     SequenceLabelSample sample;
     try {
-      while ((sample = trainSamples.read()) != null) {
+      while ((sample = trainSamples.read()) != null) {  
         for (String token : sample.getTokens()) {
           knownWords.add(token);
         }
@@ -187,7 +187,6 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     } catch (IOException e) {
       e.printStackTrace();
     }
-    return knownWords;
   }
 
 }

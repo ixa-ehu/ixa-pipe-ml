@@ -79,7 +79,7 @@ public class SequenceLabelerEvaluate {
     String seqTypes = props.getProperty("types");
     String trainSet = props.getProperty("unknownAccuracy");
     testSamples = SequenceLabelerTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
-    if (trainSet.equalsIgnoreCase("unknownAccuracy")) {
+    if (!trainSet.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG)) {
       unknownAccuracy = true;
       trainSamples = SequenceLabelerTrainer.getSequenceStream(trainSet, clearFeatures, corpusFormat);
     }
@@ -105,9 +105,10 @@ public class SequenceLabelerEvaluate {
     if (unknownAccuracy) {
       SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(trainSamples, sequenceLabeler);
       evaluator.evaluate(testSamples);
-      System.out.println("WordAccuracy: " + evaluator.getWordAccuracy());
+      System.out.println();
+      System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
       System.out.println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
-      System.out.println("Uknown Word Accuracy: " + evaluator.getUknownWordAccuracy());
+      System.out.println("Unknown Word Accuracy: " + evaluator.getUnknownWordAccuracy());
       System.out.println("Known Word Accuracy: " + evaluator.getKnownAccuracy());
     } else {
       SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);

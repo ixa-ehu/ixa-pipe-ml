@@ -1,5 +1,5 @@
 /*
- * Copyright 2015 Rodrigo Agerri
+ * Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ import eus.ixa.ixa.pipe.ml.utils.Flags;
  * Evaluation class mostly using {@link SequenceLabelerEvaluator}.
  *
  * @author ragerri
- * @version 2015-02-24
+ * @version 2016-07-04
  */
 public class SequenceLabelerEvaluate {
 

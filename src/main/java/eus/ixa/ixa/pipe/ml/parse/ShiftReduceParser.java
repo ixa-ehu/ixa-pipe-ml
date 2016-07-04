@@ -636,7 +636,7 @@ public class ShiftReduceParser {
         ParserEventTypeEnum.BUILD, parserFactory);
     Map<String, String> buildReportMap = new HashMap<String, String>();
     EventTrainer trainer = TrainerFactory.getEventTrainer(
-        trainParams.getSettings(), buildReportMap);
+        trainParams.getSettings("build"), buildReportMap);
     MaxentModel buildModel = trainer.train(bes);
     mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
     parseSamples.reset();
@@ -647,7 +647,7 @@ public class ShiftReduceParser {
         ParserEventTypeEnum.CHECK);
     Map<String, String> checkReportMap = new HashMap<String, String>();
     EventTrainer checkTrainer = TrainerFactory.getEventTrainer(
-        trainParams.getSettings(), checkReportMap);
+        trainParams.getSettings("check"), checkReportMap);
     MaxentModel checkModel = checkTrainer.train(kes);
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 

@@ -23,7 +23,7 @@ import java.util.Set;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.Evaluator;
 import opennlp.tools.util.eval.FMeasure;
-import eus.ixa.ixa.pipe.ml.eval.Accuracy;
+import opennlp.tools.util.eval.Mean;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
@@ -38,10 +38,10 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
 public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
 
   private FMeasure fmeasure = new FMeasure();
-  private Accuracy wordAccuracy = new Accuracy();
-  private Accuracy sentenceAccuracy = new Accuracy();
-  private Accuracy unknownAccuracy = new Accuracy();
-  private Accuracy knownAccuracy = new Accuracy();
+  private Mean wordAccuracy = new Mean();
+  private Mean sentenceAccuracy = new Mean();
+  private Mean unknownAccuracy = new Mean();
+  private Mean knownAccuracy = new Mean();
   private Set<String> knownWords = new HashSet<>();
 
   /**

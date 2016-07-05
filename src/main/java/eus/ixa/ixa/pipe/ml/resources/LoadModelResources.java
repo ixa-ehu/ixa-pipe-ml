@@ -139,6 +139,12 @@ public class LoadModelResources {
       artifactSerializers.put(posSerializerId, new SequenceModelResource.SequenceModelResourceSerializer());
       loadResource(posSerializerId, artifactSerializers, chunkBaselineFeatures, resources);
     }
+    if (Flags.isPredicateContextFeatures(params)) {
+      String predicateContextFeatures = Flags.getPredicateContextFeatures(params);
+      String posSerializerId = "predicatecontextserializer";
+      artifactSerializers.put(posSerializerId, new PredicateContext.PredicateContextSerializer());
+      loadResource(posSerializerId, artifactSerializers, predicateContextFeatures, resources);
+    }
     return resources;
   }
   

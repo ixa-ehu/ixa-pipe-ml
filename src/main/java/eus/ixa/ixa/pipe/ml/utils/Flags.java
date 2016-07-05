@@ -647,6 +647,16 @@ public class Flags {
     return mfsFlagArray;
   }
   
+  public static String getPredicateContextFeatures(TrainingParameters params) {
+    String lemmaFlag = null;
+    if (params.getSettings().get("PredicateContextFeatures") != null) {
+      lemmaFlag = params.getSettings().get("PredicateContextFeatures");
+    } else {
+      lemmaFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return lemmaFlag;
+  }
+  
   public static String getChunkBaselineFeatures(TrainingParameters params) {
     String lemmaFlag = null;
     if (params.getSettings().get("ChunkBaselineFeatures") != null) {
@@ -740,6 +750,11 @@ public class Flags {
       System.err.println("Specify head rules file to train the parser!!");
     }
     return headRulesFlag; 
+  }
+  
+  public static boolean isPredicateContextFeatures(TrainingParameters params) {
+    String posFeatures = getPredicateContextFeatures(params);
+    return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
   public static boolean isChunkBaselineFeatures(TrainingParameters params) {

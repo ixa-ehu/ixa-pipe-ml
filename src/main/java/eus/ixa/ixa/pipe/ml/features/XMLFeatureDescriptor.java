@@ -431,6 +431,15 @@ public final class XMLFeatureDescriptor {
       System.err.println("-> Chunk Baseline Context Generator added!");
     }
     
+    if (Flags.isPredicateContextFeatures(params)) {
+      String predicateContextFile = Flags.getPredicateContextFeatures(params);
+      Element predicateContextFeatureElement = new Element("custom");
+      predicateContextFeatureElement.setAttribute("class", PredicateContextFeatureGenerator.class.getName());
+      predicateContextFeatureElement.setAttribute("dict", IOUtils.normalizeLexiconName(new File(predicateContextFile).getName()));
+      generators.addContent(predicateContextFeatureElement);
+      System.err.println("-> Predicate Context Generator added!");
+    }
+    
     aggGenerators.addContent(cached);
     cached.addContent(generators);
     

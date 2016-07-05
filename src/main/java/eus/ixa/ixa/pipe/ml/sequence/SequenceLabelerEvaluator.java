@@ -24,6 +24,7 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.Evaluator;
 import opennlp.tools.util.eval.FMeasure;
 import opennlp.tools.util.eval.Mean;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
@@ -49,14 +50,16 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
    * {@link SequenceLabelSample} objects.
    */
   private SequenceLabeler sequenceLabeler;
+  private String corpusFormat = Flags.DEFAULT_EVAL_FORMAT;
 
   public SequenceLabelerEvaluator(SequenceLabeler seqLabeler, SequenceLabelerEvaluationMonitor ... listeners) {
     super(listeners);
     this.sequenceLabeler = seqLabeler;
   }
   
-  public SequenceLabelerEvaluator(ObjectStream<SequenceLabelSample> trainSamples, SequenceLabeler seqLabeler, SequenceLabelerEvaluationMonitor ... listeners) {
+  public SequenceLabelerEvaluator(ObjectStream<SequenceLabelSample> trainSamples, String aCorpusFormat, SequenceLabeler seqLabeler, SequenceLabelerEvaluationMonitor ... listeners) {
     super(listeners);
+    this.corpusFormat = aCorpusFormat;
     this.sequenceLabeler = seqLabeler;
     if (trainSamples != null) {
       getKnownWords(trainSamples);
@@ -92,9 +95,11 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
         references[i] = new Span(references[i].getStart(), references[i].getEnd(), "default");
       }
     }
-    updateAccuracyScores(referenceTokens, references, predictedNames);
+    if (corpusFormat.equalsIgnoreCase("lemmatizer") || corpusFormat.equalsIgnoreCase("tabulated")) {
+      updateAccuracyScores(referenceTokens, references, predictedNames);
+    }
     fmeasure.updateScores(references, predictedNames);
-    return new SequenceLabelSample(reference.getTokens(), predictedNames, reference.isClearAdaptiveDataSet());
+    return new SequenceLabelSample(referenceTokens, predictedNames, reference.isClearAdaptiveDataSet());
   }
   
   public FMeasure getFMeasure() {

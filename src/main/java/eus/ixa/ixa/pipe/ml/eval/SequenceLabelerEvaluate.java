@@ -49,6 +49,10 @@ public class SequenceLabelerEvaluate {
    */
   private ObjectStream<SequenceLabelSample> testSamples;
   private ObjectStream<SequenceLabelSample> trainSamples;
+  /**
+   * The corpus format: conll02, conll03, lemmatizer, tabulated.
+   */
+  private String corpusFormat;
   private boolean unknownAccuracy = false;
   /**
    * An instance of the probabilistic {@link SequenceLabelerME}.
@@ -75,7 +79,7 @@ public class SequenceLabelerEvaluate {
     String clearFeatures = props.getProperty("clearFeatures");
     String model = props.getProperty("model");
     String testSet = props.getProperty("testset");
-    String corpusFormat = props.getProperty("corpusFormat");
+    corpusFormat = props.getProperty("corpusFormat");
     String seqTypes = props.getProperty("types");
     String trainSet = props.getProperty("unknownAccuracy");
     testSamples = SequenceLabelerTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
@@ -103,7 +107,7 @@ public class SequenceLabelerEvaluate {
   
   public final void evaluateAccuracy() throws IOException {
     if (unknownAccuracy) {
-      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(trainSamples, sequenceLabeler);
+      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(trainSamples, corpusFormat, sequenceLabeler);
       evaluator.evaluate(testSamples);
       System.out.println();
       System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());

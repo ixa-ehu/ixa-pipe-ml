@@ -175,21 +175,39 @@ public class SequenceLabelerTrainer {
           "The SequenceLabelerFactory must be instantiated!!");
     }
     SequenceLabelerModel trainedModel = null;
-    SequenceLabelerEvaluator nerEvaluator = null;
     try {
       trainedModel = SequenceLabelerME.train(lang, null, trainSamples, params,
           nameClassifierFactory);
-      SequenceLabelerME nerTagger = new SequenceLabelerME(trainedModel);
-      nerEvaluator = new SequenceLabelerEvaluator(nerTagger);
-      nerEvaluator.evaluate(testSamples);
+      SequenceLabelerME seqLabeler = new SequenceLabelerME(trainedModel);
+      trainingEvaluate(seqLabeler);
     } catch (IOException e) {
       System.err.println("IO error while loading traing and test sets!");
       e.printStackTrace();
       System.exit(1);
     }
-    System.out.println("Final Result: \n" + nerEvaluator.getFMeasure());
-    //System.out.println("Word accuracy: " + nerEvaluator.getWordAccuracy());
     return trainedModel;
+  }
+  
+  private void trainingEvaluate(SequenceLabelerME sequenceLabeler) {
+    if (corpusFormat.equalsIgnoreCase("lemmatizer") || corpusFormat.equalsIgnoreCase("tabulated")) {
+      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(trainSamples, corpusFormat, sequenceLabeler);
+      try {
+        evaluator.evaluate(testSamples);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      System.out.println();
+      System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
+      System.out.println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
+    } else {
+      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
+      try {
+        evaluator.evaluate(testSamples);
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
+      System.out.println("Final Result: \n" + evaluator.getFMeasure());
+    }
   }
 
   /**

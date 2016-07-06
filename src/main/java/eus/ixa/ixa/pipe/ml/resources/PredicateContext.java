@@ -103,7 +103,6 @@ public class PredicateContext implements SerializableArtifact {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out));
 
     for (List<String> entry : predContexts) {
-      System.err.println(entry.get(0) + "\t" + entry.get(1) + "\t" + entry.get(2) + "\n");
       writer.write(entry.get(0) + "\t" + entry.get(1) + "\t" + entry.get(2) + "\n");
     }
     writer.flush();

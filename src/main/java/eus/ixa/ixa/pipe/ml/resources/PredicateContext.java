@@ -66,10 +66,10 @@ public class PredicateContext implements SerializableArtifact {
     }
   }
 
-  List<ArrayList<String>> predicateContext = new ArrayList<ArrayList<String>>();
+  List<List<String>> predContexts = new ArrayList<List<String>>();
 
-  public List<ArrayList<String>> getPredicateContext() {
-    return predicateContext;
+  public List<List<String>> getPredicateContext() {
+    return predContexts;
   }
   
   public PredicateContext(InputStream in) throws IOException {
@@ -86,11 +86,11 @@ public class PredicateContext implements SerializableArtifact {
     if (lineArray.length == 3) {
       String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
       String normalizedContext = dotInsideI.matcher(lineArray[1]).replaceAll("i");
-      ArrayList<String> tokenValues = new ArrayList<>();
+      List<String> tokenValues = new ArrayList<>();
       tokenValues.add(normalizedToken);
       tokenValues.add(normalizedContext);
       tokenValues.add(lineArray[2]);
-      predicateContext.add(tokenValues);
+      predContexts.add(tokenValues);
     }
   }
 
@@ -102,14 +102,15 @@ public class PredicateContext implements SerializableArtifact {
   public void serialize(OutputStream out) throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out));
 
-    for (ArrayList<String> entry : predicateContext) {
+    for (List<String> entry : predContexts) {
+      System.err.println(entry.get(0) + "\t" + entry.get(1) + "\t" + entry.get(2) + "\n");
       writer.write(entry.get(0) + "\t" + entry.get(1) + "\t" + entry.get(2) + "\n");
     }
     writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {
-    return PredicateContext.class;
+    return PredicateContextSerializer.class;
   }
 }
 

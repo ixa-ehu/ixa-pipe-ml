@@ -40,12 +40,16 @@ public class PredicateContextFeatureGenerator extends CustomFeatureGenerator imp
     String[] predicateContexts = tokens[index].split(":KK:");
     
     //token
+    //System.err.println(predicateContexts[0]);
     features.add(predicateContexts[0]);
     //pred
+    //System.err.println(predicateContexts[1]);
     features.add(predicateContexts[1]);
     //region
+    //System.err.println(predicateContexts[2]);
     features.add(predicateContexts[2]);
     //ctxt
+    //System.err.println(predicateContexts[3]);
     features.add(predicateContexts[3]);
   }
   

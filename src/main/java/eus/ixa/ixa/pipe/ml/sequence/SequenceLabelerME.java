@@ -337,7 +337,7 @@ public class SequenceLabelerME implements SequenceLabeler {
    * @param preds the sequences in an string array.
    * @return the decoded sequences
    */
-  public String[] decodeSequences(String[] preds) {
+  public static String[] decodeSequences(String[] preds) {
     List<String> decodedSequences = new ArrayList<>();
     for (String pred : preds) {
       pred = startPattern.matcher(pred).replaceAll("B-$1");

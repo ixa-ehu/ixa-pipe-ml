@@ -67,7 +67,7 @@ public class BrownCluster implements SerializableArtifact {
    */
   public BrownCluster(InputStream in) throws IOException {
     try {
-      Map <String, String> tempMap = IOUtils.readGzipObjectFromInputStream(in);
+      Map <String, String> tempMap = IOUtils.readObjectFromInputStream(in);
       tokenToClusterMap.putAll(tempMap);
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
@@ -85,7 +85,6 @@ public class BrownCluster implements SerializableArtifact {
 
   public void serialize(OutputStream out) throws IOException {
     OutputStream outputStream = new BufferedOutputStream(out);
-    outputStream = new GZIPOutputStream(outputStream);
     ObjectOutputStream oos = new ObjectOutputStream(outputStream);
     oos.writeObject(tokenToClusterMap);
     oos.flush();

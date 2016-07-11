@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPOutputStream;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
@@ -88,7 +89,6 @@ public class ClarkCluster implements SerializableArtifact {
     ObjectOutputStream oos = new ObjectOutputStream(outputStream);
     oos.writeObject(tokenToClusterMap);
     oos.flush();
-    oos.close();
   }
 
   public Class<?> getArtifactSerializerClass() {

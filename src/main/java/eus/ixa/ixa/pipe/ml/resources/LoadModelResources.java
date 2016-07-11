@@ -227,7 +227,8 @@ public class LoadModelResources {
     if (resourceFile != null) {
       String resourceId = IOUtils.normalizeLexiconName(resourceFile.getName());
       ArtifactSerializer<?> serializer = artifactSerializers.get(serializerId);
-      InputStream resourceIn = CmdLineUtil.openInFile(resourceFile);
+      //InputStream resourceIn = CmdLineUtil.openInFile(resourceFile);
+      InputStream resourceIn = IOUtils.openInFile(resourceFile);
       try {
         resources.put(resourceId, serializer.create(resourceIn));
       } catch (InvalidFormatException e) {

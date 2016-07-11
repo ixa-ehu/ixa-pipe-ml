@@ -23,6 +23,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
@@ -62,7 +63,7 @@ public class Word2VecCluster implements SerializableArtifact {
   
   public Word2VecCluster(InputStream in) throws IOException {
     try {
-      Map <String, String> tempMap = IOUtils.readObjectFromInputStream(in);
+      Map <String, String> tempMap = IOUtils.readGzipObjectFromInputStream(in);
       tokenToClusterMap.putAll(tempMap);
     } catch (ClassNotFoundException e) {
       e.printStackTrace();
@@ -78,7 +79,7 @@ public class Word2VecCluster implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    OutputStream outputStream = new BufferedOutputStream(out);
+    OutputStream outputStream = new BufferedOutputStream(new GZIPOutputStream(out));
     ObjectOutputStream oos = new ObjectOutputStream(outputStream);
     oos.writeObject(tokenToClusterMap);
     oos.flush();

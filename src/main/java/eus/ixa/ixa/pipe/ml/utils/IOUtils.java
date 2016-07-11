@@ -29,6 +29,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import opennlp.tools.cmdline.CmdLineUtil;
@@ -46,6 +47,7 @@ import opennlp.tools.util.TrainingParameters;
  */
 public final class IOUtils {
 
+  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
   /**
    * Private constructor. This class should only be used statically.
    */
@@ -228,11 +230,32 @@ public final class IOUtils {
     return outFile;
   }
   
+  public static InputStream openInFile(File file) {
+    try {
+      InputStream is = new BufferedInputStream(new FileInputStream(file));
+      if (file.getName().endsWith("gz")) {
+        is = new GZIPInputStream(is);
+      }
+      return is;
+    } catch (IOException e) {
+      throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
+    }
+  }
+  
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    ObjectInputStream ois = new ObjectInputStream(is);
-Object readObject = ois.readObject();
-return (T) readObject;
+    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is));
+  Object readObject = ois.readObject();
+  return (T) readObject;
+}
+  
+  @SuppressWarnings("unchecked")
+  public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
+  ClassNotFoundException {
+    //is = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
+    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is));
+    Object readObject = ois.readObject();
+    return (T) readObject;
 }
 }

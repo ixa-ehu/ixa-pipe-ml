@@ -15,22 +15,18 @@
  */
 package eus.ixa.ixa.pipe.ml.resources;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 
 /**
@@ -46,8 +42,6 @@ import opennlp.tools.util.model.SerializableArtifact;
  * 
  */
 public class BrownCluster implements SerializableArtifact {
-  
-  private static final Pattern tabPattern = Pattern.compile("\t");
 
   public static class BrownClusterSerializer implements ArtifactSerializer<BrownCluster> {
 
@@ -71,22 +65,11 @@ public class BrownCluster implements SerializableArtifact {
    * @throws IOException the io exception
    */
   public BrownCluster(InputStream in) throws IOException {
-
-    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
-    String line;
-    while ((line = breader.readLine()) != null) {
-      String[] lineArray = tabPattern.split(line);
-      if (lineArray.length == 3) {
-        int freq = Integer.parseInt(lineArray[2]);
-          if (freq > 5 ) {
-            String normalizedToken = ClarkCluster.dotInsideI.matcher(lineArray[1]).replaceAll("I");
-            tokenToClusterMap.put(normalizedToken, lineArray[0].intern());
-        }
-      }
-      else if (lineArray.length == 2) {
-        String normalizedToken = ClarkCluster.dotInsideI.matcher(lineArray[0]).replaceAll("I");
-        tokenToClusterMap.put(normalizedToken, lineArray[1].intern());
-      }
+    try {
+      Map <String, String> tempMap = IOUtils.readObjectFromInputStream(in);
+      tokenToClusterMap.putAll(tempMap);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
     }
   }
 
@@ -100,13 +83,10 @@ public class BrownCluster implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-
-    for (Map.Entry<String, String> entry : tokenToClusterMap.entrySet()) {
-      writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
-    }
-
-    writer.flush();
+    OutputStream outputStream = new BufferedOutputStream(out);
+    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+    oos.writeObject(tokenToClusterMap);
+    oos.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {

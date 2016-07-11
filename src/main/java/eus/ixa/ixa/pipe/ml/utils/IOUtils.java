@@ -17,13 +17,19 @@
 package eus.ixa.ixa.pipe.ml.utils;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.zip.GZIPOutputStream;
 
 import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.cmdline.TerminateToolException;
@@ -208,4 +214,25 @@ public final class IOUtils {
     }
     return lineStream;
   }
+  
+  public static File writeObjectToFile(Object o, String fileName) throws IOException {
+    File outFile = new File(fileName);
+    OutputStream outputStream = new FileOutputStream(outFile);
+    if (fileName.endsWith(".gz")) {
+      outputStream = new GZIPOutputStream(outputStream);
+    }
+    outputStream = new BufferedOutputStream(outputStream);
+    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+    oos.writeObject(o);
+    oos.close();
+    return outFile;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
+  ClassNotFoundException {
+    ObjectInputStream ois = new ObjectInputStream(is);
+Object readObject = ois.readObject();
+return (T) readObject;
+}
 }

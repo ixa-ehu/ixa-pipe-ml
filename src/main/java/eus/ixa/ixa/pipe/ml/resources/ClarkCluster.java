@@ -16,15 +16,11 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -32,6 +28,7 @@ import java.util.regex.Pattern;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 
 /**
@@ -48,7 +45,6 @@ import opennlp.tools.util.model.SerializableArtifact;
  */
 public class ClarkCluster implements SerializableArtifact {
 
-  private static final Pattern spacePattern = Pattern.compile(" ");
   /**
    * Turkish capital letter I with dot.
    */
@@ -71,18 +67,11 @@ public class ClarkCluster implements SerializableArtifact {
 
   public ClarkCluster(InputStream in) throws IOException {
 
-    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
-    String line;
-    while ((line = breader.readLine()) != null) {
-      String[] lineArray = spacePattern.split(line);
-      if (lineArray.length == 3) {
-        String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
-        tokenToClusterMap.put(normalizedToken.toLowerCase(), lineArray[1].intern());
-      }
-      else if (lineArray.length == 2) {
-        String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
-        tokenToClusterMap.put(normalizedToken.toLowerCase(), lineArray[1].intern());
-      }
+    try {
+      Map <String, String> tempMap = IOUtils.readObjectFromInputStream(in);
+      tokenToClusterMap.putAll(tempMap);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
     }
   }
 
@@ -95,13 +84,11 @@ public class ClarkCluster implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-
-    for (Map.Entry<String, String> entry : tokenToClusterMap.entrySet()) {
-      writer.write(entry.getKey() + " " + entry.getValue() + "\n");
-    }
-
-    writer.flush();
+    OutputStream outputStream = new BufferedOutputStream(out);
+    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+    oos.writeObject(tokenToClusterMap);
+    oos.flush();
+    oos.close();
   }
 
   public Class<?> getArtifactSerializerClass() {

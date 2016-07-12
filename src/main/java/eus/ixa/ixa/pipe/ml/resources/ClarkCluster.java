@@ -16,15 +16,12 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPOutputStream;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
@@ -85,10 +82,7 @@ public class ClarkCluster implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    OutputStream outputStream = new BufferedOutputStream(out);
-    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-    oos.writeObject(tokenToClusterMap);
-    oos.flush();
+    IOUtils.writeObjectToStream(tokenToClusterMap, out);
   }
 
   public Class<?> getArtifactSerializerClass() {

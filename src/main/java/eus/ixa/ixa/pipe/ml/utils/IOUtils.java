@@ -230,12 +230,42 @@ public final class IOUtils {
     return outFile;
   }
   
-  public static InputStream openInFile(File file) {
+  public static void writeGzipObjectToStream(Object o, OutputStream out) {
+    out = new BufferedOutputStream(out);
+    try {
+      out = new GZIPOutputStream(out, true);
+      ObjectOutputStream oos = new ObjectOutputStream(out);
+      oos.writeObject(o);
+      oos.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public static void writeObjectToStream(Object o, OutputStream out) {
+    out = new BufferedOutputStream(out);
+    try {
+      ObjectOutputStream oos = new ObjectOutputStream(out);
+      oos.writeObject(o);
+      oos.flush();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+  }
+  
+  public static InputStream openFromFile(File file) {
     try {
       InputStream is = new BufferedInputStream(new FileInputStream(file));
-      if (file.getName().endsWith("gz")) {
-        is = new GZIPInputStream(is);
-      }
+      return is;
+    } catch (FileNotFoundException e) {
+      throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
+    }
+  }
+  
+  public static InputStream openFromGzipFile(File file) {
+    try {
+      InputStream is = new BufferedInputStream(new FileInputStream(file));
+      is = new GZIPInputStream(is);
       return is;
     } catch (IOException e) {
       throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
@@ -245,16 +275,18 @@ public final class IOUtils {
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is));
-  Object readObject = ois.readObject();
+    is = new BufferedInputStream(is);
+    ObjectInputStream ois = new ObjectInputStream(is);
+    Object readObject = ois.readObject();
   return (T) readObject;
 }
   
   @SuppressWarnings("unchecked")
   public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    //is = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
-    ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(is));
+    is = new BufferedInputStream(is);
+    GZIPInputStream zis = new GZIPInputStream(is);
+    ObjectInputStream ois = new ObjectInputStream(zis);
     Object readObject = ois.readObject();
     return (T) readObject;
 }

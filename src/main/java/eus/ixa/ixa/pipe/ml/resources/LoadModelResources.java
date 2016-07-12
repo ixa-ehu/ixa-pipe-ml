@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.model.ArtifactSerializer;
@@ -227,8 +226,7 @@ public class LoadModelResources {
     if (resourceFile != null) {
       String resourceId = IOUtils.normalizeLexiconName(resourceFile.getName());
       ArtifactSerializer<?> serializer = artifactSerializers.get(serializerId);
-      //InputStream resourceIn = CmdLineUtil.openInFile(resourceFile);
-      InputStream resourceIn = IOUtils.openInFile(resourceFile);
+      InputStream resourceIn = IOUtils.openFromGzipFile(resourceFile);
       try {
         resources.put(resourceId, serializer.create(resourceIn));
       } catch (InvalidFormatException e) {

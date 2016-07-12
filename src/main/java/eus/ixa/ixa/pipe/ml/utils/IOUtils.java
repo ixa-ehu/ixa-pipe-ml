@@ -47,7 +47,8 @@ import opennlp.tools.util.TrainingParameters;
  */
 public final class IOUtils {
 
-  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  //private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  private static final int GZIP_FILE_BUFFER_SIZE = 131072;
   /**
    * Private constructor. This class should only be used statically.
    */
@@ -255,7 +256,7 @@ public final class IOUtils {
   
   public static InputStream openFromFile(File file) {
     try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file));
+      InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
       return is;
     } catch (FileNotFoundException e) {
       throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
@@ -264,8 +265,8 @@ public final class IOUtils {
   
   public static InputStream openFromGzipFile(File file) {
     try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file));
-      is = new GZIPInputStream(is);
+      InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
+      is = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
       return is;
     } catch (IOException e) {
       throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
@@ -275,7 +276,7 @@ public final class IOUtils {
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    is = new BufferedInputStream(is);
+    is = new BufferedInputStream(is, GZIP_FILE_BUFFER_SIZE);
     ObjectInputStream ois = new ObjectInputStream(is);
     Object readObject = ois.readObject();
   return (T) readObject;
@@ -284,8 +285,8 @@ public final class IOUtils {
   @SuppressWarnings("unchecked")
   public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    is = new BufferedInputStream(is);
-    GZIPInputStream zis = new GZIPInputStream(is);
+    is = new BufferedInputStream(is, GZIP_FILE_BUFFER_SIZE);
+    GZIPInputStream zis = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
     ObjectInputStream ois = new ObjectInputStream(zis);
     Object readObject = ois.readObject();
     return (T) readObject;

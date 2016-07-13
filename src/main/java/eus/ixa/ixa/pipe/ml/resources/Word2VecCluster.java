@@ -1,5 +1,5 @@
 /*
- *  Copyright 2014 Rodrigo Agerri
+ *  Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,18 +27,17 @@ import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
-
-
 /**
  * 
  * Class to load a Word2Vec cluster document: word\\s+word_class
- * http://code.google.com/p/word2vec/
+ * http://code.google.com/p/word2vec/ serialized as a java HashMap
+ * object.
  * 
- * The file containing the clustering lexicon has to be passed as the 
+ * The file containing the serialized clustering lexicon has to be passed as the 
  * argument of the Word2VecCluster property.
  * 
  * @author ragerri
- * @version 2014/07/29
+ * @version 2016/07/13
  * 
  */
 public class Word2VecCluster implements SerializableArtifact {

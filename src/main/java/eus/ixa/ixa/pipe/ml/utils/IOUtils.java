@@ -44,6 +44,7 @@ import opennlp.tools.util.TrainingParameters;
 /**
  * Utility functions to read and save ObjectStreams.
  * @author ragerri
+ * @version 2016-07-13
  */
 public final class IOUtils {
 
@@ -53,7 +54,6 @@ public final class IOUtils {
    * Private constructor. This class should only be used statically.
    */
   private IOUtils() {
-
   }
   
   /**
@@ -218,6 +218,13 @@ public final class IOUtils {
     return lineStream;
   }
   
+  /**
+   * Serialize java object to a file.
+   * @param o the java object
+   * @param fileName the name of the file
+   * @return the file
+   * @throws IOException if io problems
+   */
   public static File writeObjectToFile(Object o, String fileName) throws IOException {
     File outFile = new File(fileName);
     OutputStream outputStream = new FileOutputStream(outFile);
@@ -231,6 +238,12 @@ public final class IOUtils {
     return outFile;
   }
   
+  /**
+   * Serialized gzipped java object to an ObjectOutputStream. The stream
+   * remains open.
+   * @param o the java object
+   * @param out the output stream
+   */
   public static void writeGzipObjectToStream(Object o, OutputStream out) {
     out = new BufferedOutputStream(out);
     try {
@@ -243,6 +256,12 @@ public final class IOUtils {
     }
   }
   
+  /**
+   * Serialize java object to an ObjectOutputStream. The stream remains
+   * open.
+   * @param o the java object
+   * @param out the output stream
+   */
   public static void writeObjectToStream(Object o, OutputStream out) {
     out = new BufferedOutputStream(out);
     try {
@@ -254,6 +273,11 @@ public final class IOUtils {
     }
   }
   
+  /**
+   * Open file to an input stream.
+   * @param file the file
+   * @return the input stream
+   */
   public static InputStream openFromFile(File file) {
     try {
       InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
@@ -263,6 +287,11 @@ public final class IOUtils {
     }
   }
   
+  /**
+   * Open gzipped file to an input stream.
+   * @param file the file
+   * @return the input stream
+   */
   public static InputStream openFromGzipFile(File file) {
     try {
       InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
@@ -273,6 +302,13 @@ public final class IOUtils {
     }
   }
   
+  /**
+   * Read object from an input stream.
+   * @param is the input stream
+   * @return the java object
+   * @throws IOException if io problems
+   * @throws ClassNotFoundException if java object class not recognized
+   */
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
@@ -282,6 +318,13 @@ public final class IOUtils {
   return (T) readObject;
 }
   
+  /**
+   * Read gzipped object from an input stream.
+   * @param is the input stream
+   * @return the java object
+   * @throws IOException if io problems
+   * @throws ClassNotFoundException if java object class not recognized
+   */
   @SuppressWarnings("unchecked")
   public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {

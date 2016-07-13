@@ -69,7 +69,6 @@ public class MFSResource implements SerializableArtifact {
   /**
    * Build the MFS Dictionary.
    * @param in the input stream
-   * @throws ClassNotFoundException 
    * @throws IOException the io exception
    */
   public MFSResource(InputStream in) throws IOException {
@@ -285,7 +284,6 @@ public class MFSResource implements SerializableArtifact {
   /**
    * Serialize the lexicon in the original format.
    * @param out the output stream
-   * @throws IOException if io errors
    */
   public void serialize(OutputStream out) {
     IOUtils.writeObjectToStream(multiMap, out);

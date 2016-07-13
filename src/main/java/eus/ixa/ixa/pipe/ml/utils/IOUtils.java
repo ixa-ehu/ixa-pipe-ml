@@ -302,13 +302,6 @@ public final class IOUtils {
     }
   }
   
-  /**
-   * Read object from an input stream.
-   * @param is the input stream
-   * @return the java object
-   * @throws IOException if io problems
-   * @throws ClassNotFoundException if java object class not recognized
-   */
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
@@ -317,14 +310,6 @@ public final class IOUtils {
     Object readObject = ois.readObject();
   return (T) readObject;
 }
-  
-  /**
-   * Read gzipped object from an input stream.
-   * @param is the input stream
-   * @return the java object
-   * @throws IOException if io problems
-   * @throws ClassNotFoundException if java object class not recognized
-   */
   @SuppressWarnings("unchecked")
   public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {

@@ -56,9 +56,8 @@ public class Dictionary implements SerializableArtifact {
   private Map<String, String> dictionary = new HashMap<String, String>();
 
   public Dictionary(InputStream in) throws IOException {
-    Map<String, String> temp;
     try {
-      temp = IOUtils.readObjectFromInputStream(in);
+      Map<String, String> temp = IOUtils.readObjectFromInputStream(in);
       dictionary.putAll(temp);
     } catch (ClassNotFoundException e) {
       e.printStackTrace();

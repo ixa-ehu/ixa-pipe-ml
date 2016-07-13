@@ -16,19 +16,13 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
-import java.util.regex.Pattern;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
@@ -42,18 +36,17 @@ import com.google.common.collect.TreeMultimap;
 
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * Reads wordnet lexicons formated as house#n\t1092#noun.artifact
- * to search for most frequent senses.
+ * in a serialized ListMultimap object to search for most frequent senses.
  * @author ragerri
- * @version 2015-03-30
+ * @version 2016-07-13
  * 
  */
 public class MFSResource implements SerializableArtifact {
-
-  private static final Pattern spacePattern = Pattern.compile("\t");
   
   public static class MFSResourceSerializer implements ArtifactSerializer<MFSResource> {
 
@@ -76,18 +69,14 @@ public class MFSResource implements SerializableArtifact {
   /**
    * Build the MFS Dictionary.
    * @param in the input stream
+   * @throws ClassNotFoundException 
    * @throws IOException the io exception
    */
   public MFSResource(InputStream in) throws IOException {
-    BufferedReader breader = new BufferedReader(new InputStreamReader(
-        in));
-    String line;
     try {
-      while ((line = breader.readLine()) != null) {
-        String[] elems = spacePattern.split(line);
-        multiMap.put(elems[0], elems[1]);
-      }
-    } catch (IOException e) {
+      ListMultimap<String, String> temp = IOUtils.readObjectFromInputStream(in);
+      multiMap.putAll(temp);
+    } catch (ClassNotFoundException e) {
       e.printStackTrace();
     }
   }
@@ -298,13 +287,8 @@ public class MFSResource implements SerializableArtifact {
    * @param out the output stream
    * @throws IOException if io errors
    */
-  public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-
-    for (Map.Entry<String, String> entry : multiMap.entries()) {
-      writer.write(entry.getKey() + "\t" + entry.getValue() +"\n");
-    }
-    writer.flush();
+  public void serialize(OutputStream out) {
+    IOUtils.writeObjectToStream(multiMap, out);
   }
 
   public Class<?> getArtifactSerializerClass() {

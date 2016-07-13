@@ -1,5 +1,5 @@
 /*
- *  Copyright 2015 Rodrigo Agerri
+ *  Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,39 +15,30 @@
  */
 package eus.ixa.ixa.pipe.ml.resources;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.regex.Pattern;
 
-import opennlp.tools.namefind.BilouCodec;
-import opennlp.tools.namefind.BioCodec;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
+import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
+import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 /**
- * Dictionary class which creates a HashMap String, String from 
+ * Dictionary class which reads a serialized HashMap String, String from 
  * a tab separated file name\tclass\t.
  * 
  * @author ragerri
- * @version 2015-03-30
+ * @version 2016-07-13
  * 
  */
 public class Dictionary implements SerializableArtifact {
-  
-  private static final Pattern tabPattern = Pattern.compile("\t");
 
   public static class DictionarySerializer implements ArtifactSerializer<Dictionary> {
 
@@ -65,17 +56,14 @@ public class Dictionary implements SerializableArtifact {
   private Map<String, String> dictionary = new HashMap<String, String>();
 
   public Dictionary(InputStream in) throws IOException {
-
-    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
-    String line;
-    while ((line = breader.readLine()) != null) {
-      String[] lineArray = tabPattern.split(line);
-      if (lineArray.length == 2) {
-        dictionary.put(lineArray[0].toLowerCase(), lineArray[1].intern());
-      } else {
-        System.err.println(lineArray[0] + " is not well formed!");
-      }
+    Map<String, String> temp;
+    try {
+      temp = IOUtils.readObjectFromInputStream(in);
+      dictionary.putAll(temp);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
     }
+    
   }
 
   /**
@@ -214,11 +202,7 @@ public class Dictionary implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-    for (Entry<String, String> entry : dictionary.entrySet()) {
-        writer.write(entry.getKey() + "\t" + entry.getValue() + "\n");
-    }
-    writer.flush();
+   IOUtils.writeObjectToStream(dictionary, out);
   }
 
   public Class<?> getArtifactSerializerClass() {

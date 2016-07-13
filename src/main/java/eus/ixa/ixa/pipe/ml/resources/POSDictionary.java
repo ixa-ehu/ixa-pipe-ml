@@ -16,46 +16,33 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.StringUtil;
-import opennlp.tools.util.featuregen.StringPattern;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
+
 
 /**
  * 
- * Class to load a {@code TabulatedFormat} corpus and create an
+ * Class to load a serialized {@code TabulatedFormat} corpus and create an
  * automatic dictionary from it.
  * @author ragerri
- * @version 2016/06/17
+ * @version 2016/07/13
  * 
  */
 public class POSDictionary implements SerializableArtifact {
-
-  private static final Pattern tabPattern = Pattern.compile("\t");
-  /**
-   * Turkish capital letter I with dot.
-   */
-  public static final Pattern dotInsideI = Pattern.compile("\u0130", Pattern.UNICODE_CHARACTER_CLASS);
   
   public static class POSDictionarySerializer implements ArtifactSerializer<POSDictionary> {
 
@@ -73,31 +60,12 @@ public class POSDictionary implements SerializableArtifact {
   private Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
 
   public POSDictionary(InputStream in) throws IOException {
-
-    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
-    String line;
-    while ((line = breader.readLine()) != null) {
-      String[] lineArray = tabPattern.split(line);
-      populateMap(lineArray);
-    }
-  }
-  
-  private void populateMap(String[] lineArray) {
-    if (lineArray.length == 2) {
-      String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
-      // only store words
-      if (!StringPattern.recognize(normalizedToken).containsDigit()) {
-        
-        String word = StringUtil.toLowerCase(normalizedToken);
-        if (!newEntries.containsKey(word)) {
-          newEntries.put(word, new HashMap<String, AtomicInteger>());
-        }
-        if (!newEntries.get(word).containsKey(lineArray[1])) {
-          newEntries.get(word).put(lineArray[1], new AtomicInteger(1));
-        } else {
-          newEntries.get(word).get(lineArray[1]).incrementAndGet();
-        }
-      }
+    
+    try {
+      Map<String, Map<String, AtomicInteger>> temp = IOUtils.readObjectFromInputStream(in);
+      newEntries.putAll(temp);
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
     }
   }
   
@@ -137,12 +105,7 @@ public class POSDictionary implements SerializableArtifact {
    * @throws IOException if io problems
    */
   public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-
-    for (Map.Entry<String, Map<String, AtomicInteger>> entry : newEntries.entrySet()) {
-      writer.write(entry.getKey() + "\t" + entry.getValue().get(entry.getKey()) + "\n");
-    }
-    writer.flush();
+    IOUtils.writeObjectToStream(newEntries, out);
   }
 
   public Class<?> getArtifactSerializerClass() {

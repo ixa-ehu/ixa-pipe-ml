@@ -32,6 +32,9 @@ import java.nio.file.Paths;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import org.nustaq.serialization.FSTObjectInput;
+import org.nustaq.serialization.FSTObjectOutput;
+
 import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.cmdline.TerminateToolException;
 import opennlp.tools.ml.TrainerFactory;
@@ -232,7 +235,8 @@ public final class IOUtils {
       outputStream = new GZIPOutputStream(outputStream);
     }
     outputStream = new BufferedOutputStream(outputStream);
-    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+    //ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+    FSTObjectOutput oos = new FSTObjectOutput(outputStream);
     oos.writeObject(o);
     oos.close();
     return outFile;
@@ -265,7 +269,9 @@ public final class IOUtils {
   public static void writeObjectToStream(Object o, OutputStream out) {
     out = new BufferedOutputStream(out);
     try {
-      ObjectOutputStream oos = new ObjectOutputStream(out);
+      //ObjectOutputStream oos = new ObjectOutputStream(out);
+      @SuppressWarnings("resource")
+      FSTObjectOutput oos = new FSTObjectOutput(out);
       oos.writeObject(o);
       oos.flush();
     } catch (IOException e) {
@@ -281,8 +287,11 @@ public final class IOUtils {
   public static InputStream openFromFile(File file) {
     try {
       InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
+      if (file.getName().endsWith(".gz") || file.getName().endsWith("gz")) {
+       is = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
+      }
       return is;
-    } catch (FileNotFoundException e) {
+    } catch (IOException e) {
       throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
     }
   }
@@ -306,7 +315,9 @@ public final class IOUtils {
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
     is = new BufferedInputStream(is, GZIP_FILE_BUFFER_SIZE);
-    ObjectInputStream ois = new ObjectInputStream(is);
+    //ObjectInputStream ois = new ObjectInputStream(is);
+    @SuppressWarnings("resource")
+    FSTObjectInput ois = new FSTObjectInput(is);
     Object readObject = ois.readObject();
   return (T) readObject;
 }

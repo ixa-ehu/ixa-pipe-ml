@@ -64,7 +64,7 @@ public class DictionaryLemmatizer implements SerializableArtifact {
    * 
    * @param dictionary
    *          the input dictionary via inputstream
-   * @throws IOException
+   * @throws IOException if io problems
    */
   public DictionaryLemmatizer(final InputStream dictionary) throws IOException {
     try {

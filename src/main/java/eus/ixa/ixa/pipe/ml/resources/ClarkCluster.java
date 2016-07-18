@@ -1,5 +1,5 @@
 /*
- *  Copyright 2014 Rodrigo Agerri
+ *  Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -45,9 +45,6 @@ import opennlp.tools.util.model.SerializableArtifact;
  */
 public class ClarkCluster implements SerializableArtifact {
   
-  final char delimiter = ' ';
-  String[] splitted = new String[64];
-  
   public static class ClarkClusterSerializer implements ArtifactSerializer<ClarkCluster> {
 
     public ClarkCluster create(InputStream in) throws IOException,
@@ -67,28 +64,11 @@ public class ClarkCluster implements SerializableArtifact {
 
     BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
     String line;
-    long t0 = System.currentTimeMillis();
     while ((line = breader.readLine()) != null) {
       int index = line.indexOf(' ');
       tokenToClusterMap.put(line.substring(0, index), line.substring(index + 1).intern());
     }
-    long t1 = System.currentTimeMillis();
-    System.err.println("Read Clark cluster in "  + (t1 - t0) + " ms");
-    
-    
   }
-  
-  private void split(String line) {
-    int idxComma, idxToken = 0, fromIndex = 0;
-    while ((idxComma = line.indexOf(delimiter, fromIndex)) != -1) {
-        splitted[idxToken++] = line.substring(fromIndex, idxComma);
-        fromIndex = idxComma + 1;
-    }
-    splitted[idxToken] = line.substring(fromIndex);
-    tokenToClusterMap.put(splitted[0], splitted[1].intern());
-}
-  
-  
 
   public String lookupToken(String string) {
     return tokenToClusterMap.get(string);

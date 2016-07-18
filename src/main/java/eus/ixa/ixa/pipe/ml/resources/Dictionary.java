@@ -15,20 +15,27 @@
  */
 package eus.ixa.ixa.pipe.ml.resources;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.model.ArtifactSerializer;
-import opennlp.tools.util.model.SerializableArtifact;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.model.ArtifactSerializer;
+import opennlp.tools.util.model.SerializableArtifact;
 
 /**
  * Dictionary class which reads a serialized HashMap String, String from 
@@ -39,6 +46,8 @@ import eus.ixa.ixa.pipe.ml.utils.IOUtils;
  * 
  */
 public class Dictionary implements SerializableArtifact {
+  
+  private final static char tabDelimiter = '\t';
 
   public static class DictionarySerializer implements ArtifactSerializer<Dictionary> {
 
@@ -56,11 +65,14 @@ public class Dictionary implements SerializableArtifact {
   private Map<String, String> dictionary = new HashMap<String, String>();
 
   public Dictionary(InputStream in) throws IOException {
-    try {
-      Map<String, String> temp = IOUtils.readObjectFromInputStream(in);
-      dictionary.putAll(temp);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+
+    BufferedReader breader = new BufferedReader(new InputStreamReader(new BufferedInputStream(in), Charset.forName("UTF-8")));
+    String line;
+    while ((line = breader.readLine()) != null) {
+      int index = line.indexOf(tabDelimiter);
+      String token = line.substring(0, index);
+      String tokenClass = line.substring(index + 1).intern();
+      dictionary.put(token, tokenClass);
     }
     
   }
@@ -201,7 +213,11 @@ public class Dictionary implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-   IOUtils.writeObjectToStream(dictionary, out);
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+    for (Map.Entry<String, String> entry : dictionary.entrySet()) {
+      writer.write(entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue() + "\n");
+    }
+    writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {

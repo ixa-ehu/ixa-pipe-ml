@@ -25,12 +25,12 @@ import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.ClarkCluster;
+import eus.ixa.ixa.pipe.ml.resources.ClusterLexicon;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 public class ClarkFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
 
-  private ClarkCluster clarkCluster;
+  private ClusterLexicon clarkCluster;
   private Map<String, String> attributes;
   public static String unknownClarkClass = "O";
   
@@ -70,17 +70,17 @@ public class ClarkFeatureGenerator extends CustomFeatureGenerator implements Art
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     Object dictResource = resourceProvider.getResource(properties.get("dict"));
-    if (!(dictResource instanceof ClarkCluster)) {
+    if (!(dictResource instanceof ClusterLexicon)) {
       throw new InvalidFormatException("Not a ClarkCluster resource for key: " + properties.get("dict"));
     }
-    this.clarkCluster = (ClarkCluster) dictResource;
+    this.clarkCluster = (ClusterLexicon) dictResource;
     this.attributes = properties;
   }
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("clarkserializer", new ClarkCluster.ClarkClusterSerializer());
+    mapping.put("clarkserializer", new ClusterLexicon.ClusterLexiconSerializer());
     return Collections.unmodifiableMap(mapping);
   }
   

@@ -26,12 +26,12 @@ import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.Word2VecCluster;
+import eus.ixa.ixa.pipe.ml.resources.ClusterLexicon;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 public class Word2VecClusterFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
   
-  private Word2VecCluster word2vecCluster;
+  private ClusterLexicon word2vecCluster;
   private static String unknownClass = "O";
   private Map<String, String> attributes;
   
@@ -72,17 +72,17 @@ public class Word2VecClusterFeatureGenerator extends CustomFeatureGenerator impl
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     Object dictResource = resourceProvider.getResource(properties.get("dict"));
-    if (!(dictResource instanceof Word2VecCluster)) {
-      throw new InvalidFormatException("Not a Word2VecCluster resource for key: " + properties.get("dict"));
+    if (!(dictResource instanceof ClusterLexicon)) {
+      throw new InvalidFormatException("Not a ClusterLexicon resource for key: " + properties.get("dict"));
     }
-    this.word2vecCluster = (Word2VecCluster) dictResource;
+    this.word2vecCluster = (ClusterLexicon) dictResource;
     this.attributes = properties;
   }
   
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("word2vecserializer", new Word2VecCluster.Word2VecClusterSerializer());
+    mapping.put("word2vecserializer", new ClusterLexicon.ClusterLexiconSerializer());
     return Collections.unmodifiableMap(mapping);
   }
 }

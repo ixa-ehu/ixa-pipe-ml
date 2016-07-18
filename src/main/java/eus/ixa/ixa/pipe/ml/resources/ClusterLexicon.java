@@ -16,6 +16,7 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -34,25 +35,29 @@ import opennlp.tools.util.model.SerializableArtifact;
 
 
 /**
- * 
- * Class to load a Clark cluster document: word\\s+word_class\\s+prob
- * https://github.com/ninjin/clark_pos_induction
- * The cluster lexicons are normalized by the ixa-pipe-convert SerializeCluster
+ * Class to hold cluster information in a Map of String.
+ * <li>
+* <ol> Brown cluster documents: word\tword_class\tprob http://metaoptimize.com/projects/wordreprs/ </ol>
+* <ol> Clark cluster documents: word\\s+word_class\\s+prob https://github.com/ninjin/clark_pos_induction </ol>
+* <ol> Word2Vec cluster documents: word\\s+word_class http://code.google.com/p/word2vec/ </ol>
+ * The cluster lexicons are normalized by the ixa-pipe-convert SerializeResources
  * class.
  * @author ragerri
  * @version 2016-07-18
  * 
  */
-public class ClarkCluster implements SerializableArtifact {
+public class ClusterLexicon implements SerializableArtifact {
   
-  public static class ClarkClusterSerializer implements ArtifactSerializer<ClarkCluster> {
+  private final static char spaceDelimiter = ' ';
+  
+  public static class ClusterLexiconSerializer implements ArtifactSerializer<ClusterLexicon> {
 
-    public ClarkCluster create(InputStream in) throws IOException,
+    public ClusterLexicon create(InputStream in) throws IOException,
         InvalidFormatException {
-      return new ClarkCluster(in);
+      return new ClusterLexicon(in);
     }
 
-    public void serialize(ClarkCluster artifact, OutputStream out)
+    public void serialize(ClusterLexicon artifact, OutputStream out)
         throws IOException {
       artifact.serialize(out);
     }
@@ -60,12 +65,12 @@ public class ClarkCluster implements SerializableArtifact {
   
   private Map<String, String> tokenToClusterMap = new HashMap<String, String>();
 
-  public ClarkCluster(InputStream in) throws IOException {
+  public ClusterLexicon(InputStream in) throws IOException {
 
-    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+    BufferedReader breader = new BufferedReader(new InputStreamReader(new BufferedInputStream(in), Charset.forName("UTF-8")));
     String line;
     while ((line = breader.readLine()) != null) {
-      int index = line.indexOf(' ');
+      int index = line.indexOf(spaceDelimiter);
       String token = line.substring(0, index);
       String tokenClass = line.substring(index + 1).intern();
       tokenToClusterMap.put(token, tokenClass);
@@ -84,13 +89,13 @@ public class ClarkCluster implements SerializableArtifact {
     
     Writer writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
     for (Map.Entry<String, String> entry : tokenToClusterMap.entrySet()) {
-      writer.write(entry.getKey() + " " + entry.getValue() + "\n");
+      writer.write(entry.getKey() + spaceDelimiter + entry.getValue() + "\n");
     }
     writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {
-    return ClarkClusterSerializer.class;
+    return ClusterLexiconSerializer.class;
   }
 }
 

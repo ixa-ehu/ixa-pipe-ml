@@ -53,7 +53,10 @@ import opennlp.tools.util.TrainingParameters;
  */
 public final class IOUtils {
 
-  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
+  public static final int BUFFER_SIZE = 65536;
+  public static final String SPACE_DELIMITER = " ";
+  public static final String TAB_DELIMITER = "\t";
+  
   /**
    * Private constructor. This class should only be used statically.
    */
@@ -222,7 +225,7 @@ public final class IOUtils {
     return lineStream;
   }
   
-  public static <K, V> File writeClusterToFile(Map<K, V> tokenToClusterMap, String fileName) throws IOException {
+  public static <K, V> File writeClusterToFile(Map<K, V> tokenToClusterMap, String fileName, String delimiter) throws IOException {
     File outFile = new File(fileName);
     OutputStream outputStream = new FileOutputStream(outFile);
     if (fileName.endsWith(".gz")) {
@@ -231,7 +234,7 @@ public final class IOUtils {
     Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
 
     for (Entry<K, V> entry : tokenToClusterMap.entrySet()) {
-      writer.write(entry.getKey() + " " + entry.getValue() + "\n");
+      writer.write(entry.getKey() + delimiter + entry.getValue() + "\n");
     }
     writer.close();
     return outFile;
@@ -299,9 +302,9 @@ public final class IOUtils {
    */
   public static InputStream openFromFile(File file) {
     try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
+      InputStream is = new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE);
       if (file.getName().endsWith(".gz") || file.getName().endsWith("gz")) {
-       is = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
+       is = new GZIPInputStream(is, BUFFER_SIZE);
       }
       return is;
     } catch (IOException e) {
@@ -312,7 +315,7 @@ public final class IOUtils {
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    is = new BufferedInputStream(is, GZIP_FILE_BUFFER_SIZE);
+    is = new BufferedInputStream(is, BUFFER_SIZE);
     ObjectInputStream ois = new ObjectInputStream(is);
     Object readObject = ois.readObject();
   return (T) readObject;
@@ -320,8 +323,8 @@ public final class IOUtils {
   @SuppressWarnings("unchecked")
   public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
-    is = new BufferedInputStream(is, GZIP_FILE_BUFFER_SIZE);
-    GZIPInputStream zis = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
+    is = new BufferedInputStream(is, BUFFER_SIZE);
+    GZIPInputStream zis = new GZIPInputStream(is, BUFFER_SIZE);
     ObjectInputStream ois = new ObjectInputStream(zis);
     Object readObject = ois.readObject();
     return (T) readObject;

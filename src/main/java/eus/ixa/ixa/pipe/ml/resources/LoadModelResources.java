@@ -48,7 +48,7 @@ public class LoadModelResources {
       List<File> clarkClusterFiles = Flags.getClusterLexiconFiles(clarkClusterPath);
       for (File clarkClusterFile: clarkClusterFiles) {
         String clarkFilePath = clarkClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new ClarkCluster.ClarkClusterSerializer());
+        artifactSerializers.put(serializerId, new ClusterLexicon.ClusterLexiconSerializer());
         loadResource(serializerId, artifactSerializers, clarkFilePath, resources);
       }
     }
@@ -174,7 +174,7 @@ public class LoadModelResources {
       List<File> clarkClusterFiles = Flags.getClusterLexiconFiles(clarkClusterPath);
       for (File clarkClusterFile: clarkClusterFiles) {
         String clarkFilePath = clarkClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new ClarkCluster.ClarkClusterSerializer());
+        artifactSerializers.put(serializerId, new ClusterLexicon.ClusterLexiconSerializer());
         loadResource(serializerId, artifactSerializers, clarkFilePath, resources);
       }
     }

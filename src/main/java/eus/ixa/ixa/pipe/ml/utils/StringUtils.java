@@ -446,6 +446,22 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
     return tokensList.toArray(new String[tokensList.size()]);
   }
   
+  /**
+   * Fast line splitting with a separator, typically a tab or
+   * space character.
+   * @param line the line to be splitted
+   * @param delimiter the delimiter
+   * @param splitted the array containing the splitted tokens for each line
+   */
+  public static void splitLine(String line, char delimiter, String[] splitted) {
+    int idxComma, idxToken = 0, fromIndex = 0;
+    while ((idxComma = line.indexOf(delimiter, fromIndex)) != -1) {
+        splitted[idxToken++] = line.substring(fromIndex, idxComma);
+        fromIndex = idxComma + 1;
+    }
+    splitted[idxToken] = line.substring(fromIndex);
+}
+  
   
 }
 

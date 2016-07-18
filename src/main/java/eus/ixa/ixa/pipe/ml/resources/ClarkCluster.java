@@ -66,7 +66,9 @@ public class ClarkCluster implements SerializableArtifact {
     String line;
     while ((line = breader.readLine()) != null) {
       int index = line.indexOf(' ');
-      tokenToClusterMap.put(line.substring(0, index), line.substring(index + 1).intern());
+      String token = line.substring(0, index);
+      String tokenClass = line.substring(index + 1).intern();
+      tokenToClusterMap.put(token, tokenClass);
     }
   }
 

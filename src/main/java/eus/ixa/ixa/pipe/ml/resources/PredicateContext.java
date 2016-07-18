@@ -47,8 +47,6 @@ import opennlp.tools.util.model.SerializableArtifact;
  */
 public class PredicateContext implements SerializableArtifact {
 
-  final char delimiter = ' ';
-  String[] splitted = new String[64];
   private static final Pattern tabPattern = Pattern.compile("\t");
   /**
    * Turkish capital letter I with dot.
@@ -96,14 +94,7 @@ public class PredicateContext implements SerializableArtifact {
     }
   }
   
-  private void split(String line) {
-    int idxComma, idxToken = 0, fromIndex = 0;
-    while ((idxComma = line.indexOf(delimiter, fromIndex)) != -1) {
-        splitted[idxToken++] = line.substring(fromIndex, idxComma);
-        fromIndex = idxComma + 1;
-    }
-    splitted[idxToken] = line.substring(fromIndex);
-}
+ 
   
 
   /**

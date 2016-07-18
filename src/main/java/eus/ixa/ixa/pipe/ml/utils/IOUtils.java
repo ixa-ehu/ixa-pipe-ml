@@ -18,6 +18,7 @@ package eus.ixa.ixa.pipe.ml.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,13 +28,14 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import org.nustaq.serialization.FSTObjectInput;
-import org.nustaq.serialization.FSTObjectOutput;
 
 import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.cmdline.TerminateToolException;
@@ -51,8 +53,7 @@ import opennlp.tools.util.TrainingParameters;
  */
 public final class IOUtils {
 
-  //private static final int GZIP_FILE_BUFFER_SIZE = 65536;
-  private static final int GZIP_FILE_BUFFER_SIZE = 131072;
+  private static final int GZIP_FILE_BUFFER_SIZE = 65536;
   /**
    * Private constructor. This class should only be used statically.
    */
@@ -221,6 +222,21 @@ public final class IOUtils {
     return lineStream;
   }
   
+  public static <K, V> File writeClusterToFile(Map<K, V> tokenToClusterMap, String fileName) throws IOException {
+    File outFile = new File(fileName);
+    OutputStream outputStream = new FileOutputStream(outFile);
+    if (fileName.endsWith(".gz")) {
+      outputStream = new GZIPOutputStream(outputStream);
+    }
+    Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+
+    for (Entry<K, V> entry : tokenToClusterMap.entrySet()) {
+      writer.write(entry.getKey() + " " + entry.getValue() + "\n");
+    }
+    writer.close();
+    return outFile;
+  }
+  
   /**
    * Serialize java object to a file.
    * @param o the java object
@@ -235,8 +251,7 @@ public final class IOUtils {
       outputStream = new GZIPOutputStream(outputStream);
     }
     outputStream = new BufferedOutputStream(outputStream);
-    //ObjectOutputStream oos = new ObjectOutputStream(outputStream);
-    FSTObjectOutput oos = new FSTObjectOutput(outputStream);
+    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
     oos.writeObject(o);
     oos.close();
     return outFile;
@@ -269,9 +284,7 @@ public final class IOUtils {
   public static void writeObjectToStream(Object o, OutputStream out) {
     out = new BufferedOutputStream(out);
     try {
-      //ObjectOutputStream oos = new ObjectOutputStream(out);
-      @SuppressWarnings("resource")
-      FSTObjectOutput oos = new FSTObjectOutput(out);
+      ObjectOutputStream oos = new ObjectOutputStream(out);
       oos.writeObject(o);
       oos.flush();
     } catch (IOException e) {
@@ -296,28 +309,11 @@ public final class IOUtils {
     }
   }
   
-  /**
-   * Open gzipped file to an input stream.
-   * @param file the file
-   * @return the input stream
-   */
-  public static InputStream openFromGzipFile(File file) {
-    try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file), GZIP_FILE_BUFFER_SIZE);
-      is = new GZIPInputStream(is, GZIP_FILE_BUFFER_SIZE);
-      return is;
-    } catch (IOException e) {
-      throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
-    }
-  }
-  
   @SuppressWarnings("unchecked")
   public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
   ClassNotFoundException {
     is = new BufferedInputStream(is, GZIP_FILE_BUFFER_SIZE);
-    //ObjectInputStream ois = new ObjectInputStream(is);
-    @SuppressWarnings("resource")
-    FSTObjectInput ois = new FSTObjectInput(is);
+    ObjectInputStream ois = new ObjectInputStream(is);
     Object readObject = ois.readObject();
   return (T) readObject;
 }

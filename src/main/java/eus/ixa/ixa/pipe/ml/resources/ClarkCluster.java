@@ -16,37 +16,37 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
-import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
 
 /**
  * 
  * Class to load a Clark cluster document: word\\s+word_class\\s+prob
  * https://github.com/ninjin/clark_pos_induction
- * 
- * The file containing the clustering lexicon has to be passed as the 
- * argument of the DistSim property.
- * 
+ * The cluster lexicons are normalized by the ixa-pipe-convert SerializeCluster
+ * class.
  * @author ragerri
- * @version 2014/07/29
+ * @version 2016-07-18
  * 
  */
 public class ClarkCluster implements SerializableArtifact {
-
-  /**
-   * Turkish capital letter I with dot.
-   */
-  public static final Pattern dotInsideI = Pattern.compile("\u0130", Pattern.UNICODE_CHARACTER_CLASS);
+  
+  final char delimiter = ' ';
+  String[] splitted = new String[64];
   
   public static class ClarkClusterSerializer implements ArtifactSerializer<ClarkCluster> {
 
@@ -65,13 +65,30 @@ public class ClarkCluster implements SerializableArtifact {
 
   public ClarkCluster(InputStream in) throws IOException {
 
-    try {
-      Map <String, String> tempMap = IOUtils.readObjectFromInputStream(in);
-      tokenToClusterMap.putAll(tempMap);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+    String line;
+    long t0 = System.currentTimeMillis();
+    while ((line = breader.readLine()) != null) {
+      int index = line.indexOf(' ');
+      tokenToClusterMap.put(line.substring(0, index), line.substring(index + 1).intern());
     }
+    long t1 = System.currentTimeMillis();
+    System.err.println("Read Clark cluster in "  + (t1 - t0) + " ms");
+    
+    
   }
+  
+  private void split(String line) {
+    int idxComma, idxToken = 0, fromIndex = 0;
+    while ((idxComma = line.indexOf(delimiter, fromIndex)) != -1) {
+        splitted[idxToken++] = line.substring(fromIndex, idxComma);
+        fromIndex = idxComma + 1;
+    }
+    splitted[idxToken] = line.substring(fromIndex);
+    tokenToClusterMap.put(splitted[0], splitted[1].intern());
+}
+  
+  
 
   public String lookupToken(String string) {
     return tokenToClusterMap.get(string);
@@ -82,7 +99,12 @@ public class ClarkCluster implements SerializableArtifact {
   }
 
   public void serialize(OutputStream out) throws IOException {
-    IOUtils.writeObjectToStream(tokenToClusterMap, out);
+    
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
+    for (Map.Entry<String, String> entry : tokenToClusterMap.entrySet()) {
+      writer.write(entry.getKey() + " " + entry.getValue() + "\n");
+    }
+    writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {

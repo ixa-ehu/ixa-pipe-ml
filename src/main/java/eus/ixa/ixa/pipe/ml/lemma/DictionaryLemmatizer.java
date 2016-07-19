@@ -73,7 +73,7 @@ public class DictionaryLemmatizer implements SerializableArtifact {
    * 
    * The input file should have, for each line, word\tablemma\tabpostag
    * 
-   * @param dictionary
+   * @param in
    *          the input dictionary via inputstream
    * @throws IOException if io problems
    */

@@ -294,7 +294,7 @@ public class MFSResource implements SerializableArtifact {
   /**
    * Serialize the lexicon in the original format.
    * @param out the output stream
-   * @throws IOException 
+   * @throws IOException if io problems
    */
   public void serialize(OutputStream out) throws IOException {
     Writer writer = new BufferedWriter(new OutputStreamWriter(out));

@@ -1,3 +1,18 @@
+/*
+ *  Copyright 2016 Rodrigo Agerri
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 package eus.ixa.ixa.pipe.ml.resources;
 
 import java.io.File;
@@ -33,12 +48,12 @@ public class LoadModelResources {
     Map<String, ArtifactSerializer> artifactSerializers = SequenceLabelerModel.createArtifactSerializers();
     
     if (Flags.isBrownFeatures(params)) {
-      String brownClusterPath = Flags.getBrownFeatures(params);
+      String ClusterLexiconPath = Flags.getBrownFeatures(params);
       String serializerId = "brownserializer";
-      List<File> brownClusterFiles = Flags.getClusterLexiconFiles(brownClusterPath);
-      for (File brownClusterFile : brownClusterFiles) {
-        String brownFilePath = brownClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new BrownCluster.BrownClusterSerializer());
+      List<File> ClusterLexiconFiles = Flags.getClusterLexiconFiles(ClusterLexiconPath);
+      for (File ClusterLexiconFile : ClusterLexiconFiles) {
+        String brownFilePath = ClusterLexiconFile.getCanonicalPath();
+        artifactSerializers.put(serializerId, new WordCluster.WordClusterSerializer());
         loadResource(serializerId, artifactSerializers, brownFilePath, resources);
       }
     }
@@ -48,17 +63,17 @@ public class LoadModelResources {
       List<File> clarkClusterFiles = Flags.getClusterLexiconFiles(clarkClusterPath);
       for (File clarkClusterFile: clarkClusterFiles) {
         String clarkFilePath = clarkClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new ClusterLexicon.ClusterLexiconSerializer());
+        artifactSerializers.put(serializerId, new WordCluster.WordClusterSerializer());
         loadResource(serializerId, artifactSerializers, clarkFilePath, resources);
       }
     }
     if (Flags.isWord2VecClusterFeatures(params)) {
-      String word2vecClusterPath = Flags.getWord2VecClusterFeatures(params);
+      String ClusterLexiconPath = Flags.getWord2VecClusterFeatures(params);
       String serializerId = "word2vecserializer";
-      List<File> word2vecClusterFiles = Flags.getClusterLexiconFiles(word2vecClusterPath);
-      for (File word2vecClusterFile : word2vecClusterFiles) {
-        String word2vecFilePath = word2vecClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new Word2VecCluster.Word2VecClusterSerializer());
+      List<File> ClusterLexiconFiles = Flags.getClusterLexiconFiles(ClusterLexiconPath);
+      for (File ClusterLexiconFile : ClusterLexiconFiles) {
+        String word2vecFilePath = ClusterLexiconFile.getCanonicalPath();
+        artifactSerializers.put(serializerId, new WordCluster.WordClusterSerializer());
         loadResource(serializerId, artifactSerializers, word2vecFilePath, resources);
       }
     }
@@ -159,12 +174,12 @@ public class LoadModelResources {
     Map<String, ArtifactSerializer> artifactSerializers = SequenceLabelerModel.createArtifactSerializers();
     
     if (Flags.isBrownFeatures(params)) {
-      String brownClusterPath = Flags.getBrownFeatures(params);
+      String ClusterLexiconPath = Flags.getBrownFeatures(params);
       String serializerId = "brownserializer";
-      List<File> brownClusterFiles = Flags.getClusterLexiconFiles(brownClusterPath);
-      for (File brownClusterFile : brownClusterFiles) {
-        String brownFilePath = brownClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new BrownCluster.BrownClusterSerializer());
+      List<File> ClusterLexiconFiles = Flags.getClusterLexiconFiles(ClusterLexiconPath);
+      for (File ClusterLexiconFile : ClusterLexiconFiles) {
+        String brownFilePath = ClusterLexiconFile.getCanonicalPath();
+        artifactSerializers.put(serializerId, new WordCluster.WordClusterSerializer());
         loadResource(serializerId, artifactSerializers, brownFilePath, resources);
       }
     }
@@ -174,17 +189,17 @@ public class LoadModelResources {
       List<File> clarkClusterFiles = Flags.getClusterLexiconFiles(clarkClusterPath);
       for (File clarkClusterFile: clarkClusterFiles) {
         String clarkFilePath = clarkClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new ClusterLexicon.ClusterLexiconSerializer());
+        artifactSerializers.put(serializerId, new WordCluster.WordClusterSerializer());
         loadResource(serializerId, artifactSerializers, clarkFilePath, resources);
       }
     }
     if (Flags.isWord2VecClusterFeatures(params)) {
-      String word2vecClusterPath = Flags.getWord2VecClusterFeatures(params);
+      String ClusterLexiconPath = Flags.getWord2VecClusterFeatures(params);
       String serializerId = "word2vecserializer";
-      List<File> word2vecClusterFiles = Flags.getClusterLexiconFiles(word2vecClusterPath);
-      for (File word2vecClusterFile : word2vecClusterFiles) {
-        String word2vecFilePath = word2vecClusterFile.getCanonicalPath();
-        artifactSerializers.put(serializerId, new Word2VecCluster.Word2VecClusterSerializer());
+      List<File> ClusterLexiconFiles = Flags.getClusterLexiconFiles(ClusterLexiconPath);
+      for (File ClusterLexiconFile : ClusterLexiconFiles) {
+        String word2vecFilePath = ClusterLexiconFile.getCanonicalPath();
+        artifactSerializers.put(serializerId, new WordCluster.WordClusterSerializer());
         loadResource(serializerId, artifactSerializers, word2vecFilePath, resources);
       }
     }

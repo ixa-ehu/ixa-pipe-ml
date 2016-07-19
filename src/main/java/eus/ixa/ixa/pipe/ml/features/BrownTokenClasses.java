@@ -18,7 +18,7 @@ package eus.ixa.ixa.pipe.ml.features;
 import java.util.ArrayList;
 import java.util.List;
 
-import eus.ixa.ixa.pipe.ml.resources.ClusterLexicon;
+import eus.ixa.ixa.pipe.ml.resources.WordCluster;
 
 /**
  * Obtain the paths listed in the pathLengths array from the Brown class.
@@ -38,7 +38,7 @@ public class BrownTokenClasses {
    * @param brownLexicon the Brown clustering map
    * @return the list of the paths for a token
    */
-  public static List<String> getWordClasses(String token, ClusterLexicon brownLexicon) {
+  public static List<String> getWordClasses(String token, WordCluster brownLexicon) {
     if (brownLexicon.lookupToken(token) == null) {
       return new ArrayList<String>(0);
     } else {

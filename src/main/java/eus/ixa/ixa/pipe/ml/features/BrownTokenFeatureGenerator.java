@@ -25,12 +25,12 @@ import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.ClusterLexicon;
+import eus.ixa.ixa.pipe.ml.resources.WordCluster;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 public class BrownTokenFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
 
-  private ClusterLexicon brownLexicon;
+  private WordCluster brownLexicon;
   private Map<String, String> attributes;
   private static boolean DEBUG = false;
 
@@ -68,17 +68,17 @@ public class BrownTokenFeatureGenerator extends CustomFeatureGenerator implement
       throws InvalidFormatException {
     this.attributes = properties;
     Object dictResource = resourceProvider.getResource(properties.get("dict"));
-    if (!(dictResource instanceof ClusterLexicon)) {
+    if (!(dictResource instanceof WordCluster)) {
       throw new InvalidFormatException("Not a ClusterLexicon resource for key: " + properties.get("dict"));
     }
-    this.brownLexicon = (ClusterLexicon) dictResource;
+    this.brownLexicon = (WordCluster) dictResource;
     this.attributes = properties;
   }
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("brownserializer", new ClusterLexicon.ClusterLexiconSerializer());
+    mapping.put("brownserializer", new WordCluster.WordClusterSerializer());
     return Collections.unmodifiableMap(mapping);
   }
 

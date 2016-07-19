@@ -15,9 +15,16 @@
  */
 package eus.ixa.ixa.pipe.ml.lemma;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,15 +36,18 @@ import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import eus.ixa.ixa.pipe.ml.utils.Span;
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 /**
  * Lemmatize by simple dictionary lookup into a serialized hashmap built from a file
  * containing, for each line, word\tablemma\tabpostag.
  * 
  * @author ragerri
- * @version 2016-07-13
+ * @version 2016-07-19
  */
 public class DictionaryLemmatizer implements SerializableArtifact {
+  
+  private final static char tabDelimiter = '\t';
   
   public static class DictionaryLemmatizerSerializer implements ArtifactSerializer<DictionaryLemmatizer> {
 
@@ -56,6 +66,7 @@ public class DictionaryLemmatizer implements SerializableArtifact {
    * The hashmap containing the dictionary.
    */
   private final Map<List<String>, String> dictMap = new HashMap<List<String>, String>();
+  String[] splitted = new String[64];
 
   /**
    * Construct a hashmap from the input tab separated dictionary.
@@ -66,12 +77,13 @@ public class DictionaryLemmatizer implements SerializableArtifact {
    *          the input dictionary via inputstream
    * @throws IOException if io problems
    */
-  public DictionaryLemmatizer(final InputStream dictionary) throws IOException {
-    try {
-      Map<List<String>, String> temp = IOUtils.readObjectFromInputStream(dictionary);
-      dictMap.putAll(temp);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+  public DictionaryLemmatizer(final InputStream in) throws IOException {
+    
+    BufferedReader breader = new BufferedReader(new InputStreamReader(new BufferedInputStream(in), Charset.forName("UTF-8")));
+    String line;
+    while ((line = breader.readLine()) != null) {
+      StringUtils.splitLine(line, tabDelimiter, splitted);
+      dictMap.put(Arrays.asList(splitted[0], splitted[2]), splitted[1]);
     }
   }
 
@@ -127,7 +139,12 @@ public class DictionaryLemmatizer implements SerializableArtifact {
   }
   
   public void serialize(OutputStream out) throws IOException {
-    IOUtils.writeObjectToStream(dictMap, out);
+    
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    for (Map.Entry<List<String>, String> entry : dictMap.entrySet()) {
+      writer.write(entry.getKey().get(0) + IOUtils.TAB_DELIMITER + entry.getValue() + IOUtils.TAB_DELIMITER + entry.getKey().get(1) +"\n");
+    }
+    writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {

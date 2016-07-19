@@ -32,10 +32,13 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+
+import com.google.common.collect.ListMultimap;
 
 import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.cmdline.TerminateToolException;
@@ -235,6 +238,35 @@ public final class IOUtils {
 
     for (Entry<K, V> entry : tokenToClusterMap.entrySet()) {
       writer.write(entry.getKey() + delimiter + entry.getValue() + "\n");
+    }
+    writer.close();
+    return outFile;
+  }
+  
+  public static <K, V> File writeMultimapToFile(ListMultimap<K, V> tokenToClusterMap, String fileName, String delimiter) throws IOException {
+    File outFile = new File(fileName);
+    OutputStream outputStream = new FileOutputStream(outFile);
+    if (fileName.endsWith(".gz")) {
+      outputStream = new GZIPOutputStream(outputStream);
+    }
+    Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+
+    for (Map.Entry<K, V> entry : tokenToClusterMap.entries()) {
+      writer.write(entry.getKey() + delimiter + entry.getValue() + "\n");
+    }
+    writer.close();
+    return outFile;
+  }
+  
+  public static File writeDictionaryLemmatizerToFile(Map<List<String>, String> dictMap, String fileName, String delimiter) throws IOException {
+    File outFile = new File(fileName);
+    OutputStream out = new FileOutputStream(outFile);
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    if (fileName.endsWith(".gz")) {
+      out = new GZIPOutputStream(out);
+    }
+    for (Map.Entry<List<String>, String> entry : dictMap.entrySet()) {
+      writer.write(entry.getKey().get(0) + delimiter + entry.getKey().get(1) + delimiter + entry.getValue() + "\n");
     }
     writer.close();
     return outFile;

@@ -16,9 +16,16 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,11 +50,12 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  * Reads wordnet lexicons formated as house#n\t1092#noun.artifact
  * in a serialized ListMultimap object to search for most frequent senses.
  * @author ragerri
- * @version 2016-07-13
- * 
+ * @version 2016-07-19
  */
 public class MFSResource implements SerializableArtifact {
   
+  private final static char tabDelimiter = '\t';
+
   public static class MFSResourceSerializer implements ArtifactSerializer<MFSResource> {
 
     public MFSResource create(InputStream in) throws IOException,
@@ -72,11 +80,13 @@ public class MFSResource implements SerializableArtifact {
    * @throws IOException the io exception
    */
   public MFSResource(InputStream in) throws IOException {
-    try {
-      ListMultimap<String, String> temp = IOUtils.readObjectFromInputStream(in);
-      multiMap.putAll(temp);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+    BufferedReader breader = new BufferedReader(new InputStreamReader(new BufferedInputStream(in), Charset.forName("UTF-8")));
+    String line;
+    while ((line = breader.readLine()) != null) {
+      int index = line.indexOf(tabDelimiter);
+      String lemmaPos = line.substring(0, index);
+      String freqSense = line.substring(index + 1).intern();
+      multiMap.put(lemmaPos, freqSense);
     }
   }
   
@@ -284,9 +294,14 @@ public class MFSResource implements SerializableArtifact {
   /**
    * Serialize the lexicon in the original format.
    * @param out the output stream
+   * @throws IOException 
    */
-  public void serialize(OutputStream out) {
-    IOUtils.writeObjectToStream(multiMap, out);
+  public void serialize(OutputStream out) throws IOException {
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    for (Map.Entry<String, String> entry : multiMap.entries()) {
+      writer.write(entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue() +"\n");
+    }
+    writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {

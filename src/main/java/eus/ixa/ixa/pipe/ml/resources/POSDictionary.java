@@ -16,22 +16,30 @@
 
 package eus.ixa.ixa.pipe.ml.resources;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.model.ArtifactSerializer;
-import opennlp.tools.util.model.SerializableArtifact;
-
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.StringUtil;
+import opennlp.tools.util.featuregen.StringPattern;
+import opennlp.tools.util.model.ArtifactSerializer;
+import opennlp.tools.util.model.SerializableArtifact;
 
 
 /**
@@ -39,10 +47,12 @@ import eus.ixa.ixa.pipe.ml.utils.IOUtils;
  * Class to load a serialized {@code TabulatedFormat} corpus and create an
  * automatic dictionary from it.
  * @author ragerri
- * @version 2016/07/13
+ * @version 2016/07/19
  * 
  */
 public class POSDictionary implements SerializableArtifact {
+  
+  private final static char tabDelimiter = '\t';
   
   public static class POSDictionarySerializer implements ArtifactSerializer<POSDictionary> {
 
@@ -58,17 +68,36 @@ public class POSDictionary implements SerializableArtifact {
   }
 
   private Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
-
+  String[] splitted = new String[64];
+  
   public POSDictionary(InputStream in) throws IOException {
-    
-    try {
-      Map<String, Map<String, AtomicInteger>> temp = IOUtils.readObjectFromInputStream(in);
-      newEntries.putAll(temp);
-    } catch (ClassNotFoundException e) {
-      e.printStackTrace();
+    Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
+    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+    String line;
+    while ((line = breader.readLine()) != null) {
+      StringUtils.splitLine(line, tabDelimiter, splitted);
+      populatePOSMap(splitted, newEntries);
     }
   }
   
+  private static void populatePOSMap(String[] lineArray, Map<String, Map<String, AtomicInteger>> newEntries) {
+    if (lineArray.length == 2) {
+      // only store words
+      if (!StringPattern.recognize(lineArray[0]).containsDigit()) {
+        
+        String word = StringUtil.toLowerCase(lineArray[0]);
+        if (!newEntries.containsKey(word)) {
+          newEntries.put(word, new HashMap<String, AtomicInteger>());
+        }
+        if (!newEntries.get(word).containsKey(lineArray[1])) {
+          newEntries.get(word).put(lineArray[1], new AtomicInteger(1));
+        } else {
+          newEntries.get(word).get(lineArray[1]).incrementAndGet();
+        }
+      }
+    }
+  }
+
   public String getMostFrequentTag(String word) {
     TreeMultimap<Integer, String> mfTagMap = getOrderedMap(word);
     String mfTag = null;
@@ -80,7 +109,7 @@ public class POSDictionary implements SerializableArtifact {
     }
     return mfTag;
   }
-  
+
   public TreeMultimap<Integer, String> getOrderedMap(String word) {
     Map<String, AtomicInteger> tagFreqsMap = newEntries.get(word);
     TreeMultimap<Integer, String> mfTagMap = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
@@ -89,7 +118,7 @@ public class POSDictionary implements SerializableArtifact {
     }
     return mfTagMap;
   }
-  
+
   private void getOrderedTags(Map<String, AtomicInteger> tagFreqsMap, TreeMultimap<Integer, String> mfTagMap) {
    
     if (!tagFreqsMap.isEmpty() || tagFreqsMap != null) {
@@ -105,7 +134,12 @@ public class POSDictionary implements SerializableArtifact {
    * @throws IOException if io problems
    */
   public void serialize(OutputStream out) throws IOException {
-    IOUtils.writeObjectToStream(newEntries, out);
+    
+    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    for (Map.Entry<String, Map<String, AtomicInteger>> entry : newEntries.entrySet()) {
+      writer.write(entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue().get(entry.getKey()) + "\n");
+    }
+    writer.flush();
   }
 
   public Class<?> getArtifactSerializerClass() {

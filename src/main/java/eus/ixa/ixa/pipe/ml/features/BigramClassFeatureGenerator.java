@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 Rodrigo Agerri
+ * Copyright 2016 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -16,17 +16,19 @@
 package eus.ixa.ixa.pipe.ml.features;
 
 import java.util.List;
+import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-
-import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
  * Adds bigram features based on tokens and token class using {@code TokenClassFeatureGenerator}.
  * @author ragerri
- *
+ * @version 2016-07-26
  */
-public class BigramClassFeatureGenerator extends FeatureGeneratorAdapter {
+public class BigramClassFeatureGenerator extends CustomFeatureGenerator {
 
   public void createFeatures(List<String> features, String[] tokens, int index, String[] previousOutcomes) {
     String wc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index]);
@@ -49,5 +51,18 @@ public class BigramClassFeatureGenerator extends FeatureGeneratorAdapter {
         System.err.println("-> " + tokens[index] + ": wc,nc=" + wc + "," + nwc);
       }
     }
+  }
+
+  @Override
+  public void clearAdaptiveData() {
+  }
+
+  @Override
+  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  }
+
+  @Override
+  public void init(Map<String, String> arg0,
+      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
   } 
 }

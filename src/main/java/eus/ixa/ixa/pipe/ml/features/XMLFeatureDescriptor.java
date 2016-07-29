@@ -225,7 +225,7 @@ public final class XMLFeatureDescriptor {
       //previous 2 maps features
       Element prev2MapFeature = new Element("custom");
       prev2MapFeature.setAttribute("class", Prev2MapFeatureGenerator.class.getName());
-      generators.addContent(prev2MapFeature);
+      //generators.addContent(prev2MapFeature);
       //previous map and token feature (in window)
       Element prevMapTokenFeature = new Element("custom");
       prevMapTokenFeature.setAttribute("class", PreviousMapTokenFeatureGenerator.class.getName());
@@ -233,7 +233,7 @@ public final class XMLFeatureDescriptor {
       prevMapTokenWindow.setAttribute("prevLength", Integer.toString(leftWindow));
       prevMapTokenWindow.setAttribute("nextLength", Integer.toString(rightWindow));
       prevMapTokenWindow.addContent(prevMapTokenFeature);
-      generators.addContent(prevMapTokenWindow);
+      //generators.addContent(prevMapTokenWindow);
       //brown clustering features
       String brownClusterPath = Flags.getBrownFeatures(params);
       List<File> brownClusterFiles = Flags.getClusterLexiconFiles(brownClusterPath);

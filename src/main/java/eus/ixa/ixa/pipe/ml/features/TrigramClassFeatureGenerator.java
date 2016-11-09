@@ -16,8 +16,11 @@
 package eus.ixa.ixa.pipe.ml.features;
 
 import java.util.List;
+import java.util.Map;
 
-import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
  * Adds trigram features based on tokens and token class using
@@ -26,7 +29,7 @@ import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
  * @author ragerri
  * 
  */
-public class TrigramClassFeatureGenerator extends FeatureGeneratorAdapter {
+public class TrigramClassFeatureGenerator extends CustomFeatureGenerator {
 
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] previousOutcomes) {
@@ -45,4 +48,17 @@ public class TrigramClassFeatureGenerator extends FeatureGeneratorAdapter {
       features.add("wc,nwc,nnwc=" + wc + "," + nwc + "," + nnwc);
     }
   }
+  @Override
+  public void clearAdaptiveData() {
+  }
+
+  @Override
+  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  }
+
+  @Override
+  public void init(Map<String, String> arg0,
+      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
+  } 
+
 }

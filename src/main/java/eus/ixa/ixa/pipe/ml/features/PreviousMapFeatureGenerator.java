@@ -20,11 +20,12 @@ import java.util.List;
 import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
-import opennlp.tools.util.featuregen.AdaptiveFeatureGenerator;
 
-
-public class PreviousMapFeatureGenerator implements AdaptiveFeatureGenerator {
+public class PreviousMapFeatureGenerator extends CustomFeatureGenerator {
 
  private Map<String, String> previousMap = new HashMap<String, String>();
 
@@ -44,11 +45,15 @@ public class PreviousMapFeatureGenerator implements AdaptiveFeatureGenerator {
      previousMap.put(tokens[i], outcomes[i]);
    }
  }
-
  /**
   * Clears the previous map.
   */
  public void clearAdaptiveData() {
    previousMap.clear();
  }
+ 
+ @Override
+ public void init(Map<String, String> arg0, FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
+ }
+
 }

@@ -16,14 +16,17 @@
 package eus.ixa.ixa.pipe.ml.features;
 
 import java.util.List;
+import java.util.Map;
 
-import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 
 /**
  * The definition feature maps the underlying distribution of outcomes.
  */
-public class OutcomePriorFeatureGenerator extends FeatureGeneratorAdapter {
+public class OutcomePriorFeatureGenerator extends CustomFeatureGenerator {
 
   public static final String OUTCOME_PRIOR_FEATURE = "def";
 
@@ -31,5 +34,18 @@ public class OutcomePriorFeatureGenerator extends FeatureGeneratorAdapter {
       String[] previousOutcomes) {
     features.add(OUTCOME_PRIOR_FEATURE);
   }
+  
+  @Override
+  public void clearAdaptiveData() {
+  }
+
+  @Override
+  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  }
+
+  @Override
+  public void init(Map<String, String> arg0,
+      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
+  } 
 }
 

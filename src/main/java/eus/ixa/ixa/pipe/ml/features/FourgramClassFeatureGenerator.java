@@ -16,8 +16,11 @@
 package eus.ixa.ixa.pipe.ml.features;
 
 import java.util.List;
+import java.util.Map;
 
-import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
  * Adds fourgram features based on tokens and token class using
@@ -26,7 +29,7 @@ import opennlp.tools.util.featuregen.FeatureGeneratorAdapter;
  * @author ragerri
  * 
  */
-public class FourgramClassFeatureGenerator extends FeatureGeneratorAdapter {
+public class FourgramClassFeatureGenerator extends CustomFeatureGenerator {
 
   public void createFeatures(List<String> features, String[] tokens, int index,
       String[] previousOutcomes) {
@@ -46,5 +49,18 @@ public class FourgramClassFeatureGenerator extends FeatureGeneratorAdapter {
       String nnnwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 3]);
       features.add("wc,nwc,nnwc,nnnwc=" + wc + "," + nwc + "," + nnwc + "," + nnnwc);
     }
+  }
+  
+  @Override
+  public void clearAdaptiveData() {
+  }
+
+  @Override
+  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  }
+
+  @Override
+  public void init(Map<String, String> arg0,
+      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
   }
 }

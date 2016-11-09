@@ -1,12 +1,12 @@
-- Version 1.0
-
-This module uses the following APIs:
+This module uses the following dependencies:
 
     + Apache OpenNLP
       Copyright [2013] The Apache Software Foundation
 
       This product includes software developed at
-      The Apache Software Foundation (http://www.apache.org/).
+      The Apache Software Foundation (http://www.apache.org/)
 
-    + JDOM Project (http://www.jdom.org/).
     + argparse4j (http://argparse4j.sourceforge.net/)
+    + guava (https://github.com/google/guava)
+    + JDOM Project (http://www.jdom.org/)
+    + morfologik-stemming (https://github.com/morfologik/morfologik-stemming)

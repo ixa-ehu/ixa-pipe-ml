@@ -1,5 +1,3 @@
-package eus.ixa.ixa.pipe.ml.lemma;
-
 /*
  * Copyright 2014 Rodrigo Agerri
 
@@ -15,6 +13,8 @@ package eus.ixa.ixa.pipe.ml.lemma;
    See the License for the specific language governing permissions and
    limitations under the License.
  */
+
+package eus.ixa.ixa.pipe.ml.lemma;
 
 import java.io.IOException;
 import java.net.URL;

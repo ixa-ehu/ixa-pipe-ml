@@ -1,5 +1,3 @@
-package eus.ixa.ixa.pipe.ml.parse;
-
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
  * contributor license agreements.  See the NOTICE file distributed with
@@ -16,6 +14,8 @@ package eus.ixa.ixa.pipe.ml.parse;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package eus.ixa.ixa.pipe.ml.parse;
 
 import java.util.Collection;
 import java.util.Iterator;

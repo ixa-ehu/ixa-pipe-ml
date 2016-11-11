@@ -620,14 +620,13 @@ public class ShiftReduceParser {
 
     // TODO tag
     System.err.println("Training POS tagger...");
-    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode, null,
+    SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode,
         new ParseToTabulatedFormat(parseSamples), taggerParams, taggerFactory);
     parseSamples.reset();
 
     // TODO chunk
     System.err.println("Training chunker...");
-    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
-        null, new ParseToCoNLL02Format(parseSamples), chunkerParams, chunkerFactory);
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, new ParseToCoNLL02Format(parseSamples), chunkerParams, chunkerFactory);
     parseSamples.reset();
 
     // TODO build
@@ -673,8 +672,7 @@ public class ShiftReduceParser {
 
     // TODO chunk
     System.err.println("Training chunker...");
-    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode,
-        null, new ParseToCoNLL02Format(parseSamples), chunkerParams, chunkerFactory);
+    SequenceLabelerModel chunkModel = SequenceLabelerME.train(languageCode, new ParseToCoNLL02Format(parseSamples), chunkerParams, chunkerFactory);
     parseSamples.reset();
 
     // TODO build

@@ -135,8 +135,7 @@ public class CrossValidator {
     }
     SequenceLabelerCrossValidator validator = null;
     try {
-      validator = new SequenceLabelerCrossValidator(lang,
-          null, params, nameClassifierFactory,
+      validator = new SequenceLabelerCrossValidator(lang, params, nameClassifierFactory,
           listeners.toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
       validator.evaluate(trainSamples, folds);
     } catch (IOException e) {

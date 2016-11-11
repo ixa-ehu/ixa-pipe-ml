@@ -136,7 +136,6 @@ public class SequenceLabelerCrossValidator {
 
 	  private final String languageCode;
 	  private final TrainingParameters params;
-	  private final String type;
 	  private SequenceLabelerEvaluationMonitor[] listeners;
 
 	  private FMeasure fmeasure = new FMeasure();
@@ -145,37 +144,34 @@ public class SequenceLabelerCrossValidator {
 	  
 	  /** SequenceLabeler Cross Validator.
 	 * @param languageCode the language
-	 * @param type the class
 	 * @param trainParams the parameters files
 	 * @param featureGeneratorBytes the feature descriptor
 	 * @param resources the external resources
 	 * @param codec the encoding
 	 * @param listeners the listeners
 	 */
-	public SequenceLabelerCrossValidator(String languageCode, String type,
+	public SequenceLabelerCrossValidator(String languageCode,
 	      TrainingParameters trainParams, byte[] featureGeneratorBytes,
 	      Map<String, Object> resources, SequenceLabelerCodec<String> codec,
 	      SequenceLabelerEvaluationMonitor... listeners) {
 
 	    this.languageCode = languageCode;
-	    this.type = type;
 	    this.params = trainParams;
 
 	    this.listeners = listeners;
 	  }
 
-	  public SequenceLabelerCrossValidator(String languageCode, String type,
+	  public SequenceLabelerCrossValidator(String languageCode,
 	      TrainingParameters trainParams, byte[] featureGeneratorBytes,
 	      Map<String, Object> resources,
 	      SequenceLabelerEvaluationMonitor... listeners) {
-	    this(languageCode, type, trainParams, featureGeneratorBytes, resources, new BioCodec(), listeners);
+	    this(languageCode, trainParams, featureGeneratorBytes, resources, new BioCodec(), listeners);
 	  }
 
-	  public SequenceLabelerCrossValidator(String languageCode, String type,
+	  public SequenceLabelerCrossValidator(String languageCode,
 	      TrainingParameters trainParams, SequenceLabelerFactory factory,
 	      SequenceLabelerEvaluationMonitor... listeners) {
 	    this.languageCode = languageCode;
-	    this.type = type;
 	    this.params = trainParams;
 	    this.factory = factory;
 	    this.listeners = listeners;
@@ -205,7 +201,7 @@ public class SequenceLabelerCrossValidator {
 
 	      SequenceLabelerModel model = null;
 	      if (factory != null) {
-	        model = SequenceLabelerME.train(languageCode, type, new DocumentToNameSampleStream(trainingSampleStream), params, factory);
+	        model = SequenceLabelerME.train(languageCode, new DocumentToNameSampleStream(trainingSampleStream), params, factory);
 	      }
 	      else {
 	        System.err.println("You need to implement a SequenceLabelerFactory!");

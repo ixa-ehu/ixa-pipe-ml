@@ -176,7 +176,7 @@ public class SequenceLabelerTrainer {
     }
     SequenceLabelerModel trainedModel = null;
     try {
-      trainedModel = SequenceLabelerME.train(lang, null, trainSamples, params,
+      trainedModel = SequenceLabelerME.train(lang, trainSamples, params,
           nameClassifierFactory);
       SequenceLabelerME seqLabeler = new SequenceLabelerME(trainedModel);
       trainingEvaluate(seqLabeler);

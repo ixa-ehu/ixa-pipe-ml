@@ -35,21 +35,17 @@ import opennlp.tools.util.featuregen.WindowFeatureGenerator;
 public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEventStream<SequenceLabelSample> {
 
   private SequenceLabelerContextGenerator contextGenerator;
-
   private AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
-
-  private String type;
 
   private SequenceLabelerCodec<String> codec;
 
   /**
    * Creates a new name finder event stream using the specified data stream and context generator.
    * @param dataStream The data stream of events.
-   * @param type null or overrides the type parameter in the provided samples
    * @param contextGenerator The context generator used to generate features for the event stream.
    * @param codec the encoding
    */
-  public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream, String type, SequenceLabelerContextGenerator contextGenerator, SequenceLabelerCodec codec) {
+  public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream, SequenceLabelerContextGenerator contextGenerator, SequenceLabelerCodec<String> codec) {
     super(dataStream);
 
     this.codec = codec;
@@ -61,14 +57,10 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
     this.contextGenerator = contextGenerator;
     this.contextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
 
-    if (type != null)
-      this.type = type;
-    else
-      this.type = "default";
   }
 
   public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream) {
-    this(dataStream, null, new DefaultSequenceLabelerContextGenerator(), null);
+    this(dataStream, new DefaultSequenceLabelerContextGenerator(), null);
   }
 
   /**

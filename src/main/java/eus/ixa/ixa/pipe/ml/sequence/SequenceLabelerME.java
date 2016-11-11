@@ -247,8 +247,7 @@ public class SequenceLabelerME implements SequenceLabeler {
     return sprobs;
   }
 
-  public static SequenceLabelerModel train(String languageCode, String type,
-          ObjectStream<SequenceLabelSample> samples, TrainingParameters trainParams,
+  public static SequenceLabelerModel train(String languageCode, ObjectStream<SequenceLabelSample> samples, TrainingParameters trainParams,
           SequenceLabelerFactory factory) throws IOException {
     String beamSizeString = trainParams.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
 
@@ -266,7 +265,7 @@ public class SequenceLabelerME implements SequenceLabeler {
     TrainerType trainerType = TrainerFactory.getTrainerType(trainParams.getSettings());
 
     if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
-      ObjectStream<Event> eventStream = new SequenceLabelerEventStream(samples, type,
+      ObjectStream<Event> eventStream = new SequenceLabelerEventStream(samples,
               factory.createContextGenerator(), factory.createSequenceCodec());
 
       EventTrainer trainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), manifestInfoEntries);

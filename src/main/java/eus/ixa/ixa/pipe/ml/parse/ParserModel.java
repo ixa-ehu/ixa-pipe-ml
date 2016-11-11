@@ -87,6 +87,7 @@ public class ParserModel extends BaseModel {
     super(COMPONENT_NAME, modelURL);
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   protected void createArtifactSerializers(
       Map<String, ArtifactSerializer> serializers) {

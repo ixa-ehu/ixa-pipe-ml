@@ -654,6 +654,7 @@ public class ShiftReduceParser {
         chunkModel, beamSize, rules, manifestInfoEntries);
   }
   
+  //TODO this is not done, right?
   public static ParserModel train(String languageCode,
       ObjectStream<Parse> parseSamples, HeadRules rules,
       TrainingParameters trainParams, ParserFactory parserFactory,
@@ -799,7 +800,7 @@ public class ShiftReduceParser {
         get(TrainingParameters.CUTOFF_PARAM);
 
     if (cutoffString != null) {
-      // TODO: Maybe throw illegal argument exception if not parse able
+      // TODO: Maybe throw illegal argument exception if not parsable
       cutoff = Integer.parseInt(cutoffString);
     }
 

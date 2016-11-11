@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
-
-import opennlp.tools.dictionary.Dictionary;
 import opennlp.tools.ml.model.Event;
 import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.ObjectStream;
@@ -43,7 +41,6 @@ public class ParserEventStream extends opennlp.tools.util.AbstractEventStream<Pa
    */
   private ParserEventTypeEnum etype;
   private boolean fixPossesives;
-  private Dictionary dict;
   private BuildContextGenerator bcg;
   private CheckContextGenerator kcg;
 

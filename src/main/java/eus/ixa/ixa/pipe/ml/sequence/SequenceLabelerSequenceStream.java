@@ -67,7 +67,7 @@ public class SequenceLabelerSequenceStream implements SequenceStream {
     this.seqCodec = seqCodec;
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public Event[] updateContext(Sequence sequence, AbstractModel model) {
     Sequence<SequenceLabelSample> pss = sequence;
     SequenceLabeler tagger = new SequenceLabelerME(new SequenceLabelerModel("x-unspecified", model, Collections.<String, Object>emptyMap(), null));
@@ -80,6 +80,7 @@ public class SequenceLabelerSequenceStream implements SequenceStream {
     return events;
   }
 
+  @SuppressWarnings("rawtypes")
   @Override
   public Sequence read() throws IOException {
     SequenceLabelSample sample = psi.read();

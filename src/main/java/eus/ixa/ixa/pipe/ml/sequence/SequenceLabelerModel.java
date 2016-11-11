@@ -44,6 +44,11 @@ import opennlp.tools.util.model.ModelUtil;
 public class SequenceLabelerModel extends BaseModel {
 
   public static class FeatureGeneratorCreationError extends RuntimeException {
+    /**
+     * Default serial version.
+     */
+    private static final long serialVersionUID = 1L;
+
     FeatureGeneratorCreationError(Throwable t) {
       super(t);
     }
@@ -148,6 +153,7 @@ public class SequenceLabelerModel extends BaseModel {
     checkArtifactMap();
   }
 
+  @SuppressWarnings({ "unchecked" })
   public SequenceClassificationModel<String> getSequenceLabelerModel() {
 
     Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
@@ -163,7 +169,7 @@ public class SequenceLabelerModel extends BaseModel {
       return new BeamSearch<>(beamSize, (MaxentModel) artifactMap.get(MAXENT_MODEL_ENTRY_NAME));
     }
     else if (artifactMap.get(MAXENT_MODEL_ENTRY_NAME) instanceof SequenceClassificationModel) {
-      return (SequenceClassificationModel) artifactMap.get(MAXENT_MODEL_ENTRY_NAME);
+      return (SequenceClassificationModel<String>) artifactMap.get(MAXENT_MODEL_ENTRY_NAME);
     }
     else {
       return null;
@@ -180,7 +186,7 @@ public class SequenceLabelerModel extends BaseModel {
   }
   
   @Override
-  protected void createArtifactSerializers(Map<String, ArtifactSerializer> serializers) {
+  protected void createArtifactSerializers(@SuppressWarnings("rawtypes") Map<String, ArtifactSerializer> serializers) {
     super.createArtifactSerializers(serializers);
 
     serializers.put("featuregen", new ByteArraySerializer());
@@ -190,6 +196,7 @@ public class SequenceLabelerModel extends BaseModel {
    * Create the artifact serializers. The DefaultTrainer deals with any other Custom serializers.
    * @return the map containing the added serializers
    */
+  @SuppressWarnings("rawtypes")
   public static Map<String, ArtifactSerializer> createArtifactSerializers()  {
     Map<String, ArtifactSerializer> serializers = BaseModel.createArtifactSerializers();
 

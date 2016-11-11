@@ -31,10 +31,11 @@ import opennlp.tools.util.featuregen.AggregatedFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.featuregen.GeneratorFactory;
 
-// Idea of this factory is that most resources/impls used by the name finder
-// can be modified through this class!
-// That only works if thats the central class used for training/runtime
-
+/**
+ * Based on opennlp.tools.namefind.TokenNameFinderFactory.
+ * @author ragerri
+ * @version 2016-11-11
+ */
 public class SequenceLabelerFactory extends BaseToolFactory {
 
   private byte[] featureGeneratorBytes;
@@ -138,9 +139,8 @@ public class SequenceLabelerFactory extends BaseToolFactory {
   public SequenceLabelerContextGenerator createContextGenerator() {
 
     AdaptiveFeatureGenerator featureGenerator = createFeatureGenerators();
-
     if (featureGenerator == null) {
-      featureGenerator = SequenceLabelerME.createFeatureGenerator();
+      throw new NullPointerException("featureGenerator must not be null");
     }
 
     return new DefaultSequenceLabelerContextGenerator(featureGenerator);
@@ -200,6 +200,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     return generator;
   }
 
+  @SuppressWarnings("unchecked")
   public static SequenceLabelerCodec<String> instantiateSequenceCodec(
       String sequenceCodecImplName) {
 

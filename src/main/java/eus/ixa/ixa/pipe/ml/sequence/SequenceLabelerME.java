@@ -28,7 +28,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
-
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.EventModelSequenceTrainer;
 import opennlp.tools.ml.EventTrainer;
@@ -42,15 +41,7 @@ import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.Sequence;
 import opennlp.tools.util.SequenceValidator;
 import opennlp.tools.util.TrainingParameters;
-import opennlp.tools.util.featuregen.AdaptiveFeatureGenerator;
 import opennlp.tools.util.featuregen.AdditionalContextFeatureGenerator;
-import opennlp.tools.util.featuregen.BigramNameFeatureGenerator;
-import opennlp.tools.util.featuregen.CachedFeatureGenerator;
-import opennlp.tools.util.featuregen.OutcomePriorFeatureGenerator;
-import opennlp.tools.util.featuregen.PreviousMapFeatureGenerator;
-import opennlp.tools.util.featuregen.SentenceFeatureGenerator;
-import opennlp.tools.util.featuregen.TokenClassFeatureGenerator;
-import opennlp.tools.util.featuregen.TokenFeatureGenerator;
 import opennlp.tools.util.featuregen.WindowFeatureGenerator;
 
 public class SequenceLabelerME implements SequenceLabeler {
@@ -88,23 +79,6 @@ public class SequenceLabelerME implements SequenceLabeler {
     // TODO: We should deprecate this. And come up with a better solution!
     contextGenerator.addFeatureGenerator(
             new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
-  }
-
-  @Deprecated
-  /**
-   * @deprecated the default feature generation is now always included in the models and loaded
-   * if not by the factory. Subclasses using this methods should do the same.
-   */
-  static AdaptiveFeatureGenerator createFeatureGenerator() {
-    return new CachedFeatureGenerator(
-            new AdaptiveFeatureGenerator[]{
-              new WindowFeatureGenerator(new TokenFeatureGenerator(), 2, 2),
-              new WindowFeatureGenerator(new TokenClassFeatureGenerator(true), 2, 2),
-              new OutcomePriorFeatureGenerator(),
-              new PreviousMapFeatureGenerator(),
-              new BigramNameFeatureGenerator(),
-              new SentenceFeatureGenerator(true, false)
-            });
   }
 
   public Span[] tag(String[] tokens) {

@@ -33,193 +33,213 @@ import opennlp.tools.util.eval.FMeasure;
 
 public class SequenceLabelerCrossValidator {
 
-	  private class DocumentSample {
+  private class DocumentSample {
 
-	    private SequenceLabelSample samples[];
+    private final SequenceLabelSample samples[];
 
-	    DocumentSample(SequenceLabelSample samples[]) {
-	      this.samples = samples;
-	    }
+    DocumentSample(final SequenceLabelSample samples[]) {
+      this.samples = samples;
+    }
 
-	    private SequenceLabelSample[] getSamples() {
-	      return samples;
-	    }
-	  }
+    private SequenceLabelSample[] getSamples() {
+      return this.samples;
+    }
+  }
 
-	  /**
-	   * Reads Name Samples to group them as a document based on the clear adaptive data flag.
-	   */
-	  private class NameToDocumentSampleStream extends FilterObjectStream<SequenceLabelSample, DocumentSample> {
+  /**
+   * Reads Name Samples to group them as a document based on the clear adaptive
+   * data flag.
+   */
+  private class NameToDocumentSampleStream
+      extends FilterObjectStream<SequenceLabelSample, DocumentSample> {
 
-	    private SequenceLabelSample beginSample;
+    private SequenceLabelSample beginSample;
 
-	    protected NameToDocumentSampleStream(ObjectStream<SequenceLabelSample> samples) {
-	      super(samples);
-	    }
+    protected NameToDocumentSampleStream(
+        final ObjectStream<SequenceLabelSample> samples) {
+      super(samples);
+    }
 
-	    public DocumentSample read() throws IOException {
+    @Override
+    public DocumentSample read() throws IOException {
 
-	      List<SequenceLabelSample> document = new ArrayList<SequenceLabelSample>();
+      final List<SequenceLabelSample> document = new ArrayList<SequenceLabelSample>();
 
-	      if (beginSample == null) {
-	        // Assume that the clear flag is set
-	        beginSample = samples.read();
-	      }
+      if (this.beginSample == null) {
+        // Assume that the clear flag is set
+        this.beginSample = this.samples.read();
+      }
 
-	      // Underlying stream is exhausted!
-	      if (beginSample == null) {
-	        return null;
-	      }
+      // Underlying stream is exhausted!
+      if (this.beginSample == null) {
+        return null;
+      }
 
-	      document.add(beginSample);
+      document.add(this.beginSample);
 
-	      SequenceLabelSample sample;
-	      while ((sample = samples.read()) != null) {
+      SequenceLabelSample sample;
+      while ((sample = this.samples.read()) != null) {
 
-	        if (sample.isClearAdaptiveDataSet()) {
-	          beginSample = sample;
-	          break;
-	        }
+        if (sample.isClearAdaptiveDataSet()) {
+          this.beginSample = sample;
+          break;
+        }
 
-	        document.add(sample);
-	      }
+        document.add(sample);
+      }
 
-	      // Underlying stream is exhausted,
-	      // next call must return null
-	      if (sample == null) {
-	        beginSample = null;
-	      }
+      // Underlying stream is exhausted,
+      // next call must return null
+      if (sample == null) {
+        this.beginSample = null;
+      }
 
-	      return new DocumentSample(document.toArray(new SequenceLabelSample[document.size()]));
-	    }
+      return new DocumentSample(
+          document.toArray(new SequenceLabelSample[document.size()]));
+    }
 
-	    @Override
-	    public void reset() throws IOException, UnsupportedOperationException {
-	      super.reset();
+    @Override
+    public void reset() throws IOException, UnsupportedOperationException {
+      super.reset();
 
-	      beginSample = null;
-	    }
-	  }
+      this.beginSample = null;
+    }
+  }
 
-	  /**
-	   * Splits DocumentSample into NameSamples.
-	   */
-	  private class DocumentToNameSampleStream extends FilterObjectStream<DocumentSample, SequenceLabelSample>{
+  /**
+   * Splits DocumentSample into NameSamples.
+   */
+  private class DocumentToNameSampleStream
+      extends FilterObjectStream<DocumentSample, SequenceLabelSample> {
 
-	    protected DocumentToNameSampleStream(ObjectStream<DocumentSample> samples) {
-	      super(samples);
-	    }
+    protected DocumentToNameSampleStream(
+        final ObjectStream<DocumentSample> samples) {
+      super(samples);
+    }
 
-	    private Iterator<SequenceLabelSample> documentSamples = Collections.<SequenceLabelSample>emptyList().iterator();
+    private Iterator<SequenceLabelSample> documentSamples = Collections
+        .<SequenceLabelSample> emptyList().iterator();
 
-	    public SequenceLabelSample read() throws IOException {
+    @Override
+    public SequenceLabelSample read() throws IOException {
 
-	      // Note: Empty document samples should be skipped
+      // Note: Empty document samples should be skipped
 
-	      if (documentSamples.hasNext()) {
-	        return documentSamples.next();
-	      }
-	      else {
-	        DocumentSample docSample = samples.read();
+      if (this.documentSamples.hasNext()) {
+        return this.documentSamples.next();
+      } else {
+        final DocumentSample docSample = this.samples.read();
 
-	        if (docSample != null) {
-	          documentSamples = Arrays.asList(docSample.getSamples()).iterator();
+        if (docSample != null) {
+          this.documentSamples = Arrays.asList(docSample.getSamples())
+              .iterator();
 
-	          return read();
-	        }
-	        else {
-	          return null;
-	        }
-	      }
-	    }
-	  }
+          return read();
+        } else {
+          return null;
+        }
+      }
+    }
+  }
 
-	  private final String languageCode;
-	  private final TrainingParameters params;
-	  private SequenceLabelerEvaluationMonitor[] listeners;
+  private final String languageCode;
+  private final TrainingParameters params;
+  private final SequenceLabelerEvaluationMonitor[] listeners;
 
-	  private FMeasure fmeasure = new FMeasure();
-	  private SequenceLabelerFactory factory;
+  private final FMeasure fmeasure = new FMeasure();
+  private SequenceLabelerFactory factory;
 
-	  
-	  /** SequenceLabeler Cross Validator.
-	 * @param languageCode the language
-	 * @param trainParams the parameters files
-	 * @param featureGeneratorBytes the feature descriptor
-	 * @param resources the external resources
-	 * @param codec the encoding
-	 * @param listeners the listeners
-	 */
-	public SequenceLabelerCrossValidator(String languageCode,
-	      TrainingParameters trainParams, byte[] featureGeneratorBytes,
-	      Map<String, Object> resources, SequenceLabelerCodec<String> codec,
-	      SequenceLabelerEvaluationMonitor... listeners) {
+  /**
+   * SequenceLabeler Cross Validator.
+   * 
+   * @param languageCode
+   *          the language
+   * @param trainParams
+   *          the parameters files
+   * @param featureGeneratorBytes
+   *          the feature descriptor
+   * @param resources
+   *          the external resources
+   * @param codec
+   *          the encoding
+   * @param listeners
+   *          the listeners
+   */
+  public SequenceLabelerCrossValidator(final String languageCode,
+      final TrainingParameters trainParams, final byte[] featureGeneratorBytes,
+      final Map<String, Object> resources,
+      final SequenceLabelerCodec<String> codec,
+      final SequenceLabelerEvaluationMonitor... listeners) {
 
-	    this.languageCode = languageCode;
-	    this.params = trainParams;
+    this.languageCode = languageCode;
+    this.params = trainParams;
 
-	    this.listeners = listeners;
-	  }
+    this.listeners = listeners;
+  }
 
-	  public SequenceLabelerCrossValidator(String languageCode,
-	      TrainingParameters trainParams, byte[] featureGeneratorBytes,
-	      Map<String, Object> resources,
-	      SequenceLabelerEvaluationMonitor... listeners) {
-	    this(languageCode, trainParams, featureGeneratorBytes, resources, new BioCodec(), listeners);
-	  }
+  public SequenceLabelerCrossValidator(final String languageCode,
+      final TrainingParameters trainParams, final byte[] featureGeneratorBytes,
+      final Map<String, Object> resources,
+      final SequenceLabelerEvaluationMonitor... listeners) {
+    this(languageCode, trainParams, featureGeneratorBytes, resources,
+        new BioCodec(), listeners);
+  }
 
-	  public SequenceLabelerCrossValidator(String languageCode,
-	      TrainingParameters trainParams, SequenceLabelerFactory factory,
-	      SequenceLabelerEvaluationMonitor... listeners) {
-	    this.languageCode = languageCode;
-	    this.params = trainParams;
-	    this.factory = factory;
-	    this.listeners = listeners;
-	  }
+  public SequenceLabelerCrossValidator(final String languageCode,
+      final TrainingParameters trainParams,
+      final SequenceLabelerFactory factory,
+      final SequenceLabelerEvaluationMonitor... listeners) {
+    this.languageCode = languageCode;
+    this.params = trainParams;
+    this.factory = factory;
+    this.listeners = listeners;
+  }
 
-	  /**
-	   * Starts the evaluation.
-	   *
-	   * @param samples
-	   *          the data to train and test
-	   * @param nFolds
-	   *          number of folds
-	   * @throws IOException if io errors
-	   */
-	  public void evaluate(ObjectStream<SequenceLabelSample> samples, int nFolds)
-	      throws IOException {
+  /**
+   * Starts the evaluation.
+   *
+   * @param samples
+   *          the data to train and test
+   * @param nFolds
+   *          number of folds
+   * @throws IOException
+   *           if io errors
+   */
+  public void evaluate(final ObjectStream<SequenceLabelSample> samples,
+      final int nFolds) throws IOException {
 
-	    // Note: The name samples need to be grouped on a document basis.
+    // Note: The name samples need to be grouped on a document basis.
 
-	    CrossValidationPartitioner<DocumentSample> partitioner = new CrossValidationPartitioner<DocumentSample>(
-	        new NameToDocumentSampleStream(samples), nFolds);
+    final CrossValidationPartitioner<DocumentSample> partitioner = new CrossValidationPartitioner<DocumentSample>(
+        new NameToDocumentSampleStream(samples), nFolds);
 
-	    while (partitioner.hasNext()) {
+    while (partitioner.hasNext()) {
 
-	      CrossValidationPartitioner.TrainingSampleStream<DocumentSample> trainingSampleStream = partitioner
-	          .next();
+      final CrossValidationPartitioner.TrainingSampleStream<DocumentSample> trainingSampleStream = partitioner
+          .next();
 
-	      SequenceLabelerModel model = null;
-	      if (factory != null) {
-	        model = SequenceLabelerME.train(languageCode, new DocumentToNameSampleStream(trainingSampleStream), params, factory);
-	      }
-	      else {
-	        System.err.println("You need to implement a SequenceLabelerFactory!");
-	        System.exit(1);
-	      }
+      SequenceLabelerModel model = null;
+      if (this.factory != null) {
+        model = SequenceLabelerME.train(this.languageCode,
+            new DocumentToNameSampleStream(trainingSampleStream), this.params,
+            this.factory);
+      } else {
+        System.err.println("You need to implement a SequenceLabelerFactory!");
+        System.exit(1);
+      }
 
-	      // do testing
-	      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
-	          new SequenceLabelerME(model), listeners);
+      // do testing
+      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+          new SequenceLabelerME(model), this.listeners);
 
-	      evaluator.evaluate(new DocumentToNameSampleStream(trainingSampleStream.getTestSampleStream()));
+      evaluator.evaluate(new DocumentToNameSampleStream(
+          trainingSampleStream.getTestSampleStream()));
 
-	      fmeasure.mergeInto(evaluator.getFMeasure());
-	    }
-	  }
+      this.fmeasure.mergeInto(evaluator.getFMeasure());
+    }
+  }
 
-	  public FMeasure getFMeasure() {
-	    return fmeasure;
-	  }
-	}
-
+  public FMeasure getFMeasure() {
+    return this.fmeasure;
+  }
+}

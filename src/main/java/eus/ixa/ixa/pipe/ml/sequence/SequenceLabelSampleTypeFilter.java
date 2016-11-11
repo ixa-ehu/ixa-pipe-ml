@@ -25,47 +25,50 @@ import java.util.List;
 import java.util.Set;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
-
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
 
 /**
  * A stream which removes Name Samples which do not have a certain type.
  */
-public class SequenceLabelSampleTypeFilter extends FilterObjectStream<SequenceLabelSample, SequenceLabelSample> {
+public class SequenceLabelSampleTypeFilter
+    extends FilterObjectStream<SequenceLabelSample, SequenceLabelSample> {
 
   private final Set<String> types;
 
-  public SequenceLabelSampleTypeFilter(String[] types, ObjectStream<SequenceLabelSample> samples) {
+  public SequenceLabelSampleTypeFilter(final String[] types,
+      final ObjectStream<SequenceLabelSample> samples) {
     super(samples);
-    this.types = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(types)));
+    this.types = Collections
+        .unmodifiableSet(new HashSet<String>(Arrays.asList(types)));
   }
 
-  public SequenceLabelSampleTypeFilter(Set<String> types, ObjectStream<SequenceLabelSample> samples) {
+  public SequenceLabelSampleTypeFilter(final Set<String> types,
+      final ObjectStream<SequenceLabelSample> samples) {
     super(samples);
     this.types = Collections.unmodifiableSet(new HashSet<String>(types));
   }
 
+  @Override
   public SequenceLabelSample read() throws IOException {
 
-    SequenceLabelSample sample = samples.read();
+    final SequenceLabelSample sample = this.samples.read();
 
     if (sample != null) {
 
-      List<Span> filteredNames = new ArrayList<Span>();
+      final List<Span> filteredNames = new ArrayList<Span>();
 
-      for (Span name : sample.getSequences()) {
-        if (types.contains(name.getType())) {
+      for (final Span name : sample.getSequences()) {
+        if (this.types.contains(name.getType())) {
           filteredNames.add(name);
         }
       }
 
       return new SequenceLabelSample(sample.getId(), sample.getTokens(),
-          filteredNames.toArray(new Span[filteredNames.size()]), null, sample.isClearAdaptiveDataSet());
-    }
-    else {
+          filteredNames.toArray(new Span[filteredNames.size()]), null,
+          sample.isClearAdaptiveDataSet());
+    } else {
       return null;
     }
   }
 }
-

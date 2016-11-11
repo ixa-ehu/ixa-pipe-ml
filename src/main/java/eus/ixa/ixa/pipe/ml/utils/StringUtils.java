@@ -27,7 +27,6 @@ import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.tok.Token;
 
-
 /**
  * Pattern matching and other utility string functions.
  *
@@ -36,12 +35,11 @@ import eus.ixa.ixa.pipe.ml.tok.Token;
  */
 public final class StringUtils {
 
-  
   /**
    * Pattern to remove double bars from disjunct regex.
    */
   public static Pattern doubleBar = Pattern.compile("\\|\\|");
-  
+
   /**
    * Private constructor.
    */
@@ -61,13 +59,16 @@ public final class StringUtils {
    */
   public static List<Integer> exactTokenFinderIgnoreCase(final String pattern,
       final String[] tokens) {
-    String[] patternTokens = pattern.split(" ");
+    final String[] patternTokens = pattern.split(" ");
     int i, j;
-    int patternLength = patternTokens.length;
-    int sentenceLength = tokens.length;
-    List<Integer> neTokens = new ArrayList<Integer>();
+    final int patternLength = patternTokens.length;
+    final int sentenceLength = tokens.length;
+    final List<Integer> neTokens = new ArrayList<Integer>();
     for (j = 0; j <= sentenceLength - patternLength; ++j) {
-      for (i = 0; i < patternLength && patternTokens[i].equalsIgnoreCase(tokens[i + j]); ++i);
+      for (i = 0; i < patternLength
+          && patternTokens[i].equalsIgnoreCase(tokens[i + j]); ++i) {
+        ;
+      }
       if (i >= patternLength) {
         neTokens.add(j);
         neTokens.add(i + j);
@@ -88,13 +89,16 @@ public final class StringUtils {
    */
   public static List<Integer> exactTokenFinder(final String pattern,
       final String[] tokens) {
-    String[] patternTokens = pattern.split(" ");
+    final String[] patternTokens = pattern.split(" ");
     int i, j;
-    int patternLength = patternTokens.length;
-    int sentenceLength = tokens.length;
-    List<Integer> neTokens = new ArrayList<Integer>();
+    final int patternLength = patternTokens.length;
+    final int sentenceLength = tokens.length;
+    final List<Integer> neTokens = new ArrayList<Integer>();
     for (j = 0; j <= sentenceLength - patternLength; ++j) {
-      for (i = 0; i < patternLength && patternTokens[i].equals(tokens[i + j]); ++i);
+      for (i = 0; i < patternLength
+          && patternTokens[i].equals(tokens[i + j]); ++i) {
+        ;
+      }
       if (i >= patternLength) {
         neTokens.add(j);
         neTokens.add(i + j);
@@ -117,14 +121,17 @@ public final class StringUtils {
    */
   public static List<Integer> exactStringFinder(final String pattern,
       final String sentence) {
-    char[] patternArray = pattern.toCharArray(), sentenceArray = sentence
-        .toCharArray();
+    final char[] patternArray = pattern.toCharArray(),
+        sentenceArray = sentence.toCharArray();
     int i, j;
-    int patternLength = patternArray.length;
-    int sentenceLength = sentenceArray.length;
-    List<Integer> neChars = new ArrayList<Integer>();
+    final int patternLength = patternArray.length;
+    final int sentenceLength = sentenceArray.length;
+    final List<Integer> neChars = new ArrayList<Integer>();
     for (j = 0; j <= sentenceLength - patternLength; ++j) {
-      for (i = 0; i < patternLength && patternArray[i] == sentenceArray[i + j]; ++i);
+      for (i = 0; i < patternLength
+          && patternArray[i] == sentenceArray[i + j]; ++i) {
+        ;
+      }
       if (i >= patternLength) {
         neChars.add(j);
         neChars.add(i + j);
@@ -132,10 +139,11 @@ public final class StringUtils {
     }
     return neChars;
   }
-  
-  public static String getSetStringFromList(List<String> posLemmaValues) {
+
+  public static String getSetStringFromList(final List<String> posLemmaValues) {
     final StringBuilder sb = new StringBuilder();
-    HashSet<String> posLemmaSet = new LinkedHashSet<String>(posLemmaValues);
+    final HashSet<String> posLemmaSet = new LinkedHashSet<String>(
+        posLemmaValues);
     for (final String tok : posLemmaSet) {
       sb.append(tok).append(" ");
     }
@@ -150,233 +158,280 @@ public final class StringUtils {
    * @return sentence the sentence corresponding to the tokens
    */
   public static String getStringFromTokens(final String[] tokens) {
-    StringBuilder sb = new StringBuilder();
-    for (String tok : tokens) {
+    final StringBuilder sb = new StringBuilder();
+    for (final String tok : tokens) {
       sb.append(tok).append(" ");
     }
     return sb.toString().trim();
   }
-  
+
   /**
    * Recursively get every file in a directory and add them to a list.
-   * 
+   *
    * @param inputPath
    *          the input directory
    * @return the list containing all the files
    */
-  public static List<File> getFilesInDir(File inputPath) {
-    List<File> fileList = new ArrayList<File>();
-    for (File aFile : Files.fileTreeTraverser().preOrderTraversal(inputPath)) {
+  public static List<File> getFilesInDir(final File inputPath) {
+    final List<File> fileList = new ArrayList<File>();
+    for (final File aFile : Files.fileTreeTraverser()
+        .preOrderTraversal(inputPath)) {
       if (aFile.isFile()) {
         fileList.add(aFile);
       }
     }
     return fileList;
   }
-  
 
   /**
    * Get mininum of three values.
-   * @param a number a
-   * @param b number b
-   * @param c number c
+   * 
+   * @param a
+   *          number a
+   * @param b
+   *          number b
+   * @param c
+   *          number c
    * @return the minimum
    */
-  private static int minimum(int a, int b, int c) {
-      int minValue;
-      minValue = a;
-      if (b < minValue) {
-        minValue = b;
-      }
-      if (c < minValue) {
-        minValue = c;
-      }
-      return minValue;
+  private static int minimum(final int a, final int b, final int c) {
+    int minValue;
+    minValue = a;
+    if (b < minValue) {
+      minValue = b;
+    }
+    if (c < minValue) {
+      minValue = c;
+    }
+    return minValue;
   }
-  
+
   /**
-   * Computes the Levenshtein distance of two strings in a matrix.
-   * Based on pseudo-code provided here:
+   * Computes the Levenshtein distance of two strings in a matrix. Based on
+   * pseudo-code provided here:
    * https://en.wikipedia.org/wiki/Levenshtein_distance#Computing_Levenshtein_distance
-   * which in turn is based on the paper Wagner, Robert A.; Fischer, Michael J. (1974),
-   * "The String-to-String Correction Problem", Journal of the ACM 21 (1): 168-173
-   * @param wordForm the form
-   * @param lemma the lemma
+   * which in turn is based on the paper Wagner, Robert A.; Fischer, Michael J.
+   * (1974), "The String-to-String Correction Problem", Journal of the ACM 21
+   * (1): 168-173
+   * 
+   * @param wordForm
+   *          the form
+   * @param lemma
+   *          the lemma
    * @return the distance
    */
-  public static int[][] levenshteinDistance(String wordForm, String lemma) {
+  public static int[][] levenshteinDistance(final String wordForm,
+      final String lemma) {
 
-    int wordLength = wordForm.length();
-    int lemmaLength = lemma.length();
+    final int wordLength = wordForm.length();
+    final int lemmaLength = lemma.length();
     int cost;
-    int[][] distance = new int[wordLength + 1][lemmaLength + 1];
-    
+    final int[][] distance = new int[wordLength + 1][lemmaLength + 1];
+
     if (wordLength == 0) {
       return distance;
     }
     if (lemmaLength == 0) {
       return distance;
     }
-    //fill in the rows of column 0
+    // fill in the rows of column 0
     for (int i = 0; i <= wordLength; i++) {
       distance[i][0] = i;
     }
-    //fill in the columns of row 0
+    // fill in the columns of row 0
     for (int j = 0; j <= lemmaLength; j++) {
       distance[0][j] = j;
     }
-    //fill in the rest of the matrix calculating the minimum distance
+    // fill in the rest of the matrix calculating the minimum distance
     for (int i = 1; i <= wordLength; i++) {
-      int s_i = wordForm.charAt(i - 1);
+      final int s_i = wordForm.charAt(i - 1);
       for (int j = 1; j <= lemmaLength; j++) {
         if (s_i == lemma.charAt(j - 1)) {
           cost = 0;
         } else {
           cost = 1;
         }
-        //obtain minimum distance from calculating deletion, insertion, substitution
-        distance[i][j] = minimum(distance[i - 1][j] + 1, distance[i][j - 1] + 1, distance[i - 1][j - 1] + cost);
+        // obtain minimum distance from calculating deletion, insertion,
+        // substitution
+        distance[i][j] = minimum(distance[i - 1][j] + 1, distance[i][j - 1] + 1,
+            distance[i - 1][j - 1] + cost);
       }
     }
     return distance;
   }
-  
+
   /**
    * Computes the Shortest Edit Script (SES) to convert a word into its lemma.
    * This is based on Chrupala's PhD thesis (2007).
- * @param wordForm the token
- * @param lemma the target lemma
- * @param distance the levenshtein distance
- * @param permutations the number of permutations
- */
-public static void computeShortestEditScript(String wordForm, String lemma, int[][] distance, StringBuffer permutations) {
-    
-    int n = distance.length;
-    int m = distance[0].length;
-    
+   * 
+   * @param wordForm
+   *          the token
+   * @param lemma
+   *          the target lemma
+   * @param distance
+   *          the levenshtein distance
+   * @param permutations
+   *          the number of permutations
+   */
+  public static void computeShortestEditScript(final String wordForm,
+      final String lemma, final int[][] distance,
+      final StringBuffer permutations) {
+
+    final int n = distance.length;
+    final int m = distance[0].length;
+
     int wordFormLength = n - 1;
     int lemmaLength = m - 1;
-    while(true) {
-        
-        if (distance[wordFormLength][lemmaLength] == 0) {
-          break;
-        }
-        if ((lemmaLength > 0 && wordFormLength > 0) && (distance[wordFormLength - 1][lemmaLength - 1] < distance[wordFormLength][lemmaLength])) {
-            permutations.append('R').append(Integer.toString(wordFormLength - 1)).append(wordForm.charAt(wordFormLength - 1)).append(lemma.charAt(lemmaLength - 1));
-            lemmaLength--;
-            wordFormLength--;
-            continue;
-        }
-        if (lemmaLength > 0 && (distance[wordFormLength][lemmaLength - 1] < distance[wordFormLength][lemmaLength])) {
-            permutations.append('I').append(Integer.toString(wordFormLength)).append(lemma.charAt(lemmaLength - 1));
-            lemmaLength--;
-            continue;
-        }
-        if (wordFormLength > 0 && (distance[wordFormLength - 1][lemmaLength] < distance[wordFormLength][lemmaLength])) {
-            permutations.append('D').append(Integer.toString(wordFormLength - 1)).append(wordForm.charAt(wordFormLength - 1));
-            wordFormLength--;
-            continue;
-        }
-        if ((wordFormLength > 0 && lemmaLength > 0) && (distance[wordFormLength - 1][lemmaLength - 1] == distance[wordFormLength][lemmaLength])) {
-            wordFormLength--; lemmaLength--;
-            continue ;
-        }
-        if (wordFormLength > 0 && (distance[wordFormLength - 1][lemmaLength] == distance[wordFormLength][lemmaLength])) {
-            wordFormLength--;
-            continue;
-        }
-        if (lemmaLength > 0 && (distance[wordFormLength][lemmaLength - 1] == distance[wordFormLength][lemmaLength])) {
-            lemmaLength--;
-            continue;
-        }   
+    while (true) {
+
+      if (distance[wordFormLength][lemmaLength] == 0) {
+        break;
+      }
+      if (lemmaLength > 0 && wordFormLength > 0
+          && distance[wordFormLength - 1][lemmaLength
+              - 1] < distance[wordFormLength][lemmaLength]) {
+        permutations.append('R').append(Integer.toString(wordFormLength - 1))
+            .append(wordForm.charAt(wordFormLength - 1))
+            .append(lemma.charAt(lemmaLength - 1));
+        lemmaLength--;
+        wordFormLength--;
+        continue;
+      }
+      if (lemmaLength > 0 && distance[wordFormLength][lemmaLength
+          - 1] < distance[wordFormLength][lemmaLength]) {
+        permutations.append('I').append(Integer.toString(wordFormLength))
+            .append(lemma.charAt(lemmaLength - 1));
+        lemmaLength--;
+        continue;
+      }
+      if (wordFormLength > 0 && distance[wordFormLength
+          - 1][lemmaLength] < distance[wordFormLength][lemmaLength]) {
+        permutations.append('D').append(Integer.toString(wordFormLength - 1))
+            .append(wordForm.charAt(wordFormLength - 1));
+        wordFormLength--;
+        continue;
+      }
+      if (wordFormLength > 0 && lemmaLength > 0
+          && distance[wordFormLength - 1][lemmaLength
+              - 1] == distance[wordFormLength][lemmaLength]) {
+        wordFormLength--;
+        lemmaLength--;
+        continue;
+      }
+      if (wordFormLength > 0 && distance[wordFormLength
+          - 1][lemmaLength] == distance[wordFormLength][lemmaLength]) {
+        wordFormLength--;
+        continue;
+      }
+      if (lemmaLength > 0 && distance[wordFormLength][lemmaLength
+          - 1] == distance[wordFormLength][lemmaLength]) {
+        lemmaLength--;
+        continue;
+      }
     }
-}
+  }
+
   /**
-   * Read predicted SES by the lemmatizer model and apply the
-   * permutations to obtain the lemma from the wordForm.
-   * @param wordForm the wordForm
-   * @param permutations the permutations predicted by the lemmatizer model
+   * Read predicted SES by the lemmatizer model and apply the permutations to
+   * obtain the lemma from the wordForm.
+   * 
+   * @param wordForm
+   *          the wordForm
+   * @param permutations
+   *          the permutations predicted by the lemmatizer model
    * @return the lemma
    */
-  public static String decodeShortestEditScript(String wordForm, String permutations) {
-    
-    StringBuffer lemma = new StringBuffer(wordForm).reverse();
-    
+  public static String decodeShortestEditScript(final String wordForm,
+      final String permutations) {
+
+    final StringBuffer lemma = new StringBuffer(wordForm).reverse();
+
     int permIndex = 0;
-    while(true) {
-        if (permutations.length() <= permIndex) {
-          break;
-        }
-        //read first letter of permutation string
-        char nextOperation = permutations.charAt(permIndex);
-        //System.err.println("-> NextOP: " + nextOperation);
-        //go to the next permutation letter
+    while (true) {
+      if (permutations.length() <= permIndex) {
+        break;
+      }
+      // read first letter of permutation string
+      final char nextOperation = permutations.charAt(permIndex);
+      // System.err.println("-> NextOP: " + nextOperation);
+      // go to the next permutation letter
+      permIndex++;
+      if (nextOperation == 'R') {
+        final String charAtPerm = Character
+            .toString(permutations.charAt(permIndex));
+        final int charIndex = Integer.parseInt(charAtPerm);
+        // go to the next character in the permutation buffer
+        // which is the replacement character
         permIndex++;
-        if (nextOperation == 'R') {
-            String charAtPerm = Character.toString(permutations.charAt(permIndex));
-            int charIndex = Integer.parseInt(charAtPerm);
-            // go to the next character in the permutation buffer
-            // which is the replacement character
-            permIndex++;
-            char replace = permutations.charAt(permIndex);
-            //go to the next char in the permutation buffer
-            // which is the candidate character
-            permIndex++;
-            char with = permutations.charAt(permIndex);
-            
-            if (lemma.length() <= charIndex) {
-              return wordForm; 
-            }
-            if (lemma.charAt(charIndex) == replace) {
-              lemma.setCharAt(charIndex, with);
-            }
-            //System.err.println("-> ROP: " + lemma.toString());
-            //go to next permutation
-            permIndex++;
-            
-        } else if (nextOperation == 'I') {
-            String charAtPerm = Character.toString(permutations.charAt(permIndex));
-            int charIndex = Integer.parseInt(charAtPerm);
-            permIndex++;
-            //character to be inserted
-            char in = permutations.charAt(permIndex);
-        
-            if (lemma.length() < charIndex) {
-              return wordForm; 
-            }
-            lemma.insert(charIndex, in);
-            //System.err.println("-> IOP " + lemma.toString());
-            //go to next permutation
-            permIndex++;
-        } else if (nextOperation == 'D') {
-            String charAtPerm = Character.toString(permutations.charAt(permIndex));
-            int charIndex = Integer.parseInt(charAtPerm);
-            if (lemma.length() <= charIndex) {
-              return wordForm;
-            }
-            lemma.deleteCharAt(charIndex);
-            permIndex++;
-            // go to next permutation
-            permIndex++;
+        final char replace = permutations.charAt(permIndex);
+        // go to the next char in the permutation buffer
+        // which is the candidate character
+        permIndex++;
+        final char with = permutations.charAt(permIndex);
+
+        if (lemma.length() <= charIndex) {
+          return wordForm;
         }
+        if (lemma.charAt(charIndex) == replace) {
+          lemma.setCharAt(charIndex, with);
+        }
+        // System.err.println("-> ROP: " + lemma.toString());
+        // go to next permutation
+        permIndex++;
+
+      } else if (nextOperation == 'I') {
+        final String charAtPerm = Character
+            .toString(permutations.charAt(permIndex));
+        final int charIndex = Integer.parseInt(charAtPerm);
+        permIndex++;
+        // character to be inserted
+        final char in = permutations.charAt(permIndex);
+
+        if (lemma.length() < charIndex) {
+          return wordForm;
+        }
+        lemma.insert(charIndex, in);
+        // System.err.println("-> IOP " + lemma.toString());
+        // go to next permutation
+        permIndex++;
+      } else if (nextOperation == 'D') {
+        final String charAtPerm = Character
+            .toString(permutations.charAt(permIndex));
+        final int charIndex = Integer.parseInt(charAtPerm);
+        if (lemma.length() <= charIndex) {
+          return wordForm;
+        }
+        lemma.deleteCharAt(charIndex);
+        permIndex++;
+        // go to next permutation
+        permIndex++;
+      }
     }
     return lemma.reverse().toString();
-}
-  
+  }
+
   /**
    * Get the SES required to go from a word to a lemma.
-   * @param wordForm the word
-   * @param lemma the lemma
+   * 
+   * @param wordForm
+   *          the word
+   * @param lemma
+   *          the lemma
    * @return the shortest edit script
    */
-  public static String getShortestEditScript(String wordForm, String lemma) {
-    String reversedWF = new StringBuffer(wordForm.toLowerCase()).reverse().toString();
-    String reversedLemma = new StringBuffer(lemma.toLowerCase()).reverse().toString();
-    StringBuffer permutations = new StringBuffer();
+  public static String getShortestEditScript(final String wordForm,
+      final String lemma) {
+    final String reversedWF = new StringBuffer(wordForm.toLowerCase()).reverse()
+        .toString();
+    final String reversedLemma = new StringBuffer(lemma.toLowerCase()).reverse()
+        .toString();
+    final StringBuffer permutations = new StringBuffer();
     String ses;
     if (!reversedWF.equals(reversedLemma)) {
-      int[][]levenDistance = StringUtils.levenshteinDistance(reversedWF, reversedLemma);
-      StringUtils.computeShortestEditScript(reversedWF, reversedLemma, levenDistance, permutations);
+      final int[][] levenDistance = StringUtils.levenshteinDistance(reversedWF,
+          reversedLemma);
+      StringUtils.computeShortestEditScript(reversedWF, reversedLemma,
+          levenDistance, permutations);
       ses = permutations.toString();
     } else {
       ses = "O";
@@ -386,15 +441,21 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
 
   /**
    * Decodes the lemma from the word and the induced lemma class.
-   * @param tokens the array of tokens
-   * @param preds the predicted lemma classes
+   * 
+   * @param tokens
+   *          the array of tokens
+   * @param preds
+   *          the predicted lemma classes
    * @return the array of decoded lemmas
    */
-  public static String[] decodeLemmas(String[] tokens, Span[] preds) {
-    List<String> lemmas = new ArrayList<>();
-    for (Span span : preds) {
-      String lemma = decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
-      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
+  public static String[] decodeLemmas(final String[] tokens,
+      final Span[] preds) {
+    final List<String> lemmas = new ArrayList<>();
+    for (final Span span : preds) {
+      String lemma = decodeShortestEditScript(
+          span.getCoveredText(tokens).toLowerCase(), span.getType());
+      // System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " +
+      // preds[i] + " " + lemma);
       if (lemma.length() == 0) {
         lemma = "_";
       }
@@ -404,22 +465,28 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
   }
 
   /**
-   * Decodes the lemma induced type into the lemma and sets it as
-   * value of the Span type.
-   * @param tokens the tokens in the sentence
-   * @param preds the predicted spans
+   * Decodes the lemma induced type into the lemma and sets it as value of the
+   * Span type.
+   * 
+   * @param tokens
+   *          the tokens in the sentence
+   * @param preds
+   *          the predicted spans
    */
-  public static void decodeLemmasToSpans(String[] tokens, Span[] preds) {
-    for (Span span : preds) {
-      String lemma = decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
-      //System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " + preds[i] + " " + lemma);
+  public static void decodeLemmasToSpans(final String[] tokens,
+      final Span[] preds) {
+    for (final Span span : preds) {
+      String lemma = decodeShortestEditScript(
+          span.getCoveredText(tokens).toLowerCase(), span.getType());
+      // System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " +
+      // preds[i] + " " + lemma);
       if (lemma.length() == 0) {
         lemma = "_";
       }
       span.setType(lemma);
     }
   }
-  
+
   public static String createDisjunctRegexFromList(final List<String> words) {
     final StringBuilder sb = new StringBuilder();
     for (final String word : words) {
@@ -431,37 +498,42 @@ public static void computeShortestEditScript(String wordForm, String lemma, int[
     final String result = regExp.substring(1, regExp.length() - 1);
     return result;
   }
-  
+
   /**
-   * Convert a list of token objects (e.g. a tokenized sentence) into
-   * an array containing the token strings.
-   * @param tokenizedSentence the list of token objects
+   * Convert a list of token objects (e.g. a tokenized sentence) into an array
+   * containing the token strings.
+   * 
+   * @param tokenizedSentence
+   *          the list of token objects
    * @return the array of token strings
    */
-  public static String[] convertListTokenToArrayStrings(List<Token> tokenizedSentence) {
-    List<String> tokensList = new ArrayList<>();
-    for (Token token : tokenizedSentence) {
+  public static String[] convertListTokenToArrayStrings(
+      final List<Token> tokenizedSentence) {
+    final List<String> tokensList = new ArrayList<>();
+    for (final Token token : tokenizedSentence) {
       tokensList.add(token.getTokenValue());
     }
     return tokensList.toArray(new String[tokensList.size()]);
   }
-  
+
   /**
-   * Fast line splitting with a separator, typically a tab or
-   * space character.
-   * @param line the line to be splitted
-   * @param delimiter the delimiter
-   * @param splitted the array containing the splitted tokens for each line
+   * Fast line splitting with a separator, typically a tab or space character.
+   * 
+   * @param line
+   *          the line to be splitted
+   * @param delimiter
+   *          the delimiter
+   * @param splitted
+   *          the array containing the splitted tokens for each line
    */
-  public static void splitLine(String line, char delimiter, String[] splitted) {
+  public static void splitLine(final String line, final char delimiter,
+      final String[] splitted) {
     int idxComma, idxToken = 0, fromIndex = 0;
     while ((idxComma = line.indexOf(delimiter, fromIndex)) != -1) {
-        splitted[idxToken++] = line.substring(fromIndex, idxComma);
-        fromIndex = idxComma + 1;
+      splitted[idxToken++] = line.substring(fromIndex, idxComma);
+      fromIndex = idxComma + 1;
     }
     splitted[idxToken] = line.substring(fromIndex);
-}
-  
-  
-}
+  }
 
+}

@@ -27,9 +27,11 @@ import opennlp.tools.parser.ParserEventTypeEnum;
 import opennlp.tools.util.ObjectStream;
 
 /**
- * Abstract class extended by parser event streams which perform tagging and chunking.
+ * Abstract class extended by parser event streams which perform tagging and
+ * chunking.
  */
-public abstract class AbstractParserEventStream extends opennlp.tools.util.AbstractEventStream<Parse> {
+public abstract class AbstractParserEventStream
+    extends opennlp.tools.util.AbstractEventStream<Parse> {
 
   protected HeadRules rules;
   protected Set<String> punctSet;
@@ -41,45 +43,47 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
   protected boolean fixPossesives;
   protected Dictionary dict;
 
-  public AbstractParserEventStream(ObjectStream<Parse> dataStream, HeadRules rules, ParserEventTypeEnum etype) {
+  public AbstractParserEventStream(final ObjectStream<Parse> dataStream,
+      final HeadRules rules, final ParserEventTypeEnum etype) {
     super(dataStream);
-    //this.dict = dict;
+    // this.dict = dict;
     this.rules = rules;
-    punctSet = rules.getPunctuationTags();
+    this.punctSet = rules.getPunctuationTags();
     this.etype = etype;
     init();
   }
 
   @Override
-  protected Iterator<Event> createEvents(Parse sample) {
-    List<Event> newEvents = new ArrayList<Event>();
+  protected Iterator<Event> createEvents(final Parse sample) {
+    final List<Event> newEvents = new ArrayList<Event>();
 
     Parse.pruneParse(sample);
-    if (fixPossesives) {
+    if (this.fixPossesives) {
       Parse.fixPossesives(sample);
     }
-    sample.updateHeads(rules);
-    Parse[] chunks = getInitialChunks(sample);
-    addParseEvents(newEvents, ShiftReduceParser.collapsePunctuation(chunks, punctSet));
+    sample.updateHeads(this.rules);
+    final Parse[] chunks = getInitialChunks(sample);
+    addParseEvents(newEvents,
+        ShiftReduceParser.collapsePunctuation(chunks, this.punctSet));
     return newEvents.iterator();
   }
 
   protected void init() {
-    fixPossesives = false;
+    this.fixPossesives = false;
   }
 
-  public static Parse[] getInitialChunks(Parse p) {
-    List<Parse> chunks = new ArrayList<Parse>();
+  public static Parse[] getInitialChunks(final Parse p) {
+    final List<Parse> chunks = new ArrayList<Parse>();
     getInitialChunks(p, chunks);
     return chunks.toArray(new Parse[chunks.size()]);
   }
 
-  private static void getInitialChunks(Parse p, List<Parse> ichunks) {
+  private static void getInitialChunks(final Parse p,
+      final List<Parse> ichunks) {
     if (p.isPosTag()) {
       ichunks.add(p);
-    }
-    else {
-      Parse[] kids = p.getChildren();
+    } else {
+      final Parse[] kids = p.getChildren();
       boolean allKidsAreTags = true;
       for (int ci = 0, cl = kids.length; ci < cl; ci++) {
         if (!kids[ci].isPosTag()) {
@@ -89,33 +93,40 @@ public abstract class AbstractParserEventStream extends opennlp.tools.util.Abstr
       }
       if (allKidsAreTags) {
         ichunks.add(p);
-      }
-      else {
-        for (int ci = 0, cl = kids.length; ci < cl; ci++) {
-          getInitialChunks(kids[ci], ichunks);
+      } else {
+        for (final Parse kid : kids) {
+          getInitialChunks(kid, ichunks);
         }
       }
     }
   }
 
   /**
-   * Produces all events for the specified sentence chunks
-   * and adds them to the specified list.
-   * @param newEvents A list of events to be added to.
-   * @param chunks Pre-chunked constituents of a sentence.
+   * Produces all events for the specified sentence chunks and adds them to the
+   * specified list.
+   * 
+   * @param newEvents
+   *          A list of events to be added to.
+   * @param chunks
+   *          Pre-chunked constituents of a sentence.
    */
   protected abstract void addParseEvents(List<Event> newEvents, Parse[] chunks);
 
   /**
-   * Returns true if the specified child is the last child of the specified parent.
-   * @param child The child parse.
-   * @param parent The parent parse.
-   * @return true if the specified child is the last child of the specified parent; false otherwise.
+   * Returns true if the specified child is the last child of the specified
+   * parent.
+   * 
+   * @param child
+   *          The child parse.
+   * @param parent
+   *          The parent parse.
+   * @return true if the specified child is the last child of the specified
+   *         parent; false otherwise.
    */
-  protected boolean lastChild(Parse child, Parse parent) {
-    Parse[] kids = ShiftReduceParser.collapsePunctuation(parent.getChildren(),punctSet);
-    return (kids[kids.length - 1] == child);
+  protected boolean lastChild(final Parse child, final Parse parent) {
+    final Parse[] kids = ShiftReduceParser
+        .collapsePunctuation(parent.getChildren(), this.punctSet);
+    return kids[kids.length - 1] == child;
   }
 
 }
-

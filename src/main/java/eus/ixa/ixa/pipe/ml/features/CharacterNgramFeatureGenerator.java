@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-
 import opennlp.tools.ngram.NGramModel;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.StringList;
@@ -27,12 +26,11 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
- * The {@link CharacterNgramFeatureGenerator} uses character ngrams to
- * generate features about each token.
- * The minimum and maximum length can be specified.
+ * The {@link CharacterNgramFeatureGenerator} uses character ngrams to generate
+ * features about each token. The minimum and maximum length can be specified.
  */
 public class CharacterNgramFeatureGenerator extends CustomFeatureGenerator {
-  
+
   private Map<String, String> attributes;
 
   /**
@@ -41,23 +39,28 @@ public class CharacterNgramFeatureGenerator extends CustomFeatureGenerator {
   public CharacterNgramFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index, String[] preds) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
 
-    NGramModel model = new NGramModel();
-    model.add(tokens[index], Integer.parseInt(attributes.get("minLength")), Integer.parseInt(attributes.get("maxLength")));
-    for (StringList tokenList : model) {
+    final NGramModel model = new NGramModel();
+    model.add(tokens[index], Integer.parseInt(this.attributes.get("minLength")),
+        Integer.parseInt(this.attributes.get("maxLength")));
+    for (final StringList tokenList : model) {
 
       if (tokenList.size() > 0) {
         features.add("ng=" + tokenList.getToken(0).toLowerCase());
         if (Flags.DEBUG) {
-          System.err.println("-> " + tokenList.getToken(0).toLowerCase() + ": ng=" + tokenList.getToken(0).toLowerCase()); 
+          System.err.println("-> " + tokenList.getToken(0).toLowerCase()
+              + ": ng=" + tokenList.getToken(0).toLowerCase());
         }
       }
     }
   }
 
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
   }
 
   @Override
@@ -65,11 +68,10 @@ public class CharacterNgramFeatureGenerator extends CustomFeatureGenerator {
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     this.attributes = properties;
-    
+
   }
 }
-

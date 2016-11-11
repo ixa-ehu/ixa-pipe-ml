@@ -18,16 +18,16 @@ package eus.ixa.ixa.pipe.ml.pos;
 /**
  * Interface of the pos tagger based on Dictionary lookup. So far this is
  * thought to work with monosemic words only.
- * 
+ *
  * @author ragerri
  * @version 2014-12-05
- * 
+ *
  */
 public interface DictionaryTagger {
 
   /**
    * Postag by dictionary lookup.
-   * 
+   *
    * @param word
    *          the surface form word
    * @param posTag
@@ -37,4 +37,3 @@ public interface DictionaryTagger {
   String tag(String word, String posTag);
 
 }
-

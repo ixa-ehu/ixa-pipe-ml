@@ -26,12 +26,11 @@ import opennlp.tools.util.eval.Evaluator;
 import opennlp.tools.util.eval.FMeasure;
 
 /**
- * Class for ParserEvaluator.
- * This ParserEvaluator behaves like EVALB with no exceptions, e.g,
- * without removing punctuation tags, or equality between ADVP and PRT
- * (as in COLLINS convention). To follow parsing evaluation conventions
- * (Bikel, Collins, Charniak, etc.) as in EVALB, options are to be added
- * to the {@code ParserEvaluatorTool}.
+ * Class for ParserEvaluator. This ParserEvaluator behaves like EVALB with no
+ * exceptions, e.g, without removing punctuation tags, or equality between ADVP
+ * and PRT (as in COLLINS convention). To follow parsing evaluation conventions
+ * (Bikel, Collins, Charniak, etc.) as in EVALB, options are to be added to the
+ * {@code ParserEvaluatorTool}.
  *
  */
 public class ParserEvaluator extends Evaluator<Parse> {
@@ -39,7 +38,7 @@ public class ParserEvaluator extends Evaluator<Parse> {
   /**
    * fmeasure.
    */
-  private FMeasure fmeasure = new FMeasure();
+  private final FMeasure fmeasure = new FMeasure();
   /**
    * The parser to evaluate.
    */
@@ -47,39 +46,46 @@ public class ParserEvaluator extends Evaluator<Parse> {
 
   /**
    * Construct a parser with some evaluation monitors.
-   * @param aParser the parser
-   * @param monitors the evaluation monitors
+   * 
+   * @param aParser
+   *          the parser
+   * @param monitors
+   *          the evaluation monitors
    */
-  public ParserEvaluator(final ShiftReduceParser aParser, final ParserEvaluationMonitor... monitors) {
+  public ParserEvaluator(final ShiftReduceParser aParser,
+      final ParserEvaluationMonitor... monitors) {
     super(monitors);
     this.parser = aParser;
   }
 
   /**
    * Obtain {@code Span}s for every parse in the sentence.
-   * @param parse the parse from which to obtain the spans
+   * 
+   * @param parse
+   *          the parse from which to obtain the spans
    * @return an array containing every span for the parse
    */
   private static Span[] getConstituencySpans(final Parse parse) {
 
-    Stack<Parse> stack = new Stack<Parse>();
+    final Stack<Parse> stack = new Stack<Parse>();
 
     if (parse.getChildCount() > 0) {
-      for (Parse child : parse.getChildren()) {
+      for (final Parse child : parse.getChildren()) {
         stack.push(child);
       }
     }
-    List<Span> consts = new ArrayList<Span>();
+    final List<Span> consts = new ArrayList<Span>();
 
     while (!stack.isEmpty()) {
 
-      Parse constSpan = stack.pop();
+      final Parse constSpan = stack.pop();
 
       if (!constSpan.isPosTag()) {
-        Span span = constSpan.getSpan();
-        consts.add(new Span(span.getStart(), span.getEnd(), constSpan.getType()));
+        final Span span = constSpan.getSpan();
+        consts
+            .add(new Span(span.getStart(), span.getEnd(), constSpan.getType()));
 
-        for (Parse child : constSpan.getChildren()) {
+        for (final Parse child : constSpan.getChildren()) {
           stack.push(child);
         }
       }
@@ -88,50 +94,59 @@ public class ParserEvaluator extends Evaluator<Parse> {
     return consts.toArray(new Span[consts.size()]);
   }
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   * 
    * @see opennlp.tools.util.eval.Evaluator#processSample(java.lang.Object)
    */
   @Override
   protected final Parse processSample(final Parse reference) {
 
-    String sentenceText = reference.getText();
+    final String sentenceText = reference.getText();
 
-    Parse[] predictions = ShiftReduceParser.parseLine(sentenceText, parser, 1);
+    final Parse[] predictions = ShiftReduceParser.parseLine(sentenceText,
+        this.parser, 1);
 
     Parse prediction = null;
     if (predictions.length > 0) {
       prediction = predictions[0];
-      //System.err.println("-> Prediction: " + prediction.getType());
+      // System.err.println("-> Prediction: " + prediction.getType());
     }
 
-    fmeasure.updateScores(getConstituencySpans(reference), getConstituencySpans(prediction));
+    this.fmeasure.updateScores(getConstituencySpans(reference),
+        getConstituencySpans(prediction));
 
     return prediction;
   }
 
   /**
    * It returns the fmeasure result.
+   * 
    * @return the fmeasure value
    */
   public final FMeasure getFMeasure() {
-    return fmeasure;
+    return this.fmeasure;
   }
 
   /**
-   * Main method to show the example of running the evaluator.
-   * Moved to a test case soon, hopefully.
-   * @param args arguments
+   * Main method to show the example of running the evaluator. Moved to a test
+   * case soon, hopefully.
+   * 
+   * @param args
+   *          arguments
    */
   // TODO: Move this to a test case!
   public static void main(final String[] args) {
 
-    String goldParseString = "(TOP (S (NP (NNS Sales) (NNS executives)) (VP (VBD were) (VP (VBG examing) (NP (DT the) (NNS figures)) (PP (IN with) (NP (JJ great) (NN care))) ))  (NP (NN yesterday)) (. .) ))";
-    Span[] goldConsts = getConstituencySpans(Parse.parseParse(goldParseString));
+    final String goldParseString = "(TOP (S (NP (NNS Sales) (NNS executives)) (VP (VBD were) (VP (VBG examing) (NP (DT the) (NNS figures)) (PP (IN with) (NP (JJ great) (NN care))) ))  (NP (NN yesterday)) (. .) ))";
+    final Span[] goldConsts = getConstituencySpans(
+        Parse.parseParse(goldParseString));
 
-    String testParseString = "(TOP (S (NP (NNS Sales) (NNS executives)) (VP (VBD were) (VP (VBG examing) (NP (DT the) (NNS figures)) (PP (IN with) (NP (JJ great) (NN care) (NN yesterday))) ))  (. .) ))";
-    Span[] testConsts = getConstituencySpans(Parse.parseParse(testParseString));
+    final String testParseString = "(TOP (S (NP (NNS Sales) (NNS executives)) (VP (VBD were) (VP (VBG examing) (NP (DT the) (NNS figures)) (PP (IN with) (NP (JJ great) (NN care) (NN yesterday))) ))  (. .) ))";
+    final Span[] testConsts = getConstituencySpans(
+        Parse.parseParse(testParseString));
 
-    FMeasure measure = new FMeasure();
+    final FMeasure measure = new FMeasure();
     measure.updateScores(goldConsts, testConsts);
 
     // Expected output:

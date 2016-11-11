@@ -82,7 +82,8 @@ public class SequenceLabel {
    * @param aSeqSpan
    *          the span of the sequence
    */
-  public SequenceLabel(final String aStr, final String aType, final Span aSeqSpan) {
+  public SequenceLabel(final String aStr, final String aType,
+      final Span aSeqSpan) {
     this.str = aStr;
     this.type = aType;
     this.sequenceSpan = aSeqSpan;
@@ -122,8 +123,8 @@ public class SequenceLabel {
    * @param aSeqLength
    *          End offset in original text
    */
-  public SequenceLabel(final String aStr, final String aType, final Span aSeqSpan,
-      final int aStartOffset, final int aSeqLength) {
+  public SequenceLabel(final String aStr, final String aType,
+      final Span aSeqSpan, final int aStartOffset, final int aSeqLength) {
     this.str = aStr;
     this.type = aType;
     this.sequenceSpan = aSeqSpan;
@@ -137,7 +138,7 @@ public class SequenceLabel {
    * @return the string value for the label
    */
   public final String getString() {
-    return str;
+    return this.str;
   }
 
   /**
@@ -146,7 +147,7 @@ public class SequenceLabel {
    * @return the type of the Sequence
    */
   public final String getType() {
-    return type;
+    return this.type;
   }
 
   /**
@@ -155,7 +156,7 @@ public class SequenceLabel {
    * @return the Span
    */
   public final Span getSpan() {
-    return sequenceSpan;
+    return this.sequenceSpan;
   }
 
   /**
@@ -165,7 +166,7 @@ public class SequenceLabel {
    *          The value for the Sequence
    */
   public final void setValue(final String value) {
-    str = value;
+    this.str = value;
   }
 
   /**
@@ -175,7 +176,7 @@ public class SequenceLabel {
    *          the class of the Sequence
    */
   public final void setType(final String neType) {
-    type = neType;
+    this.type = neType;
   }
 
   /**
@@ -185,7 +186,7 @@ public class SequenceLabel {
    *          the Span of the name
    */
   public final void setSpan(final Span span) {
-    sequenceSpan = span;
+    this.sequenceSpan = span;
   }
 
   /**
@@ -200,21 +201,21 @@ public class SequenceLabel {
 
   @Override
   public final String toString() {
-    return str;
+    return this.str;
   }
 
   /**
    * @return the starting offset
    */
   public final int startOffset() {
-    return startOffset;
+    return this.startOffset;
   }
 
   /**
    * @return the length in characters of the sequence
    */
   public final int sequenceLength() {
-    return sequenceLength;
+    return this.sequenceLength;
   }
 
   /**

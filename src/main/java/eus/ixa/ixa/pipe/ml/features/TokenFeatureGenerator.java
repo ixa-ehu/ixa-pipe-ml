@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
@@ -30,37 +29,40 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 public class TokenFeatureGenerator extends CustomFeatureGenerator {
 
   private Map<String, String> attributes;
-  
+
   public TokenFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] preds) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
 
-    if (attributes.get("range").equalsIgnoreCase("lower")) {
+    if (this.attributes.get("range").equalsIgnoreCase("lower")) {
       features.add("w=" + tokens[index].toLowerCase());
       if (Flags.DEBUG) {
-        System.err.println("-> " + tokens[index].toLowerCase() + ": w=" + tokens[index].toLowerCase());
+        System.err.println("-> " + tokens[index].toLowerCase() + ": w="
+            + tokens[index].toLowerCase());
       }
     } else {
       features.add("w=" + tokens[index]);
     }
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
   }
 
   @Override
   public void clearAdaptiveData() {
   }
-  
+
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     this.attributes = properties;
-    
+
   }
-  
+
 }

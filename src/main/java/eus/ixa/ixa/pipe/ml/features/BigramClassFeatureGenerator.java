@@ -24,30 +24,40 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
- * Adds bigram features based on tokens and token class using {@code TokenClassFeatureGenerator}.
+ * Adds bigram features based on tokens and token class using
+ * {@code TokenClassFeatureGenerator}.
+ * 
  * @author ragerri
  * @version 2016-07-26
  */
 public class BigramClassFeatureGenerator extends CustomFeatureGenerator {
 
-  public void createFeatures(List<String> features, String[] tokens, int index, String[] previousOutcomes) {
-    String wc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index]);
-    //bi-gram features 
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+    final String wc = TokenClassFeatureGenerator
+        .tokenShapeFeature(tokens[index]);
+    // bi-gram features
     if (index > 0) {
-      features.add("pw,w=" + tokens[index-1] + "," + tokens[index]);
-      String pwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 1]);
+      features.add("pw,w=" + tokens[index - 1] + "," + tokens[index]);
+      final String pwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 1]);
       features.add("pwc,wc=" + pwc + "," + wc);
       if (Flags.DEBUG) {
-        System.err.println("-> " + tokens[index] + ": pw,w=" + tokens[index-1] + "," + tokens[index]);
-        System.err.println("-> " + tokens[index] + ": pwc,wc=" + pwc + "," + wc);
+        System.err.println("-> " + tokens[index] + ": pw,w=" + tokens[index - 1]
+            + "," + tokens[index]);
+        System.err
+            .println("-> " + tokens[index] + ": pwc,wc=" + pwc + "," + wc);
       }
     }
     if (index + 1 < tokens.length) {
       features.add("w,nw=" + tokens[index] + "," + tokens[index + 1]);
-      String nwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 1]);
+      final String nwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 1]);
       features.add("wc,nc=" + wc + "," + nwc);
       if (Flags.DEBUG) {
-        System.err.println("-> " + tokens[index] + ": w,nw=" + tokens[index] + "," + tokens[index + 1]);
+        System.err.println("-> " + tokens[index] + ": w,nw=" + tokens[index]
+            + "," + tokens[index + 1]);
         System.err.println("-> " + tokens[index] + ": wc,nc=" + wc + "," + nwc);
       }
     }
@@ -58,11 +68,12 @@ public class BigramClassFeatureGenerator extends CustomFeatureGenerator {
   }
 
   @Override
-  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  public void updateAdaptiveData(final String[] arg0, final String[] arg1) {
   }
 
   @Override
-  public void init(Map<String, String> arg0,
-      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
-  } 
+  public void init(final Map<String, String> arg0,
+      final FeatureGeneratorResourceProvider arg1)
+      throws InvalidFormatException {
+  }
 }

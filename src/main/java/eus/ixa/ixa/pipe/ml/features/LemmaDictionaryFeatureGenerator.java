@@ -21,25 +21,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
+import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
-import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
-import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
- * Generate lemma features from a dictionary as feature of
- * the current token. This feature generator can also be placed in a sliding
- * window.
- * 
+ * Generate lemma features from a dictionary as feature of the current token.
+ * This feature generator can also be placed in a sliding window.
+ *
  * @author ragerri
  * @version 2016-04-07
  */
-public class LemmaDictionaryFeatureGenerator extends CustomFeatureGenerator implements
-    ArtifactToSerializerMapper {
+public class LemmaDictionaryFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
 
   private SequenceModelResource posModelResource;
   private DictionaryLemmatizer lemmaDictResource;
@@ -50,22 +49,26 @@ public class LemmaDictionaryFeatureGenerator extends CustomFeatureGenerator impl
   public LemmaDictionaryFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
 
     // cache annotation results for each sentence
-    if (currentSentence != tokens) {
-      currentSentence = tokens;
-      currentTags = posModelResource.seqToSpans(tokens);
-      currentLemmas = lemmaDictResource.lemmatize(tokens, currentTags);
+    if (this.currentSentence != tokens) {
+      this.currentSentence = tokens;
+      this.currentTags = this.posModelResource.seqToSpans(tokens);
+      this.currentLemmas = this.lemmaDictResource.lemmatize(tokens,
+          this.currentTags);
     }
-    String lemma = currentLemmas.get(index);
+    final String lemma = this.currentLemmas.get(index);
     features.add("lemmaDict=" + lemma);
-    //System.err.println("-> Dictionary Lemma: " + tokens[index] + " " + lemma);
+    // System.err.println("-> Dictionary Lemma: " + tokens[index] + " " +
+    // lemma);
   }
 
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
 
   }
 
@@ -75,26 +78,28 @@ public class LemmaDictionaryFeatureGenerator extends CustomFeatureGenerator impl
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    Object posResource = resourceProvider.getResource(properties.get("model"));
+    final Object posResource = resourceProvider
+        .getResource(properties.get("model"));
     if (!(posResource instanceof SequenceModelResource)) {
-      throw new InvalidFormatException("Not a POSModelResource for key: "
-          + properties.get("model"));
+      throw new InvalidFormatException(
+          "Not a POSModelResource for key: " + properties.get("model"));
     }
     this.posModelResource = (SequenceModelResource) posResource;
-    Object lemmaResource = resourceProvider.getResource(properties.get("dict"));
+    final Object lemmaResource = resourceProvider
+        .getResource(properties.get("dict"));
     if (!(lemmaResource instanceof DictionaryLemmatizer)) {
-      throw new InvalidFormatException("Not a DictionaryLemmatizer for key: "
-          + properties.get("dict"));
+      throw new InvalidFormatException(
+          "Not a DictionaryLemmatizer for key: " + properties.get("dict"));
     }
     this.lemmaDictResource = (DictionaryLemmatizer) lemmaResource;
   }
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
     mapping.put("seqmodelserializer",
         new SequenceModelResource.SequenceModelResourceSerializer());
     mapping.put("lemmadictserializer",
@@ -102,4 +107,3 @@ public class LemmaDictionaryFeatureGenerator extends CustomFeatureGenerator impl
     return Collections.unmodifiableMap(mapping);
   }
 }
-

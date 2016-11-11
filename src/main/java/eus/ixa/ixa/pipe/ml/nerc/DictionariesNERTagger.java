@@ -31,20 +31,20 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 /**
  * Named Entity Recognition module based on {@link Dictionaries} objects This
  * class provides the following functionalities:
- * 
+ *
  * <ol>
  * <li>string matching against of a string (typically tokens) against a
  * Dictionary containing names. This function is also used to implement
  * Dictionary based features in the training package.
  * <li>tag: Provided a Dictionaries it tags only the names it matches against it
  * <li>post: This function checks for names in the Dictionary that have not been
- * detected by a {@link StatisticalSequenceLabeler}; it also corrects the Name type
- * for those detected by a {@link StatisticalSequenceLabeler} but also present in a
- * dictionary.
+ * detected by a {@link StatisticalSequenceLabeler}; it also corrects the Name
+ * type for those detected by a {@link StatisticalSequenceLabeler} but also
+ * present in a dictionary.
  * </ol>
- * 
+ *
  * @author ragerri 2014/03/14
- * 
+ *
  */
 
 public class DictionariesNERTagger {
@@ -56,7 +56,7 @@ public class DictionariesNERTagger {
   /**
    * The dictionary to find the names.
    */
-  private Dictionaries dictionaries;
+  private final Dictionaries dictionaries;
   /**
    * Debugging switch.
    */
@@ -65,7 +65,7 @@ public class DictionariesNERTagger {
   /**
    * Construct a DictionaryNameFinder using one dictionary and one named entity
    * class.
-   * 
+   *
    * @param aDictionaries
    *          the dictionaries
    */
@@ -76,7 +76,7 @@ public class DictionariesNERTagger {
   /**
    * Construct a DictionariesNameFinder with a dictionary, a type and a name
    * factory.
-   * 
+   *
    * @param aDictionaries
    *          the dictionaries
    * @param aNameFactory
@@ -90,39 +90,41 @@ public class DictionariesNERTagger {
 
   /**
    * {@link Dictionaries} based Named Entity Detection and Classification.
-   * 
+   *
    * @param tokens
    *          the tokenized sentence
    * @return a list of detected {@link SequenceLabel} objects
    */
   public final List<SequenceLabel> getNames(final String[] tokens) {
 
-    Span[] origSpans = nercToSpans(tokens);
-    Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
+    final Span[] origSpans = nercToSpans(tokens);
+    final Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    final List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
     return names;
   }
 
   /**
    * Detects Named Entities in a {@link Dictionaries} by NE type ignoring case.
-   * 
+   *
    * @param tokens
    *          the tokenized sentence
    * @return spans of the Named Entities
    */
   public final Span[] nercToSpans(final String[] tokens) {
-    List<Span> neSpans = new ArrayList<Span>();
-    for (Map<String, String> neDict : dictionaries.getIgnoreCaseDictionaries()) {
-      for (Map.Entry<String, String> neEntry : neDict.entrySet()) {
-        String neForm = neEntry.getKey();
-        String neType = neEntry.getValue();
-        List<Integer> neIds = StringUtils.exactTokenFinderIgnoreCase(neForm,
-            tokens);
+    final List<Span> neSpans = new ArrayList<Span>();
+    for (final Map<String, String> neDict : this.dictionaries
+        .getIgnoreCaseDictionaries()) {
+      for (final Map.Entry<String, String> neEntry : neDict.entrySet()) {
+        final String neForm = neEntry.getKey();
+        final String neType = neEntry.getValue();
+        final List<Integer> neIds = StringUtils
+            .exactTokenFinderIgnoreCase(neForm, tokens);
         if (!neIds.isEmpty()) {
           for (int i = 0; i < neIds.size(); i += 2) {
-            Span neSpan = new Span(neIds.get(i), neIds.get(i+1), neType);
+            final Span neSpan = new Span(neIds.get(i), neIds.get(i + 1),
+                neType);
             neSpans.add(neSpan);
-            if (debug) {
+            if (this.debug) {
               System.err.println(neSpans.toString());
             }
           }
@@ -135,24 +137,26 @@ public class DictionariesNERTagger {
   /**
    * Detects Named Entities in a {@link Dictionaries} by NE type This method is
    * case sensitive.
-   * 
+   *
    * @param tokens
    *          the tokenized sentence
    * @return spans of the Named Entities all
    */
   public final Span[] nercToSpansExact(final String[] tokens) {
-    List<Span> neSpans = new ArrayList<Span>();
-    for (Map<String, String> neDict : dictionaries.getDictionaries()) {
-      for (Map.Entry<String, String> neEntry : neDict.entrySet()) {
-        String neForm = neEntry.getKey();
-        String neType = neEntry.getValue();
-        List<Integer> neIds = StringUtils.exactTokenFinder(neForm,
+    final List<Span> neSpans = new ArrayList<Span>();
+    for (final Map<String, String> neDict : this.dictionaries
+        .getDictionaries()) {
+      for (final Map.Entry<String, String> neEntry : neDict.entrySet()) {
+        final String neForm = neEntry.getKey();
+        final String neType = neEntry.getValue();
+        final List<Integer> neIds = StringUtils.exactTokenFinder(neForm,
             tokens);
         if (!neIds.isEmpty()) {
           for (int i = 0; i < neIds.size(); i += 2) {
-            Span neSpan = new Span(neIds.get(i), neIds.get(i+1), neType);
+            final Span neSpan = new Span(neIds.get(i), neIds.get(i + 1),
+                neType);
             neSpans.add(neSpan);
-            if (debug) {
+            if (this.debug) {
               System.err.println(neSpans.toString());
             }
           }
@@ -164,7 +168,7 @@ public class DictionariesNERTagger {
 
   /**
    * Creates a list of {@link SequenceLabel} objects from spans and tokens.
-   * 
+   *
    * @param neSpans
    *          the spans of the entities in the sentence
    * @param tokens
@@ -173,11 +177,12 @@ public class DictionariesNERTagger {
    */
   public final List<SequenceLabel> getNamesFromSpans(final Span[] neSpans,
       final String[] tokens) {
-    List<SequenceLabel> names = new ArrayList<SequenceLabel>();
-    for (Span neSpan : neSpans) {
-      String nameString = neSpan.getCoveredText(tokens);
-      String neType = neSpan.getType();
-      SequenceLabel name = nameFactory.createSequence(nameString, neType, neSpan);
+    final List<SequenceLabel> names = new ArrayList<SequenceLabel>();
+    for (final Span neSpan : neSpans) {
+      final String nameString = neSpan.getCoveredText(tokens);
+      final String neType = neSpan.getType();
+      final SequenceLabel name = this.nameFactory.createSequence(nameString,
+          neType, neSpan);
       names.add(name);
     }
     return names;

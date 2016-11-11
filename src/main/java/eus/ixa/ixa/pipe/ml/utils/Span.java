@@ -23,19 +23,19 @@ import java.util.List;
 import opennlp.tools.util.StringUtil;
 
 /**
- * Class for storing start and end integer offsets.
- * Adapted from Apache OpenNLP Span class.
+ * Class for storing start and end integer offsets. Adapted from Apache OpenNLP
+ * Span class.
  */
 public class Span implements Comparable<Span> {
 
-  private int start;
-  private int end;
-  private double prob;// default is 0
+  private final int start;
+  private final int end;
+  private final double prob;// default is 0
   private String type;
 
   /**
    * Initializes a new Span Object. Sets the prob to 0 as default.
-   * 
+   *
    * @param s
    *          start of span.
    * @param e
@@ -43,224 +43,230 @@ public class Span implements Comparable<Span> {
    * @param type
    *          the type of the span
    */
-  public Span(int s, int e, String type) {
+  public Span(final int s, final int e, final String type) {
     if (s < 0) {
       throw new IllegalArgumentException(
           "start index must be zero or greater: " + s);
     }
     if (e < 0) {
-      throw new IllegalArgumentException("end index must be zero or greater: "
-          + e);
+      throw new IllegalArgumentException(
+          "end index must be zero or greater: " + e);
     }
     if (s > e) {
       throw new IllegalArgumentException(
           "start index must not be larger than end index: " + "start=" + s
               + ", end=" + e);
     }
-    start = s;
-    end = e;
+    this.start = s;
+    this.end = e;
     this.type = type;
     this.prob = 0d;
   }
 
-  public Span(int s, int e, String type, double prob) {
+  public Span(final int s, final int e, final String type, final double prob) {
     if (s < 0) {
       throw new IllegalArgumentException(
           "start index must be zero or greater: " + s);
     }
     if (e < 0) {
-      throw new IllegalArgumentException("end index must be zero or greater: "
-          + e);
+      throw new IllegalArgumentException(
+          "end index must be zero or greater: " + e);
     }
     if (s > e) {
       throw new IllegalArgumentException(
           "start index must not be larger than end index: " + "start=" + s
               + ", end=" + e);
     }
-    start = s;
-    end = e;
+    this.start = s;
+    this.end = e;
     this.prob = prob;
     this.type = type;
   }
 
   /**
    * Initializes a new Span Object. Sets the prob to 0 as default
-   * 
+   *
    * @param s
    *          start of span.
    * @param e
    *          end of span.
    */
-  public Span(int s, int e) {
+  public Span(final int s, final int e) {
     this(s, e, null, 0d);
   }
 
   /**
-   * 
+   *
    * @param s
    *          the start of the span (the token index, not the char index)
    * @param e
    *          the end of the span (the token index, not the char index)
-   * @param prob the probability score
+   * @param prob
+   *          the probability score
    */
-  public Span(int s, int e, double prob) {
+  public Span(final int s, final int e, final double prob) {
     this(s, e, null, prob);
   }
 
   /**
    * Initializes a new Span object with an existing Span which is shifted by an
    * offset.
-   * 
-   * @param span the span
-   * @param offset the offset
+   *
+   * @param span
+   *          the span
+   * @param offset
+   *          the offset
    */
-  public Span(Span span, int offset) {
-    this(span.start + offset, span.end + offset, span.getType(), span.getProb());
+  public Span(final Span span, final int offset) {
+    this(span.start + offset, span.end + offset, span.getType(),
+        span.getProb());
   }
 
   /**
    * Creates a new immutable span based on an existing span, where the existing
    * span did not include the prob
-   * 
+   *
    * @param span
    *          the span that has no prob or the prob is incorrect and a new Span
    *          must be generated
    * @param prob
    *          the probability of the span
    */
-  public Span(Span span, double prob) {
+  public Span(final Span span, final double prob) {
     this(span.start, span.end, span.getType(), prob);
   }
 
   /**
    * Return the start of a span.
-   * 
+   *
    * @return the start of a span.
-   * 
+   *
    */
   public int getStart() {
-    return start;
+    return this.start;
   }
 
   /**
    * Return the end of a span.
-   * 
+   *
    * Note: that the returned index is one past the actual end of the span in the
    * text, or the first element past the end of the span.
-   * 
+   *
    * @return the end of a span.
-   * 
+   *
    */
   public int getEnd() {
-    return end;
+    return this.end;
   }
 
   /**
    * Retrieves the type of the span.
-   * 
+   *
    * @return the type or null if not set
    */
   public String getType() {
-    return type;
+    return this.type;
   }
 
-  public void setType(String aType) {
-    type = aType;
+  public void setType(final String aType) {
+    this.type = aType;
   }
 
   /**
    * Returns the length of this span.
-   * 
+   *
    * @return the length of the span.
    */
   public int length() {
-    return end - start;
+    return this.end - this.start;
   }
 
   public double getProb() {
-    return prob;
+    return this.prob;
   }
 
   /**
    * Returns true if the specified span is contained by this span. Identical
    * spans are considered to contain each other.
-   * 
+   *
    * @param s
    *          The span to compare with this span.
-   * 
+   *
    * @return true is the specified span is contained by this span; false
    *         otherwise.
    */
-  public boolean contains(Span s) {
-    return start <= s.getStart() && s.getEnd() <= end;
+  public boolean contains(final Span s) {
+    return this.start <= s.getStart() && s.getEnd() <= this.end;
   }
 
   /**
    * Returns true if the specified index is contained inside this span. An index
    * with the value of end is considered outside the span.
-   * 
+   *
    * @param index
    *          the index to test with this span.
-   * 
+   *
    * @return true if the span contains this specified index; false otherwise.
    */
-  public boolean contains(int index) {
-    return start <= index && index < end;
+  public boolean contains(final int index) {
+    return this.start <= index && index < this.end;
   }
 
   /**
    * Returns true if the specified span is the begin of this span and the
    * specified span is contained in this span.
-   * 
+   *
    * @param s
    *          The span to compare with this span.
-   * 
+   *
    * @return true if the specified span starts with this span and is contained
    *         in this span; false otherwise
    */
-  public boolean startsWith(Span s) {
+  public boolean startsWith(final Span s) {
     return getStart() == s.getStart() && contains(s);
   }
 
   /**
    * Returns true if the specified span intersects with this span.
-   * 
+   *
    * @param s
    *          The span to compare with this span.
-   * 
+   *
    * @return true is the spans overlap; false otherwise.
    */
-  public boolean intersects(Span s) {
-    int sstart = s.getStart();
+  public boolean intersects(final Span s) {
+    final int sstart = s.getStart();
     // either s's start is in this or this' start is in s
-    return this.contains(s) || s.contains(this) || getStart() <= sstart
-        && sstart < getEnd() || sstart <= getStart() && getStart() < s.getEnd();
+    return this.contains(s) || s.contains(this)
+        || getStart() <= sstart && sstart < getEnd()
+        || sstart <= getStart() && getStart() < s.getEnd();
   }
 
   /**
    * Returns true is the specified span crosses this span.
-   * 
+   *
    * @param s
    *          The span to compare with this span.
-   * 
+   *
    * @return true is the specified span overlaps this span and contains a
    *         non-overlapping section; false otherwise.
    */
-  public boolean crosses(Span s) {
-    int sstart = s.getStart();
+  public boolean crosses(final Span s) {
+    final int sstart = s.getStart();
     // either s's start is in this or this' start is in s
-    return !this.contains(s)
-        && !s.contains(this)
-        && (getStart() <= sstart && sstart < getEnd() || sstart <= getStart()
-            && getStart() < s.getEnd());
+    return !this.contains(s) && !s.contains(this)
+        && (getStart() <= sstart && sstart < getEnd()
+            || sstart <= getStart() && getStart() < s.getEnd());
   }
 
   /**
    * Return a copy of this span with leading and trailing white spaces removed.
-   * @param text the text
+   * 
+   * @param text
+   *          the text
    * @return the trimmed span or the same object if already trimmed
    */
-  public Span trim(CharSequence text) {
+  public Span trim(final CharSequence text) {
 
     int newStartOffset = getStart();
 
@@ -287,7 +293,8 @@ public class Span implements Comparable<Span> {
   /**
    * Compares the specified span to the current span.
    */
-  public int compareTo(Span s) {
+  @Override
+  public int compareTo(final Span s) {
     if (getStart() < s.getStart()) {
       return -1;
     } else if (getStart() == s.getStart()) {
@@ -333,17 +340,17 @@ public class Span implements Comparable<Span> {
    * Checks if the specified span is equal to the current span.
    */
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
 
     boolean result;
 
     if (o == this) {
       result = true;
     } else if (o instanceof Span) {
-      Span s = (Span) o;
+      final Span s = (Span) o;
 
-      result = (getStart() == s.getStart()) && (getEnd() == s.getEnd())
-          && (getType() != null ? type.equals(s.getType()) : true)
+      result = getStart() == s.getStart() && getEnd() == s.getEnd()
+          && (getType() != null ? this.type.equals(s.getType()) : true)
           && (s.getType() != null ? s.getType().equals(getType()) : true);
     } else {
       result = false;
@@ -357,7 +364,7 @@ public class Span implements Comparable<Span> {
    */
   @Override
   public String toString() {
-    StringBuilder toStringBuffer = new StringBuilder(15);
+    final StringBuilder toStringBuffer = new StringBuilder(15);
     toStringBuffer.append("[");
     toStringBuffer.append(getStart());
     toStringBuffer.append("..");
@@ -371,7 +378,7 @@ public class Span implements Comparable<Span> {
     return toStringBuffer.toString();
   }
 
-  public CharSequence getCoveredText(CharSequence text) {
+  public CharSequence getCoveredText(final CharSequence text) {
     if (getEnd() > text.length()) {
       throw new IllegalArgumentException("The span " + toString()
           + " is outside the given text which has length " + text.length()
@@ -381,7 +388,7 @@ public class Span implements Comparable<Span> {
   }
 
   public String getCoveredText(final String[] tokens) {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     for (int si = getStart(); si < getEnd(); si++) {
       sb.append(tokens[si]).append(" ");
     }
@@ -390,13 +397,16 @@ public class Span implements Comparable<Span> {
 
   /**
    * Converts an array of {@link Span}s to an array of {@link String}s.
-   * 
-   * @param spans the spans array
-   * @param s the strings
+   *
+   * @param spans
+   *          the spans array
+   * @param s
+   *          the strings
    * @return the strings array
    */
-  public static String[] spansToStrings(Span[] spans, CharSequence s) {
-    String[] tokens = new String[spans.length];
+  public static String[] spansToStrings(final Span[] spans,
+      final CharSequence s) {
+    final String[] tokens = new String[spans.length];
 
     for (int si = 0, sl = spans.length; si < sl; si++) {
       tokens[si] = spans[si].getCoveredText(s).toString();
@@ -404,9 +414,10 @@ public class Span implements Comparable<Span> {
     return tokens;
   }
 
-  public static String[] spansToStrings(Span[] spans, String[] tokens) {
-    String[] chunks = new String[spans.length];
-    StringBuilder cb = new StringBuilder();
+  public static String[] spansToStrings(final Span[] spans,
+      final String[] tokens) {
+    final String[] chunks = new String[spans.length];
+    final StringBuilder cb = new StringBuilder();
     for (int si = 0, sl = spans.length; si < sl; si++) {
       cb.setLength(0);
       for (int ti = spans[si].getStart(); ti < spans[si].getEnd(); ti++) {
@@ -420,7 +431,7 @@ public class Span implements Comparable<Span> {
   /**
    * Get an array of Spans and their associated tokens and obtains an array of
    * Strings containing the type for each Span.
-   * 
+   *
    * @param spans
    *          the array of Spans
    * @param tokens
@@ -429,8 +440,8 @@ public class Span implements Comparable<Span> {
    */
   public static String[] getTypesFromSpans(final Span[] spans,
       final String[] tokens) {
-    List<String> tagsList = new ArrayList<String>();
-    for (Span span : spans) {
+    final List<String> tagsList = new ArrayList<String>();
+    for (final Span span : spans) {
       tagsList.add(span.getType());
     }
     return tagsList.toArray(new String[tagsList.size()]);
@@ -438,7 +449,7 @@ public class Span implements Comparable<Span> {
 
   /**
    * Removes spans from the preList if the span is contained in the postList.
-   * 
+   *
    * @param preList
    *          the list of spans to be post-processed
    * @param postList
@@ -446,9 +457,9 @@ public class Span implements Comparable<Span> {
    */
   public static final void postProcessDuplicatedSpans(final List<Span> preList,
       final Span[] postList) {
-    List<Span> duplicatedSpans = new ArrayList<Span>();
-    for (Span span1 : preList) {
-      for (Span span2 : postList) {
+    final List<Span> duplicatedSpans = new ArrayList<Span>();
+    for (final Span span1 : preList) {
+      for (final Span span2 : postList) {
         if (span1.contains(span2)) {
           duplicatedSpans.add(span1);
         } else if (span2.contains(span1)) {
@@ -462,7 +473,7 @@ public class Span implements Comparable<Span> {
   /**
    * Concatenates two span lists adding the spans of the second parameter to the
    * list in first parameter.
-   * 
+   *
    * @param allSpans
    *          the spans to which the other spans are added
    * @param neSpans
@@ -470,7 +481,7 @@ public class Span implements Comparable<Span> {
    */
   public static final void concatenateSpans(final List<Span> allSpans,
       final Span[] neSpans) {
-    for (Span span : neSpans) {
+    for (final Span span : neSpans) {
       allSpans.add(span);
     }
   }

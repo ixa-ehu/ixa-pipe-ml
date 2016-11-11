@@ -31,10 +31,10 @@ import morfologik.stemming.WordData;
 /**
  * Lemmatizer based on Morfologik Stemming library. It requires a FSA Morfologik
  * dictionary as input.
- * 
+ *
  * @author ragerri
  * @version 2014-07-08
- * 
+ *
  */
 public class MorfologikLemmatizer {
 
@@ -45,24 +45,22 @@ public class MorfologikLemmatizer {
 
   /**
    * Reads a dictionary in morfologik FSA format.
-   * 
+   *
    * @param dictURL
-   *          the URL containing the dictionary
-   *          the language
+   *          the URL containing the dictionary the language
    * @throws IllegalArgumentException
    *           if an exception is illegal
    * @throws IOException
    *           throws an exception if dictionary path is not correct
    */
-  public MorfologikLemmatizer(final URL dictURL)
-      throws IOException {
+  public MorfologikLemmatizer(final URL dictURL) throws IOException {
     this.dictLookup = new DictionaryLookup(Dictionary.read(dictURL));
   }
 
   /**
    * Get the lemma for a surface form word and a postag from a FSA morfologik
    * generated dictionary.
-   * 
+   *
    * @param word
    *          the surface form
    * @return the hashmap with the word and tag as keys and the lemma as value
@@ -78,17 +76,19 @@ public class MorfologikLemmatizer {
     }
     return dictMap;
   }
-  
-  public final void getAllPosLemmas(final String word, List<String> posLemmaValues) {
+
+  public final void getAllPosLemmas(final String word,
+      final List<String> posLemmaValues) {
     final List<WordData> wdList = this.dictLookup.lookup(word);
     for (final WordData wd : wdList) {
-      posLemmaValues.add(wd.getTag().toString() + "#" + wd.getStem().toString());
+      posLemmaValues
+          .add(wd.getTag().toString() + "#" + wd.getStem().toString());
     }
   }
 
   /**
    * Generate the dictionary keys (word, postag).
-   * 
+   *
    * @param word
    *          the surface form
    * @param postag
@@ -103,7 +103,7 @@ public class MorfologikLemmatizer {
 
   /**
    * Generates the dictionary map.
-   * 
+   *
    * @param word
    *          the surface form word
    * @param postag
@@ -116,25 +116,31 @@ public class MorfologikLemmatizer {
     dictMap = this.getLemmaTagsDict(word.toLowerCase());
     return dictMap;
   }
-  
-  /* (non-Javadoc)
-   * @see eus.ixa.ixa.pipe.lemma.Lemmatizer#lemmatize(java.lang.String[], java.lang.String[])
+
+  /*
+   * (non-Javadoc)
+   * 
+   * @see eus.ixa.ixa.pipe.lemma.Lemmatizer#lemmatize(java.lang.String[],
+   * java.lang.String[])
    */
   public String[] lemmatize(final String[] tokens, final String[] postags) {
-    List<String> lemmas = new ArrayList<String>();
+    final List<String> lemmas = new ArrayList<String>();
     for (int i = 0; i < tokens.length; i++) {
-      lemmas.add(this.apply(tokens[i], postags[i])); 
+      lemmas.add(this.apply(tokens[i], postags[i]));
     }
     return lemmas.toArray(new String[lemmas.size()]);
   }
 
   /**
    * Looks-up the lemma in a dictionary. Outputs "O" if not found.
- * @param word the token
- * @param postag the postag
- * @return the lemma
- */
-public String apply(final String word, final String postag) {
+   * 
+   * @param word
+   *          the token
+   * @param postag
+   *          the postag
+   * @return the lemma
+   */
+  public String apply(final String word, final String postag) {
     String lemma = null;
     final List<String> keys = this.getDictKeys(word, postag);
     final HashMap<List<String>, String> dictMap = this.getDictMap(word, postag);
@@ -149,4 +155,3 @@ public String apply(final String word, final String postag) {
   }
 
 }
-

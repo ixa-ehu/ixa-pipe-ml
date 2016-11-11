@@ -20,14 +20,15 @@ package eus.ixa.ixa.pipe.ml.parse;
 import java.util.Stack;
 
 /**
- * Interface for labeling nodes which contain traces so that these traces can be predicted
- * by the parser.
+ * Interface for labeling nodes which contain traces so that these traces can be
+ * predicted by the parser.
  */
 public interface GapLabeler {
   /**
    * Labels the constituents found in the stack with gap labels if appropriate.
-   * @param stack The stack of un-completed constituents.
+   * 
+   * @param stack
+   *          The stack of un-completed constituents.
    */
   public void labelGaps(Stack<Constituent> stack);
 }
-

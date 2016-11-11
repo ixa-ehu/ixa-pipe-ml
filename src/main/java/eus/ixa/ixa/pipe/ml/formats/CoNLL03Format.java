@@ -22,23 +22,21 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 import opennlp.tools.util.InputStreamFactory;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.StringUtil;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
-import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
- * 2 fields CoNLL 2003 tabulated format: word\tabclass\n 
- * I- start chunk
- * B- begin chunk when next to same class entity
- * O- outside chunk
- * 
+ * 2 fields CoNLL 2003 tabulated format: word\tabclass\n I- start chunk B- begin
+ * chunk when next to same class entity O- outside chunk
+ *
  * @author ragerri
  * @version 2015-02-24
- * 
+ *
  */
 public class CoNLL03Format implements ObjectStream<SequenceLabelSample> {
 
@@ -57,52 +55,65 @@ public class CoNLL03Format implements ObjectStream<SequenceLabelSample> {
 
   /**
    * Construct a CoNLL03Format formatter.
-   * @param resetFeatures clear adaptive features
-   * @param lineStream the stream
+   * 
+   * @param resetFeatures
+   *          clear adaptive features
+   * @param lineStream
+   *          the stream
    */
-  public CoNLL03Format(String resetFeatures, ObjectStream<String> lineStream) {
+  public CoNLL03Format(final String resetFeatures,
+      final ObjectStream<String> lineStream) {
     this.clearFeatures = resetFeatures;
     this.lineStream = lineStream;
   }
 
   /**
    * Construct a CoNLL03 formatter.
-   * @param resetFeatures the features to be reset
-   * @param in inputstream factory
-   * @throws IOException the io exception
+   * 
+   * @param resetFeatures
+   *          the features to be reset
+   * @param in
+   *          inputstream factory
+   * @throws IOException
+   *           the io exception
    */
-  public CoNLL03Format(String resetFeatures, InputStreamFactory in) throws IOException {
+  public CoNLL03Format(final String resetFeatures, final InputStreamFactory in)
+      throws IOException {
 
     this.clearFeatures = resetFeatures;
     try {
       this.lineStream = new PlainTextByLineStream(in, "UTF-8");
       System.setOut(new PrintStream(System.out, true, "UTF-8"));
-    } catch (UnsupportedEncodingException e) {
+    } catch (final UnsupportedEncodingException e) {
       // UTF-8 is available on all JVMs, will never happen
       throw new IllegalStateException(e);
     }
   }
 
+  @Override
   public SequenceLabelSample read() throws IOException {
 
-    List<String> tokens = new ArrayList<String>();
-    List<String> seqTypes = new ArrayList<String>();
+    final List<String> tokens = new ArrayList<String>();
+    final List<String> seqTypes = new ArrayList<String>();
     boolean isClearAdaptiveData = false;
 
     // Empty line indicates end of sentence
     String line;
-    while ((line = lineStream.read()) != null && !StringUtil.isEmpty(line)) {
-      //clear adaptive data if document mark appears following
-      //CoNLL03 conventions
-      if (clearFeatures.equalsIgnoreCase("docstart") 
+    while ((line = this.lineStream.read()) != null
+        && !StringUtil.isEmpty(line)) {
+      // clear adaptive data if document mark appears following
+      // CoNLL03 conventions
+      if (this.clearFeatures.equalsIgnoreCase("docstart")
           && line.startsWith("-DOCSTART-")) {
         isClearAdaptiveData = true;
-        String emptyLine = lineStream.read();
-        if (!StringUtil.isEmpty(emptyLine))
-          throw new IOException("Empty line after -DOCSTART- not empty: '" + emptyLine +"'!");
+        final String emptyLine = this.lineStream.read();
+        if (!StringUtil.isEmpty(emptyLine)) {
+          throw new IOException(
+              "Empty line after -DOCSTART- not empty: '" + emptyLine + "'!");
+        }
         continue;
       }
-      String fields[] = line.split("\t");
+      final String fields[] = line.split("\t");
       if (fields.length == 2) {
         tokens.add(fields[0]);
         seqTypes.add(fields[1]);
@@ -113,85 +124,86 @@ public class CoNLL03Format implements ObjectStream<SequenceLabelSample> {
       }
     }
     // if no -DOCSTART- mark, check if we need to clear features every sentence
-    if (clearFeatures.equalsIgnoreCase("yes")) {
+    if (this.clearFeatures.equalsIgnoreCase("yes")) {
       isClearAdaptiveData = true;
     }
 
     if (tokens.size() > 0) {
       // convert sequence tags into spans
-      List<Span> sequences = new ArrayList<Span>();
+      final List<Span> sequences = new ArrayList<Span>();
 
       int beginIndex = -1;
       int endIndex = -1;
       for (int i = 0; i < seqTypes.size(); i++) {
-        String seqTag = seqTypes.get(i);
+        final String seqTag = seqTypes.get(i);
         if (seqTag.equals("O")) {
           // O means we don't have anything this round.
           if (beginIndex != -1) {
-            sequences.add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+            sequences
+                .add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
             beginIndex = -1;
             endIndex = -1;
           }
-        }
-        else if (seqTag.startsWith("B-")) {
-          // B- prefix means we have two same entities of the same class next to each other
+        } else if (seqTag.startsWith("B-")) {
+          // B- prefix means we have two same entities of the same class next to
+          // each other
           if (beginIndex != -1) {
-            sequences.add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+            sequences
+                .add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
           }
           beginIndex = i;
           endIndex = i + 1;
-        }
-        else if (seqTag.startsWith("I-")) {
+        } else if (seqTag.startsWith("I-")) {
           // I- starts or continues a current name entity
           if (beginIndex == -1) {
             beginIndex = i;
             endIndex = i + 1;
-          }
-          else if (!seqTag.endsWith(seqTypes.get(beginIndex).substring(1))) {
+          } else if (!seqTag.endsWith(seqTypes.get(beginIndex).substring(1))) {
             // we have a new tag type following a tagged word series
             // also may not have the same I- starting the previous!
-            sequences.add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+            sequences
+                .add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
             beginIndex = i;
             endIndex = i + 1;
+          } else {
+            endIndex++;
           }
-          else {
-            endIndex ++;
-          }
-        }
-        else {
+        } else {
           throw new IOException("Invalid tag: " + seqTag);
         }
       }
 
       // if one span remains, create it here
-      if (beginIndex != -1)
+      if (beginIndex != -1) {
         sequences.add(extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+      }
 
-      return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]), sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
-    }
-    else if (line != null) {
+      return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
+          sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
+    } else if (line != null) {
       // Just filter out empty events, if two lines in a row are empty
       return read();
-    }
-    else {
+    } else {
       // source stream is not returning anymore lines
       return null;
     }
   }
-  
-  static final Span extract(int begin, int end, String beginTag)
-      throws InvalidFormatException {
 
-    String type = beginTag.substring(2);
+  static final Span extract(final int begin, final int end,
+      final String beginTag) throws InvalidFormatException {
+
+    final String type = beginTag.substring(2);
     return new Span(begin, end, type);
   }
 
+  @Override
   public void reset() throws IOException, UnsupportedOperationException {
-    lineStream.reset();
+    this.lineStream.reset();
   }
 
+  @Override
   public void close() throws IOException {
-    lineStream.close();
+    this.lineStream.close();
   }
 
 }

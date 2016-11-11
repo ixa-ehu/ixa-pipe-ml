@@ -20,45 +20,51 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.resources.POSDictionary;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.POSDictionary;
 
-public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
+public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
 
   private POSDictionary posDictionary;
   private Map<String, String> attributes;
-  
+
   public POSDictionaryFeatureGenerator() {
   }
-  
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] preds) {
 
-    String posTag = posDictionary.getMostFrequentTag(tokens[index].toLowerCase());
-    features.add(attributes.get("dict") + "=" + posTag);
-  }
-  
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
+
+    final String posTag = this.posDictionary
+        .getMostFrequentTag(tokens[index].toLowerCase());
+    features.add(this.attributes.get("dict") + "=" + posTag);
+  }
+
+  @Override
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
+
   }
 
   @Override
   public void clearAdaptiveData() {
-    
+
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    Object dictResource = resourceProvider.getResource(properties.get("dict"));
+    final Object dictResource = resourceProvider
+        .getResource(properties.get("dict"));
     if (!(dictResource instanceof POSDictionary)) {
-      throw new InvalidFormatException("Not a POSDictionary resource for key: " + properties.get("dict"));
+      throw new InvalidFormatException(
+          "Not a POSDictionary resource for key: " + properties.get("dict"));
     }
     this.posDictionary = (POSDictionary) dictResource;
     this.attributes = properties;
@@ -66,10 +72,10 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator implem
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("posdictserializer", new POSDictionary.POSDictionarySerializer());
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    mapping.put("posdictserializer",
+        new POSDictionary.POSDictionarySerializer());
     return Collections.unmodifiableMap(mapping);
   }
-  
-}
 
+}

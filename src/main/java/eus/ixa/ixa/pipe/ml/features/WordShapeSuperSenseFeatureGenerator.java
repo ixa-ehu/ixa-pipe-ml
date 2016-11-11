@@ -23,34 +23,36 @@ import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
- * Ciaramita and Altun (2006) word shape features. This feature generator
- * can also be placed on a sliding window.
- * 
+ * Ciaramita and Altun (2006) word shape features. This feature generator can
+ * also be placed on a sliding window.
+ *
  * @author ragerri
  * @version 2015-03-17
  */
-public class WordShapeSuperSenseFeatureGenerator extends CustomFeatureGenerator {
+public class WordShapeSuperSenseFeatureGenerator
+    extends CustomFeatureGenerator {
 
   public WordShapeSuperSenseFeatureGenerator() {
 
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] preds) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
 
-    String normalizedToken = normalize(tokens[index]);
+    final String normalizedToken = normalize(tokens[index]);
     features.add("sh=" + normalizedToken);
     features.add("w,sh=" + tokens[index].toLowerCase() + "," + normalizedToken);
   }
 
   /**
    * Normalize upper case, lower case, digits and duplicate characters.
-   * 
+   *
    * @param token
    *          the token to be normalized
    * @return the normalized token
    */
-  public static String normalize(String token) {
+  public static String normalize(final String token) {
     String normalizedToken = "";
 
     char currentCharacter;
@@ -90,13 +92,15 @@ public class WordShapeSuperSenseFeatureGenerator extends CustomFeatureGenerator 
   }
 
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
 
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resources) throws InvalidFormatException {
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resources)
+      throws InvalidFormatException {
 
   }
 

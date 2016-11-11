@@ -35,22 +35,27 @@ import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
 /**
-* Class for obtaining head rules from Spanish Ancora parse
-* trees.
-* @author ragerri
-* @version 2015-05-06
-*/
-public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtifact {
-  
-  public static class AncoraHeadRulesSerializer implements ArtifactSerializer<AncoraHeadRules> {
+ * Class for obtaining head rules from Spanish Ancora parse trees.
+ * 
+ * @author ragerri
+ * @version 2015-05-06
+ */
+public class AncoraHeadRules
+    implements HeadRules, GapLabeler, SerializableArtifact {
 
-    public AncoraHeadRules create(InputStream in) throws IOException,
-        InvalidFormatException {
-      return new AncoraHeadRules(new BufferedReader(new InputStreamReader(in, "UTF-8")));
+  public static class AncoraHeadRulesSerializer
+      implements ArtifactSerializer<AncoraHeadRules> {
+
+    @Override
+    public AncoraHeadRules create(final InputStream in)
+        throws IOException, InvalidFormatException {
+      return new AncoraHeadRules(
+          new BufferedReader(new InputStreamReader(in, "UTF-8")));
     }
 
-    public void serialize(AncoraHeadRules artifact, OutputStream out)
-        throws IOException {
+    @Override
+    public void serialize(final AncoraHeadRules artifact,
+        final OutputStream out) throws IOException {
       artifact.serialize(new OutputStreamWriter(out, "UTF-8"));
     }
   }
@@ -60,10 +65,10 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
 
   /**
    * Creates a new set of head rules based on the specified reader.
-   * 
+   *
    * @param rulesReader
    *          the head rules reader.
-   * 
+   *
    * @throws IOException
    *           if the head rules reader can not be read.
    */
@@ -78,7 +83,7 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
     this.punctSet.add("''");
     // punctSet.add(":");
   }
-  
+
   private void readHeadRules(final BufferedReader str) throws IOException {
     String line;
     this.headRules = new HashMap<String, HeadRule>(60);
@@ -97,10 +102,12 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
     }
   }
 
+  @Override
   public Set<String> getPunctuationTags() {
     return this.punctSet;
   }
 
+  @Override
   public Parse getHead(final Parse[] constituents, final String type) {
     if (constituents[0].getType() == ShiftReduceParser.TOK_NODE) {
       return null;
@@ -146,11 +153,11 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
           }
         }
       }
-      final String[] tags3 = { "AQ0MS0", "AQ0FS0", "AQ0CS0", "AQ0MSP",
-          "AQ0FSP", "AQ0CSP", "AQ0CNP", "AQ0MP0", "AQ0FP0", "AQ0CP0", "AQ0MPP",
-          "AQ0FPP", "AQ0CPP", "AQ0MN0", "AQ0FN0", "AQ0CN0", "AQ0MNP", "AQ0FNP",
-          "AQ0CNP", "AQSMS0", "AQSFS0", "AQSCS0", "AQSMN0", "AQSFN0", "AQSCN0",
-          "AQSMP0", "AQSFP0", "AQSCP0", "RG", "RN", "GRUP.NOM" };
+      final String[] tags3 = { "AQ0MS0", "AQ0FS0", "AQ0CS0", "AQ0MSP", "AQ0FSP",
+          "AQ0CSP", "AQ0CNP", "AQ0MP0", "AQ0FP0", "AQ0CP0", "AQ0MPP", "AQ0FPP",
+          "AQ0CPP", "AQ0MN0", "AQ0FN0", "AQ0CN0", "AQ0MNP", "AQ0FNP", "AQ0CNP",
+          "AQSMS0", "AQSFS0", "AQSCS0", "AQSMN0", "AQSFN0", "AQSCN0", "AQSMP0",
+          "AQSFP0", "AQSCP0", "RG", "RN", "GRUP.NOM" };
       for (int ci = constituents.length - 1; ci >= 0; ci--) {
         for (int ti = tags3.length - 1; ti >= 0; ti--) {
           if (constituents[ci].getType().equals(tags3[ti])) {
@@ -190,6 +197,7 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
     return constituents[constituents.length - 1];
   }
 
+  @Override
   public void labelGaps(final Stack<Constituent> stack) {
     if (stack.size() > 4) {
       // Constituent con0 = (Constituent) stack.get(stack.size()-1);
@@ -197,7 +205,8 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
       final Constituent con2 = stack.get(stack.size() - 3);
       final Constituent con3 = stack.get(stack.size() - 4);
       final Constituent con4 = stack.get(stack.size() - 5);
-      // System.err.println("con0="+con0.label+" con1="+con1.label+" con2="+con2.label+" con3="+con3.label+" con4="+con4.label);
+      // System.err.println("con0="+con0.label+" con1="+con1.label+"
+      // con2="+con2.label+" con3="+con3.label+" con4="+con4.label);
       // subject extraction
       if (con1.getLabel().equals("SN") && con2.getLabel().equals("S")
           && con3.getLabel().equals("GRUP.NOM")) {
@@ -224,7 +233,7 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
    * <p>
    * After the entries have been written, the writer is flushed. The writer
    * remains open after this method returns.
-   * 
+   *
    * @param writer
    *          the writer
    * @throws IOException
@@ -275,7 +284,7 @@ public class AncoraHeadRules implements HeadRules, GapLabeler, SerializableArtif
     assert false : "hashCode not designed";
     return 42; // any arbitrary constant will do
   }
-  
+
   @Override
   public Class<?> getArtifactSerializerClass() {
     return AncoraHeadRulesSerializer.class;

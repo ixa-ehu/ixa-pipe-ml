@@ -33,17 +33,16 @@ import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
-
 /**
+ *
+ * Class to load a {@code PredicateContext} resource containing predicate and
+ * window feature information about that predicate. The format of the file
+ * contains: predicate, context predicate and region mark in that order. For
+ * example: set\tbeen set .\t1
  * 
- * Class to load a {@code PredicateContext} resource containing
- * predicate and window feature information about that predicate.
- * The format of the file contains: predicate, context predicate
- * and region mark in that order. For example:
- * set\tbeen set .\t1
  * @author ragerri
  * @version 2016/07/05
- * 
+ *
  */
 public class PredicateContext implements SerializableArtifact {
 
@@ -51,17 +50,21 @@ public class PredicateContext implements SerializableArtifact {
   /**
    * Turkish capital letter I with dot.
    */
-  public static final Pattern dotInsideI = Pattern.compile("\u0130", Pattern.UNICODE_CHARACTER_CLASS);
-  
-  public static class PredicateContextSerializer implements ArtifactSerializer<PredicateContext> {
+  public static final Pattern dotInsideI = Pattern.compile("\u0130",
+      Pattern.UNICODE_CHARACTER_CLASS);
 
-    public PredicateContext create(InputStream in) throws IOException,
-        InvalidFormatException {
+  public static class PredicateContextSerializer
+      implements ArtifactSerializer<PredicateContext> {
+
+    @Override
+    public PredicateContext create(final InputStream in)
+        throws IOException, InvalidFormatException {
       return new PredicateContext(in);
     }
 
-    public void serialize(PredicateContext artifact, OutputStream out)
-        throws IOException {
+    @Override
+    public void serialize(final PredicateContext artifact,
+        final OutputStream out) throws IOException {
       artifact.serialize(out);
     }
   }
@@ -69,51 +72,54 @@ public class PredicateContext implements SerializableArtifact {
   List<List<String>> predContexts = new ArrayList<List<String>>();
 
   public List<List<String>> getPredicateContext() {
-    return predContexts;
+    return this.predContexts;
   }
-  
-  public PredicateContext(InputStream in) throws IOException {
 
-    BufferedReader breader = new BufferedReader(new InputStreamReader(in, Charset.forName("UTF-8")));
+  public PredicateContext(final InputStream in) throws IOException {
+
+    final BufferedReader breader = new BufferedReader(
+        new InputStreamReader(in, Charset.forName("UTF-8")));
     String line;
     while ((line = breader.readLine()) != null) {
-      String[] lineArray = tabPattern.split(line);
+      final String[] lineArray = tabPattern.split(line);
       populateLists(lineArray);
     }
   }
-  
-  private void populateLists(String[] lineArray) {
+
+  private void populateLists(final String[] lineArray) {
     if (lineArray.length == 3) {
-      String normalizedToken = dotInsideI.matcher(lineArray[0]).replaceAll("i");
-      String normalizedContext = dotInsideI.matcher(lineArray[1]).replaceAll("i");
-      List<String> tokenValues = new ArrayList<>();
+      final String normalizedToken = dotInsideI.matcher(lineArray[0])
+          .replaceAll("i");
+      final String normalizedContext = dotInsideI.matcher(lineArray[1])
+          .replaceAll("i");
+      final List<String> tokenValues = new ArrayList<>();
       tokenValues.add(normalizedToken);
       tokenValues.add(normalizedContext);
       tokenValues.add(lineArray[2]);
-      predContexts.add(tokenValues);
+      this.predContexts.add(tokenValues);
     }
   }
-  
- 
-  
 
   /**
    * Serialize the dictionary to original corpus format
-   * @param out the output stream
-   * @throws IOException if io problems
+   * 
+   * @param out
+   *          the output stream
+   * @throws IOException
+   *           if io problems
    */
-  public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+  public void serialize(final OutputStream out) throws IOException {
+    final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
 
-    for (List<String> entry : predContexts) {
-      writer.write(entry.get(0) + "\t" + entry.get(1) + "\t" + entry.get(2) + "\n");
+    for (final List<String> entry : this.predContexts) {
+      writer.write(
+          entry.get(0) + "\t" + entry.get(1) + "\t" + entry.get(2) + "\n");
     }
     writer.flush();
   }
 
+  @Override
   public Class<?> getArtifactSerializerClass() {
     return PredicateContextSerializer.class;
   }
 }
-
-

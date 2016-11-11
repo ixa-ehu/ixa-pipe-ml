@@ -29,10 +29,10 @@ import morfologik.stemming.WordData;
  * POS tagger based on Morfologik Stemming library. It requires a FSA Morfologik
  * dictionary as input. Right now this is only thought to work with monosemic
  * dictionaries.
- * 
+ *
  * @author ragerri
  * @version 2014-12-05
- * 
+ *
  */
 public class MorfologikTagger implements DictionaryTagger {
 
@@ -43,7 +43,7 @@ public class MorfologikTagger implements DictionaryTagger {
 
   /**
    * Reads a dictionary in morfologik FSA format.
-   * 
+   *
    * @param dictURL
    *          the URL containing the dictionary
    * @param aLang
@@ -59,11 +59,12 @@ public class MorfologikTagger implements DictionaryTagger {
   /**
    * Get the postag for a surface form from a FSA morfologik generated
    * dictionary.
-   * 
+   *
    * @param word
    *          the surface form
    * @return the hashmap with the word as key and the postag as value
    */
+  @Override
   public String tag(final String word, final String posTag) {
     final List<WordData> wdList = this.dictLookup.lookup(word.toLowerCase());
     String newPosTag = null;
@@ -76,4 +77,3 @@ public class MorfologikTagger implements DictionaryTagger {
     return newPosTag;
   }
 }
-

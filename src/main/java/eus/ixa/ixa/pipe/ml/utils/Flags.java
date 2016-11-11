@@ -23,6 +23,7 @@ import opennlp.tools.util.TrainingParameters;
 
 /**
  * Flags for training.
+ * 
  * @author ragerri
  *
  */
@@ -59,13 +60,12 @@ public class Flags {
   public static final String DEFAULT_SEQUENCE_CODEC = "BILOU";
   public static final String DEFAULT_EVAL_FORMAT = "conll02";
   public static final String DEFAULT_TASK = "ner";
-  public static final String DEFAULT_HOSTNAME= "localhost";
+  public static final String DEFAULT_HOSTNAME = "localhost";
 
   private Flags() {
 
   }
-  
-  
+
   public static String getComponent(final TrainingParameters params) {
     String component = null;
     if (params.getSettings().get("Component") == null) {
@@ -76,7 +76,7 @@ public class Flags {
     return component;
   }
 
-  public static String getLanguage(TrainingParameters params) {
+  public static String getLanguage(final TrainingParameters params) {
     String lang = null;
     if (params.getSettings().get("Language") == null) {
       langException();
@@ -86,7 +86,8 @@ public class Flags {
     return lang;
   }
 
-  public static String getDataSet(String dataset, TrainingParameters params) {
+  public static String getDataSet(final String dataset,
+      final TrainingParameters params) {
     String trainSet = null;
     if (params.getSettings().get(dataset) == null) {
       datasetException();
@@ -96,7 +97,7 @@ public class Flags {
     return trainSet;
   }
 
-  public static String getModel(TrainingParameters params) {
+  public static String getModel(final TrainingParameters params) {
     String model = null;
     if (params.getSettings().get("OutputModel") == null) {
       modelException();
@@ -109,7 +110,7 @@ public class Flags {
     return model;
   }
 
-  public static String getCorpusFormat(TrainingParameters params) {
+  public static String getCorpusFormat(final TrainingParameters params) {
     String corpusFormat = null;
     if (params.getSettings().get("CorpusFormat") == null) {
       corpusFormatException();
@@ -119,7 +120,7 @@ public class Flags {
     return corpusFormat;
   }
 
-  public static String getOutputFormat(TrainingParameters params) {
+  public static String getOutputFormat(final TrainingParameters params) {
     String outFormatOption = null;
     if (params.getSettings().get("OutputFormat") != null) {
       outFormatOption = params.getSettings().get("OutputFormat");
@@ -129,7 +130,7 @@ public class Flags {
     return outFormatOption;
   }
 
-  public static Integer getBeamsize(TrainingParameters params) {
+  public static Integer getBeamsize(final TrainingParameters params) {
     Integer beamsize = null;
     if (params.getSettings().get("BeamSize") == null) {
       beamsize = Flags.DEFAULT_BEAM_SIZE;
@@ -139,7 +140,7 @@ public class Flags {
     return beamsize;
   }
 
-  public static Integer getFolds(TrainingParameters params) {
+  public static Integer getFolds(final TrainingParameters params) {
     Integer beamsize = null;
     if (params.getSettings().get("Folds") == null) {
       beamsize = Flags.DEFAULT_FOLDS_VALUE;
@@ -149,7 +150,7 @@ public class Flags {
     return beamsize;
   }
 
-  public static String getSequenceCodec(TrainingParameters params) {
+  public static String getSequenceCodec(final TrainingParameters params) {
     String seqCodec = null;
     if (params.getSettings().get("SequenceCodec") == null) {
       seqCodec = Flags.DEFAULT_SEQUENCE_CODEC;
@@ -159,7 +160,8 @@ public class Flags {
     return seqCodec;
   }
 
-  public static String getClearTrainingFeatures(TrainingParameters params) {
+  public static String getClearTrainingFeatures(
+      final TrainingParameters params) {
     String clearFeatures = null;
     if (params.getSettings().get("ClearTrainingFeatures") == null) {
       clearFeatures = Flags.DEFAULT_FEATURE_FLAG;
@@ -169,7 +171,8 @@ public class Flags {
     return clearFeatures;
   }
 
-  public static String getClearEvaluationFeatures(TrainingParameters params) {
+  public static String getClearEvaluationFeatures(
+      final TrainingParameters params) {
     String clearFeatures = null;
     if (params.getSettings().get("ClearEvaluationFeatures") == null) {
       clearFeatures = Flags.DEFAULT_FEATURE_FLAG;
@@ -179,7 +182,7 @@ public class Flags {
     return clearFeatures;
   }
 
-  public static String getWindow(TrainingParameters params) {
+  public static String getWindow(final TrainingParameters params) {
     String windowFlag = null;
     if (params.getSettings().get("Window") == null) {
       windowFlag = Flags.DEFAULT_WINDOW;
@@ -189,7 +192,7 @@ public class Flags {
     return windowFlag;
   }
 
-  public static String getTokenFeatures(TrainingParameters params) {
+  public static String getTokenFeatures(final TrainingParameters params) {
     String tokenFlag = null;
     if (params.getSettings().get("TokenFeatures") != null) {
       tokenFlag = params.getSettings().get("TokenFeatures");
@@ -198,8 +201,8 @@ public class Flags {
     }
     return tokenFlag;
   }
-  
-  public static String getTokenFeaturesRange(TrainingParameters params) {
+
+  public static String getTokenFeaturesRange(final TrainingParameters params) {
     String tokenRangeFlag = null;
     if (params.getSettings().get("TokenFeaturesRange") != null) {
       tokenRangeFlag = params.getSettings().get("TokenFeaturesRange");
@@ -209,7 +212,7 @@ public class Flags {
     return tokenRangeFlag;
   }
 
-  public static String getTokenClassFeatures(TrainingParameters params) {
+  public static String getTokenClassFeatures(final TrainingParameters params) {
     String tokenClassFlag = null;
     if (params.getSettings().get("TokenClassFeatures") != null) {
       tokenClassFlag = params.getSettings().get("TokenClassFeatures");
@@ -218,8 +221,9 @@ public class Flags {
     }
     return tokenClassFlag;
   }
-  
-  public static String getTokenClassFeaturesRange(TrainingParameters params) {
+
+  public static String getTokenClassFeaturesRange(
+      final TrainingParameters params) {
     String tokenRangeFlag = null;
     if (params.getSettings().get("TokenClassFeaturesRange") != null) {
       tokenRangeFlag = params.getSettings().get("TokenClassFeaturesRange");
@@ -228,17 +232,19 @@ public class Flags {
     }
     return tokenRangeFlag;
   }
-  
-  public static String[] processTokenClassFeaturesRange(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] processTokenClassFeaturesRange(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 2) {
-      System.err.println("TokenClassFeaturesRange requires two fields but got " + mfsFlagArray.length);
+      System.err.println("TokenClassFeaturesRange requires two fields but got "
+          + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
 
-  public static String getWordShapeSuperSenseFeatures(TrainingParameters params) {
+  public static String getWordShapeSuperSenseFeatures(
+      final TrainingParameters params) {
     String tokenClassFlag = null;
     if (params.getSettings().get("WordShapeSuperSenseFeatures") != null) {
       tokenClassFlag = params.getSettings().get("WordShapeSuperSenseFeatures");
@@ -248,7 +254,8 @@ public class Flags {
     return tokenClassFlag;
   }
 
-  public static String getOutcomePriorFeatures(TrainingParameters params) {
+  public static String getOutcomePriorFeatures(
+      final TrainingParameters params) {
     String outcomePriorFlag = null;
     if (params.getSettings().get("OutcomePriorFeatures") != null) {
       outcomePriorFlag = params.getSettings().get("OutcomePriorFeatures");
@@ -258,7 +265,7 @@ public class Flags {
     return outcomePriorFlag;
   }
 
-  public static String getPreviousMapFeatures(TrainingParameters params) {
+  public static String getPreviousMapFeatures(final TrainingParameters params) {
     String previousMapFlag = null;
     if (params.getSettings().get("PreviousMapFeatures") != null) {
       previousMapFlag = params.getSettings().get("PreviousMapFeatures");
@@ -268,7 +275,7 @@ public class Flags {
     return previousMapFlag;
   }
 
-  public static String getSentenceFeatures(TrainingParameters params) {
+  public static String getSentenceFeatures(final TrainingParameters params) {
     String sentenceFlag = null;
     if (params.getSettings().get("SentenceFeatures") != null) {
       sentenceFlag = params.getSettings().get("SentenceFeatures");
@@ -277,8 +284,9 @@ public class Flags {
     }
     return sentenceFlag;
   }
-  
-  public static String getSentenceFeaturesBegin(TrainingParameters params) {
+
+  public static String getSentenceFeaturesBegin(
+      final TrainingParameters params) {
     String beginFlag = null;
     if (params.getSettings().get("SentenceFeaturesBegin") != null) {
       beginFlag = params.getSettings().get("SentenceFeaturesBegin");
@@ -287,8 +295,8 @@ public class Flags {
     }
     return beginFlag;
   }
-  
-  public static String getSentenceFeaturesEnd(TrainingParameters params) {
+
+  public static String getSentenceFeaturesEnd(final TrainingParameters params) {
     String endFlag = null;
     if (params.getSettings().get("SentenceFeaturesEnd") != null) {
       endFlag = params.getSettings().get("SentenceFeaturesEnd");
@@ -298,8 +306,7 @@ public class Flags {
     return endFlag;
   }
 
-
-  public static String getPreffixFeatures(TrainingParameters params) {
+  public static String getPreffixFeatures(final TrainingParameters params) {
     String prefixFlag = null;
     if (params.getSettings().get("PrefixFeatures") != null) {
       prefixFlag = params.getSettings().get("PrefixFeatures");
@@ -308,8 +315,8 @@ public class Flags {
     }
     return prefixFlag;
   }
-  
-  public static String getPrefixFeaturesBegin(TrainingParameters params) {
+
+  public static String getPrefixFeaturesBegin(final TrainingParameters params) {
     String beginFlag = null;
     if (params.getSettings().get("PrefixFeaturesBegin") != null) {
       beginFlag = params.getSettings().get("PrefixFeaturesBegin");
@@ -318,8 +325,8 @@ public class Flags {
     }
     return beginFlag;
   }
-  
-  public static String getPrefixFeaturesEnd(TrainingParameters params) {
+
+  public static String getPrefixFeaturesEnd(final TrainingParameters params) {
     String endFlag = null;
     if (params.getSettings().get("PrefixFeaturesEnd") != null) {
       endFlag = params.getSettings().get("PrefixFeaturesEnd");
@@ -329,8 +336,7 @@ public class Flags {
     return endFlag;
   }
 
-
-  public static String getSuffixFeatures(TrainingParameters params) {
+  public static String getSuffixFeatures(final TrainingParameters params) {
     String suffixFlag = null;
     if (params.getSettings().get("SuffixFeatures") != null) {
       suffixFlag = params.getSettings().get("SuffixFeatures");
@@ -339,8 +345,8 @@ public class Flags {
     }
     return suffixFlag;
   }
-  
-  public static String getSuffixFeaturesBegin(TrainingParameters params) {
+
+  public static String getSuffixFeaturesBegin(final TrainingParameters params) {
     String beginFlag = null;
     if (params.getSettings().get("SuffixFeaturesBegin") != null) {
       beginFlag = params.getSettings().get("SuffixFeaturesBegin");
@@ -349,8 +355,8 @@ public class Flags {
     }
     return beginFlag;
   }
-  
-  public static String getSuffixFeaturesEnd(TrainingParameters params) {
+
+  public static String getSuffixFeaturesEnd(final TrainingParameters params) {
     String endFlag = null;
     if (params.getSettings().get("SuffixFeaturesEnd") != null) {
       endFlag = params.getSettings().get("SuffixFeaturesEnd");
@@ -360,7 +366,7 @@ public class Flags {
     return endFlag;
   }
 
-  public static String getBigramClassFeatures(TrainingParameters params) {
+  public static String getBigramClassFeatures(final TrainingParameters params) {
     String bigramClassFlag = null;
     if (params.getSettings().get("BigramClassFeatures") != null) {
       bigramClassFlag = params.getSettings().get("BigramClassFeatures");
@@ -370,7 +376,8 @@ public class Flags {
     return bigramClassFlag;
   }
 
-  public static String getTrigramClassFeatures(TrainingParameters params) {
+  public static String getTrigramClassFeatures(
+      final TrainingParameters params) {
     String trigramClassFlag = null;
     if (params.getSettings().get("TrigramClassFeatures") != null) {
       trigramClassFlag = params.getSettings().get("TrigramClassFeatures");
@@ -380,7 +387,8 @@ public class Flags {
     return trigramClassFlag;
   }
 
-  public static String getFourgramClassFeatures(TrainingParameters params) {
+  public static String getFourgramClassFeatures(
+      final TrainingParameters params) {
     String fourgramClassFlag = null;
     if (params.getSettings().get("FourgramClassFeatures") != null) {
       fourgramClassFlag = params.getSettings().get("FourgramClassFeatures");
@@ -390,7 +398,8 @@ public class Flags {
     return fourgramClassFlag;
   }
 
-  public static String getFivegramClassFeatures(TrainingParameters params) {
+  public static String getFivegramClassFeatures(
+      final TrainingParameters params) {
     String fivegramClassFlag = null;
     if (params.getSettings().get("FivegramClassFeatures") != null) {
       fivegramClassFlag = params.getSettings().get("FivegramClassFeatures");
@@ -400,7 +409,7 @@ public class Flags {
     return fivegramClassFlag;
   }
 
-  public static String getCharNgramFeatures(TrainingParameters params) {
+  public static String getCharNgramFeatures(final TrainingParameters params) {
     String charNgramFlag = null;
     if (params.getSettings().get("CharNgramFeatures") != null) {
       charNgramFlag = params.getSettings().get("CharNgramFeatures");
@@ -410,7 +419,8 @@ public class Flags {
     return charNgramFlag;
   }
 
-  public static String getCharNgramFeaturesRange(TrainingParameters params) {
+  public static String getCharNgramFeaturesRange(
+      final TrainingParameters params) {
     String charNgramRangeFlag = null;
     if (params.getSettings().get("CharNgramFeaturesRange") != null) {
       charNgramRangeFlag = params.getSettings().get("CharNgramFeaturesRange");
@@ -419,17 +429,18 @@ public class Flags {
     }
     return charNgramRangeFlag;
   }
-  
-  public static String[] processNgramRange(String charngramRangeFlag) {
-    String[] charngramArray = charngramRangeFlag.split("[ :-]");
+
+  public static String[] processNgramRange(final String charngramRangeFlag) {
+    final String[] charngramArray = charngramRangeFlag.split("[ :-]");
     if (charngramArray.length != 2) {
-      System.err.println("CharNgramFeaturesRange requires two fieds but got " + charngramArray.length);
+      System.err.println("CharNgramFeaturesRange requires two fieds but got "
+          + charngramArray.length);
       System.exit(1);
     }
-  return charngramArray;
-}
+    return charngramArray;
+  }
 
-  public static String getDictionaryFeatures(TrainingParameters params) {
+  public static String getDictionaryFeatures(final TrainingParameters params) {
     String dictionaryFlag = null;
     if (params.getSettings().get("DictionaryFeatures") != null) {
       dictionaryFlag = params.getSettings().get("DictionaryFeatures");
@@ -439,7 +450,7 @@ public class Flags {
     return dictionaryFlag;
   }
 
-  public static String getClarkFeatures(TrainingParameters params) {
+  public static String getClarkFeatures(final TrainingParameters params) {
     String distSimFlag = null;
     if (params.getSettings().get("ClarkClusterFeatures") != null) {
       distSimFlag = params.getSettings().get("ClarkClusterFeatures");
@@ -449,7 +460,8 @@ public class Flags {
     return distSimFlag;
   }
 
-  public static String getWord2VecClusterFeatures(TrainingParameters params) {
+  public static String getWord2VecClusterFeatures(
+      final TrainingParameters params) {
     String word2vecFlag = null;
     if (params.getSettings().get("Word2VecClusterFeatures") != null) {
       word2vecFlag = params.getSettings().get("Word2VecClusterFeatures");
@@ -459,7 +471,7 @@ public class Flags {
     return word2vecFlag;
   }
 
-  public static String getBrownFeatures(TrainingParameters params) {
+  public static String getBrownFeatures(final TrainingParameters params) {
     String brownFlag = null;
     if (params.getSettings().get("BrownClusterFeatures") != null) {
       brownFlag = params.getSettings().get("BrownClusterFeatures");
@@ -468,8 +480,9 @@ public class Flags {
     }
     return brownFlag;
   }
-  
-  public static String getPOSDictionaryFeatures(TrainingParameters params) {
+
+  public static String getPOSDictionaryFeatures(
+      final TrainingParameters params) {
     String dictionaryFlag = null;
     if (params.getSettings().get("POSDictionaryFeatures") != null) {
       dictionaryFlag = params.getSettings().get("POSDictionaryFeatures");
@@ -478,8 +491,8 @@ public class Flags {
     }
     return dictionaryFlag;
   }
-  
-  public static String getPOSTagModelFeatures(TrainingParameters params) {
+
+  public static String getPOSTagModelFeatures(final TrainingParameters params) {
     String morphoFlag = null;
     if (params.getSettings().get("POSTagModelFeatures") != null) {
       morphoFlag = params.getSettings().get("POSTagModelFeatures");
@@ -488,15 +501,16 @@ public class Flags {
     }
     return morphoFlag;
   }
-  
+
   /**
    * Get the morphological features configuration.
-   * 
+   *
    * @param params
    *          the training parameters
    * @return a list containing the options
    */
-  public static String getPOSTagModelFeaturesRange(TrainingParameters params) {
+  public static String getPOSTagModelFeaturesRange(
+      final TrainingParameters params) {
     String lemmaRangeFlag = null;
     if (params.getSettings().get("POSTagModelFeaturesRange") != null) {
       lemmaRangeFlag = params.getSettings().get("POSTagModelFeaturesRange");
@@ -505,18 +519,18 @@ public class Flags {
     }
     return lemmaRangeFlag;
   }
-  
-  public static String[] processPOSTagModelFeaturesRange(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] processPOSTagModelFeaturesRange(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 2) {
-      System.err.println("POSTagFeaturesRange requires two fields but got " + mfsFlagArray.length);
+      System.err.println("POSTagFeaturesRange requires two fields but got "
+          + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
-  
-  
-  public static String getLemmaModelFeatures(TrainingParameters params) {
+
+  public static String getLemmaModelFeatures(final TrainingParameters params) {
     String morphoFlag = null;
     if (params.getSettings().get("LemmaModelFeatures") != null) {
       morphoFlag = params.getSettings().get("LemmaModelFeatures");
@@ -525,9 +539,9 @@ public class Flags {
     }
     return morphoFlag;
   }
-  
-  
-  public static String getLemmaDictionaryFeatures(TrainingParameters params) {
+
+  public static String getLemmaDictionaryFeatures(
+      final TrainingParameters params) {
     String morphoFlag = null;
     if (params.getSettings().get("LemmaDictionaryFeatures") != null) {
       morphoFlag = params.getSettings().get("LemmaDictionaryFeatures");
@@ -536,18 +550,19 @@ public class Flags {
     }
     return morphoFlag;
   }
-  
-  public static String[] getLemmaDictionaryResources(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] getLemmaDictionaryResources(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 2) {
-      System.err.println("LemmaDictionary resources requires two fields but got " + mfsFlagArray.length);
+      System.err
+          .println("LemmaDictionary resources requires two fields but got "
+              + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
 
-  
-  public static String getSuperSenseFeatures(TrainingParameters params) {
+  public static String getSuperSenseFeatures(final TrainingParameters params) {
     String mfsFlag = null;
     if (params.getSettings().get("SuperSenseFeatures") != null) {
       mfsFlag = params.getSettings().get("SuperSenseFeatures");
@@ -556,8 +571,8 @@ public class Flags {
     }
     return mfsFlag;
   }
-  
-  public static String getPOSBaselineFeatures(TrainingParameters params) {
+
+  public static String getPOSBaselineFeatures(final TrainingParameters params) {
     String posFlag = null;
     if (params.getSettings().get("POSBaselineFeatures") != null) {
       posFlag = params.getSettings().get("POSBaselineFeatures");
@@ -566,8 +581,8 @@ public class Flags {
     }
     return posFlag;
   }
-  
-  public static String getPrefixBegin(TrainingParameters params) {
+
+  public static String getPrefixBegin(final TrainingParameters params) {
     String beginFlag = null;
     if (params.getSettings().get("PrefixBegin") != null) {
       beginFlag = params.getSettings().get("PrefixBegin");
@@ -576,8 +591,8 @@ public class Flags {
     }
     return beginFlag;
   }
-  
-  public static String getPrefixEnd(TrainingParameters params) {
+
+  public static String getPrefixEnd(final TrainingParameters params) {
     String endFlag = null;
     if (params.getSettings().get("PrefixEnd") != null) {
       endFlag = params.getSettings().get("PrefixEnd");
@@ -586,8 +601,8 @@ public class Flags {
     }
     return endFlag;
   }
-  
-  public static String getSuffixBegin(TrainingParameters params) {
+
+  public static String getSuffixBegin(final TrainingParameters params) {
     String beginFlag = null;
     if (params.getSettings().get("SuffixBegin") != null) {
       beginFlag = params.getSettings().get("SuffixBegin");
@@ -596,8 +611,8 @@ public class Flags {
     }
     return beginFlag;
   }
-  
-  public static String getSuffixEnd(TrainingParameters params) {
+
+  public static String getSuffixEnd(final TrainingParameters params) {
     String endFlag = null;
     if (params.getSettings().get("SuffixEnd") != null) {
       endFlag = params.getSettings().get("SuffixEnd");
@@ -606,8 +621,8 @@ public class Flags {
     }
     return endFlag;
   }
-  
-  public static String getMFSFeatures(TrainingParameters params) {
+
+  public static String getMFSFeatures(final TrainingParameters params) {
     String mfsFlag = null;
     if (params.getSettings().get("MFSFeatures") != null) {
       mfsFlag = params.getSettings().get("MFSFeatures");
@@ -616,9 +631,9 @@ public class Flags {
     }
     return mfsFlag;
   }
-  
-  
-  public static String getLemmaBaselineFeatures(TrainingParameters params) {
+
+  public static String getLemmaBaselineFeatures(
+      final TrainingParameters params) {
     String lemmaFlag = null;
     if (params.getSettings().get("LemmaBaselineFeatures") != null) {
       lemmaFlag = params.getSettings().get("LemmaBaselineFeatures");
@@ -627,8 +642,9 @@ public class Flags {
     }
     return lemmaFlag;
   }
-  
-  public static String getLemmaBaselineFeaturesRange(TrainingParameters params) {
+
+  public static String getLemmaBaselineFeaturesRange(
+      final TrainingParameters params) {
     String mfsRangeFlag = null;
     if (params.getSettings().get("LemmaBaselineFeaturesRange") != null) {
       mfsRangeFlag = params.getSettings().get("LemmaBaselineFeaturesRange");
@@ -637,17 +653,21 @@ public class Flags {
     }
     return mfsRangeFlag;
   }
-  
-  public static String[] processLemmaBaselineFeaturesRange(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] processLemmaBaselineFeaturesRange(
+      final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 2) {
-      System.err.println("LemmaBaselineFeaturesRange requires two fields but got " + mfsFlagArray.length);
+      System.err
+          .println("LemmaBaselineFeaturesRange requires two fields but got "
+              + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
-  
-  public static String getPredicateContextFeatures(TrainingParameters params) {
+
+  public static String getPredicateContextFeatures(
+      final TrainingParameters params) {
     String lemmaFlag = null;
     if (params.getSettings().get("PredicateContextFeatures") != null) {
       lemmaFlag = params.getSettings().get("PredicateContextFeatures");
@@ -656,8 +676,9 @@ public class Flags {
     }
     return lemmaFlag;
   }
-  
-  public static String getChunkBaselineFeatures(TrainingParameters params) {
+
+  public static String getChunkBaselineFeatures(
+      final TrainingParameters params) {
     String lemmaFlag = null;
     if (params.getSettings().get("ChunkBaselineFeatures") != null) {
       lemmaFlag = params.getSettings().get("ChunkBaselineFeatures");
@@ -666,26 +687,29 @@ public class Flags {
     }
     return lemmaFlag;
   }
-  
-  public static String[] getSuperSenseResources(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] getSuperSenseResources(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 3) {
-      System.err.println("SuperSense resources requires three fields but got " + mfsFlagArray.length);
+      System.err.println("SuperSense resources requires three fields but got "
+          + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
-  
-  public static String[] getMFSResources(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] getMFSResources(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 3) {
-      System.err.println("MFS resources requires three fields but got " + mfsFlagArray.length);
+      System.err.println(
+          "MFS resources requires three fields but got " + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
-  
-  public static String getSuperSenseFeaturesRange(TrainingParameters params) {
+
+  public static String getSuperSenseFeaturesRange(
+      final TrainingParameters params) {
     String mfsRangeFlag = null;
     if (params.getSettings().get("SuperSenseFeaturesRange") != null) {
       mfsRangeFlag = params.getSettings().get("SuperSenseFeaturesRange");
@@ -694,8 +718,8 @@ public class Flags {
     }
     return mfsRangeFlag;
   }
-  
-  public static String getMFSFeaturesRange(TrainingParameters params) {
+
+  public static String getMFSFeaturesRange(final TrainingParameters params) {
     String mfsRangeFlag = null;
     if (params.getSettings().get("MFSFeaturesRange") != null) {
       mfsRangeFlag = params.getSettings().get("MFSFeaturesRange");
@@ -704,221 +728,238 @@ public class Flags {
     }
     return mfsRangeFlag;
   }
-  
-  public static String[] processSuperSenseFeaturesRange(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] processSuperSenseFeaturesRange(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 2) {
-      System.err.println("SuperSenseFeaturesRange requires two fields but got " + mfsFlagArray.length);
+      System.err.println("SuperSenseFeaturesRange requires two fields but got "
+          + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
-  
-  public static String[] processMFSFeaturesRange(String mfsFlag) {
-    String[] mfsFlagArray = mfsFlag.split(",");
+
+  public static String[] processMFSFeaturesRange(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
     if (mfsFlagArray.length != 5) {
-      System.err.println("MFSFeaturesRange requires five fields but got " + mfsFlagArray.length);
+      System.err.println("MFSFeaturesRange requires five fields but got "
+          + mfsFlagArray.length);
       System.exit(1);
     }
     return mfsFlagArray;
   }
-  
+
   /**
    * Get a parameter in trainParams.prop file consisting of a list of clustering
    * lexicons separated by comma "," and return a list of files, one for each
    * lexicon.
-   * 
+   *
    * @param clusterPath
    *          the clustering parameter in the prop file
    * @return a list of files one for each lexicon
    */
-  public static List<File> getClusterLexiconFiles(String clusterPath) {
-    List<File> clusterLexicons = new ArrayList<File>();
-    String[] clusterPaths = clusterPath.split(",");
-    for (String clusterName : clusterPaths) {
+  public static List<File> getClusterLexiconFiles(final String clusterPath) {
+    final List<File> clusterLexicons = new ArrayList<File>();
+    final String[] clusterPaths = clusterPath.split(",");
+    for (final String clusterName : clusterPaths) {
       clusterLexicons.add(new File(clusterName));
     }
     return clusterLexicons;
 
   }
-  
-  public static String getHeadRulesFile(TrainingParameters params) {
+
+  public static String getHeadRulesFile(final TrainingParameters params) {
     String headRulesFlag = null;
     if (params.getSettings().get("HeadRules") != null) {
       headRulesFlag = params.getSettings().get("HeadRules");
     } else {
       System.err.println("Specify head rules file to train the parser!!");
     }
-    return headRulesFlag; 
+    return headRulesFlag;
   }
-  
-  public static boolean isPredicateContextFeatures(TrainingParameters params) {
-    String posFeatures = getPredicateContextFeatures(params);
+
+  public static boolean isPredicateContextFeatures(
+      final TrainingParameters params) {
+    final String posFeatures = getPredicateContextFeatures(params);
     return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
-  public static boolean isChunkBaselineFeatures(TrainingParameters params) {
-    String posFeatures = getChunkBaselineFeatures(params);
+
+  public static boolean isChunkBaselineFeatures(
+      final TrainingParameters params) {
+    final String posFeatures = getChunkBaselineFeatures(params);
     return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
-  public static boolean isLemmaBaselineFeatures(TrainingParameters params) {
-    String posFeatures = getLemmaBaselineFeatures(params);
+
+  public static boolean isLemmaBaselineFeatures(
+      final TrainingParameters params) {
+    final String posFeatures = getLemmaBaselineFeatures(params);
     return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
+
   /**
    * Check if POS Baseline features are active.
-   * @param params the parameters
+   * 
+   * @param params
+   *          the parameters
    * @return whether the pos baseline features are activated or not
    */
-  public static boolean isPOSBaselineFeatures(TrainingParameters params) {
-    String posFeatures = getPOSBaselineFeatures(params);
+  public static boolean isPOSBaselineFeatures(final TrainingParameters params) {
+    final String posFeatures = getPOSBaselineFeatures(params);
     return !posFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
+
   /**
    * Check if supersense tagger features are active.
-   * @param params the parameters
+   * 
+   * @param params
+   *          the parameters
    * @return whether the supersense features are activated or not
    */
-  public static boolean isSuperSenseFeatures(TrainingParameters params) {
-    String mfsFeatures = getSuperSenseFeatures(params);
+  public static boolean isSuperSenseFeatures(final TrainingParameters params) {
+    final String mfsFeatures = getSuperSenseFeatures(params);
     return !mfsFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
+
   /**
    * Check if mfs features are active.
-   * @param params the parameters
+   * 
+   * @param params
+   *          the parameters
    * @return whether the mfs features are activated or not
    */
-  public static boolean isMFSFeatures(TrainingParameters params) {
-    String mfsFeatures = getMFSFeatures(params);
+  public static boolean isMFSFeatures(final TrainingParameters params) {
+    final String mfsFeatures = getMFSFeatures(params);
     return !mfsFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
-  public static boolean isLemmaDictionaryFeatures(TrainingParameters params) {
-    String morphoFeatures = getLemmaDictionaryFeatures(params);
-    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
-  }
-  
-  public static boolean isLemmaModelFeatures(TrainingParameters params) {
-    String morphoFeatures = getLemmaModelFeatures(params);
-    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
-  }
-  
-  public static boolean isPOSDictionaryFeatures(TrainingParameters params) {
-    String dictFeatures = getPOSDictionaryFeatures(params);
-    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
-  }
-  
-  public static boolean isPOSTagModelFeatures(TrainingParameters params) {
-    String morphoFeatures = getPOSTagModelFeatures(params);
+
+  public static boolean isLemmaDictionaryFeatures(
+      final TrainingParameters params) {
+    final String morphoFeatures = getLemmaDictionaryFeatures(params);
     return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isWord2VecClusterFeatures(TrainingParameters params) {
-    String word2vecClusterFeatures = getWord2VecClusterFeatures(params);
+  public static boolean isLemmaModelFeatures(final TrainingParameters params) {
+    final String morphoFeatures = getLemmaModelFeatures(params);
+    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+
+  public static boolean isPOSDictionaryFeatures(
+      final TrainingParameters params) {
+    final String dictFeatures = getPOSDictionaryFeatures(params);
+    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+
+  public static boolean isPOSTagModelFeatures(final TrainingParameters params) {
+    final String morphoFeatures = getPOSTagModelFeatures(params);
+    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+
+  public static boolean isWord2VecClusterFeatures(
+      final TrainingParameters params) {
+    final String word2vecClusterFeatures = getWord2VecClusterFeatures(params);
     return !word2vecClusterFeatures
         .equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isClarkFeatures(TrainingParameters params) {
-    String clarkFeatures = getClarkFeatures(params);
+  public static boolean isClarkFeatures(final TrainingParameters params) {
+    final String clarkFeatures = getClarkFeatures(params);
     return !clarkFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isBrownFeatures(TrainingParameters params) {
-    String brownFeatures = getBrownFeatures(params);
+  public static boolean isBrownFeatures(final TrainingParameters params) {
+    final String brownFeatures = getBrownFeatures(params);
     return !brownFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isDictionaryFeatures(TrainingParameters params) {
-    String dictFeatures = getDictionaryFeatures(params);
+  public static boolean isDictionaryFeatures(final TrainingParameters params) {
+    final String dictFeatures = getDictionaryFeatures(params);
     return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isCharNgramClassFeature(TrainingParameters params) {
-    String charngramParam = getCharNgramFeatures(params);
+  public static boolean isCharNgramClassFeature(
+      final TrainingParameters params) {
+    final String charngramParam = getCharNgramFeatures(params);
     return !charngramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isFivegramClassFeature(TrainingParameters params) {
-    String fivegramParam = getFivegramClassFeatures(params);
+  public static boolean isFivegramClassFeature(
+      final TrainingParameters params) {
+    final String fivegramParam = getFivegramClassFeatures(params);
     return !fivegramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isFourgramClassFeature(TrainingParameters params) {
-    String fourgramParam = getFourgramClassFeatures(params);
+  public static boolean isFourgramClassFeature(
+      final TrainingParameters params) {
+    final String fourgramParam = getFourgramClassFeatures(params);
     return !fourgramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isTrigramClassFeature(TrainingParameters params) {
-    String trigramParam = getTrigramClassFeatures(params);
+  public static boolean isTrigramClassFeature(final TrainingParameters params) {
+    final String trigramParam = getTrigramClassFeatures(params);
     return !trigramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isBigramClassFeature(TrainingParameters params) {
-    String bigramParam = getBigramClassFeatures(params);
+  public static boolean isBigramClassFeature(final TrainingParameters params) {
+    final String bigramParam = getBigramClassFeatures(params);
     return !bigramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isSuffixFeature(TrainingParameters params) {
-    String suffixParam = getSuffixFeatures(params);
+  public static boolean isSuffixFeature(final TrainingParameters params) {
+    final String suffixParam = getSuffixFeatures(params);
     return !suffixParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isPrefixFeature(TrainingParameters params) {
-    String prefixParam = getPreffixFeatures(params);
+  public static boolean isPrefixFeature(final TrainingParameters params) {
+    final String prefixParam = getPreffixFeatures(params);
     return !prefixParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isSentenceFeature(TrainingParameters params) {
-    String sentenceParam = getSentenceFeatures(params);
+  public static boolean isSentenceFeature(final TrainingParameters params) {
+    final String sentenceParam = getSentenceFeatures(params);
     return !sentenceParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isPreviousMapFeature(TrainingParameters params) {
-    String previousMapParam = getPreviousMapFeatures(params);
+  public static boolean isPreviousMapFeature(final TrainingParameters params) {
+    final String previousMapParam = getPreviousMapFeatures(params);
     return !previousMapParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isOutcomePriorFeature(TrainingParameters params) {
-    String outcomePriorParam = getOutcomePriorFeatures(params);
+  public static boolean isOutcomePriorFeature(final TrainingParameters params) {
+    final String outcomePriorParam = getOutcomePriorFeatures(params);
     return !outcomePriorParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
-  public static boolean isWordShapeSuperSenseFeature(TrainingParameters params) {
-    String tokenParam = getWordShapeSuperSenseFeatures(params);
+
+  public static boolean isWordShapeSuperSenseFeature(
+      final TrainingParameters params) {
+    final String tokenParam = getWordShapeSuperSenseFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isTokenClassFeature(TrainingParameters params) {
-    String tokenParam = getTokenClassFeatures(params);
+  public static boolean isTokenClassFeature(final TrainingParameters params) {
+    final String tokenParam = getTokenClassFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
-  public static boolean isTokenFeature(TrainingParameters params) {
-    String tokenParam = getTokenFeatures(params);
+  public static boolean isTokenFeature(final TrainingParameters params) {
+    final String tokenParam = getTokenFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
-  
-  
+
   public static void componentException() {
-    System.err
-        .println("Please provide a component name in the Component field in the parameters file!");
+    System.err.println(
+        "Please provide a component name in the Component field in the parameters file!");
     System.exit(1);
   }
 
   public static void devSetException() {
-    System.err
-        .println("UseDevSet options in the parameters file if CrossEval is activated!");
+    System.err.println(
+        "UseDevSet options in the parameters file if CrossEval is activated!");
     System.exit(1);
   }
 
   public static void modelException() {
-    System.err
-        .println("Please provide a model in the OutputModel field in the parameters file!");
+    System.err.println(
+        "Please provide a model in the OutputModel field in the parameters file!");
     System.exit(1);
   }
 
@@ -929,8 +970,8 @@ public class Flags {
   }
 
   public static void datasetException() {
-    System.err
-        .println("Please specify your training/testing sets in the TrainSet and TestSet fields in the parameters file!");
+    System.err.println(
+        "Please specify your training/testing sets in the TrainSet and TestSet fields in the parameters file!");
     System.exit(1);
   }
 
@@ -941,14 +982,14 @@ public class Flags {
   }
 
   public static void dictionaryException() {
-    System.err
-        .println("You need to set the --dictPath option to the dictionaries directory to use the dictTag option!");
+    System.err.println(
+        "You need to set the --dictPath option to the dictionaries directory to use the dictTag option!");
     System.exit(1);
   }
 
   public static void dictionaryFeaturesException() {
-    System.err
-        .println("You need to specify the DictionaryFeatures in the parameters file to use the DictionaryPath!");
+    System.err.println(
+        "You need to specify the DictionaryFeatures in the parameters file to use the DictionaryPath!");
     System.exit(1);
   }
 

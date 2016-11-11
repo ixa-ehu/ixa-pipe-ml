@@ -21,36 +21,38 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.resources.WordCluster;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.WordCluster;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
 
-public class Word2VecClusterFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
-  
+public class Word2VecClusterFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
+
   private WordCluster word2vecCluster;
   private static String unknownClass = "O";
   private Map<String, String> attributes;
-  
-  
+
   public Word2VecClusterFeatureGenerator() {
   }
-  
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    
-    String wordClass = getWordClass(tokens[index].toLowerCase());
-    features.add(attributes.get("dict") + "=" + wordClass);
+
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+
+    final String wordClass = getWordClass(tokens[index].toLowerCase());
+    features.add(this.attributes.get("dict") + "=" + wordClass);
     if (Flags.DEBUG) {
-      System.err.println("-> " + tokens[index].toLowerCase() + ": " + attributes.get("dict") + "=" + wordClass);
+      System.err.println("-> " + tokens[index].toLowerCase() + ": "
+          + this.attributes.get("dict") + "=" + wordClass);
     }
   }
-  
-  private String getWordClass(String token) {
-    String wordClass = word2vecCluster.lookupToken(token);
+
+  private String getWordClass(final String token) {
+    String wordClass = this.word2vecCluster.lookupToken(token);
     if (wordClass == null) {
       wordClass = unknownClass;
     }
@@ -58,30 +60,33 @@ public class Word2VecClusterFeatureGenerator extends CustomFeatureGenerator impl
   }
 
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
+
   }
 
   @Override
   public void clearAdaptiveData() {
-    
+
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    Object dictResource = resourceProvider.getResource(properties.get("dict"));
+    final Object dictResource = resourceProvider
+        .getResource(properties.get("dict"));
     if (!(dictResource instanceof WordCluster)) {
-      throw new InvalidFormatException("Not a ClusterLexicon resource for key: " + properties.get("dict"));
+      throw new InvalidFormatException(
+          "Not a ClusterLexicon resource for key: " + properties.get("dict"));
     }
     this.word2vecCluster = (WordCluster) dictResource;
     this.attributes = properties;
   }
-  
+
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
     mapping.put("word2vecserializer", new WordCluster.WordClusterSerializer());
     return Collections.unmodifiableMap(mapping);
   }

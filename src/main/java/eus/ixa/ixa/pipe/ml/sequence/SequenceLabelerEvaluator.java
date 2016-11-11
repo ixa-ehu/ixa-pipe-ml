@@ -15,22 +15,22 @@
  */
 
 package eus.ixa.ixa.pipe.ml.sequence;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import eus.ixa.ixa.pipe.ml.utils.Flags;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.eval.Evaluator;
 import opennlp.tools.util.eval.FMeasure;
 import opennlp.tools.util.eval.Mean;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
-import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
- * The {@link SequenceLabelerEvaluator} measures the F1 performance
- * of the given {@link SequenceLabeler} with the provided
- * reference {@link SequenceLabelSample}s. Based on Apache OpenNLP
- * evaluators.
+ * The {@link SequenceLabelerEvaluator} measures the F1 performance of the given
+ * {@link SequenceLabeler} with the provided reference
+ * {@link SequenceLabelSample}s. Based on Apache OpenNLP evaluators.
  *
  * @see Evaluator
  * @see SequenceLabeler
@@ -38,26 +38,30 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
  */
 public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
 
-  private FMeasure fmeasure = new FMeasure();
-  private Mean wordAccuracy = new Mean();
-  private Mean sentenceAccuracy = new Mean();
-  private Mean unknownAccuracy = new Mean();
-  private Mean knownAccuracy = new Mean();
-  private Set<String> knownWords = new HashSet<>();
+  private final FMeasure fmeasure = new FMeasure();
+  private final Mean wordAccuracy = new Mean();
+  private final Mean sentenceAccuracy = new Mean();
+  private final Mean unknownAccuracy = new Mean();
+  private final Mean knownAccuracy = new Mean();
+  private final Set<String> knownWords = new HashSet<>();
 
   /**
    * The {@link SequenceLabeler} used to create the predicted
    * {@link SequenceLabelSample} objects.
    */
-  private SequenceLabeler sequenceLabeler;
+  private final SequenceLabeler sequenceLabeler;
   private String corpusFormat = Flags.DEFAULT_EVAL_FORMAT;
 
-  public SequenceLabelerEvaluator(SequenceLabeler seqLabeler, SequenceLabelerEvaluationMonitor ... listeners) {
+  public SequenceLabelerEvaluator(final SequenceLabeler seqLabeler,
+      final SequenceLabelerEvaluationMonitor... listeners) {
     super(listeners);
     this.sequenceLabeler = seqLabeler;
   }
-  
-  public SequenceLabelerEvaluator(ObjectStream<SequenceLabelSample> trainSamples, String aCorpusFormat, SequenceLabeler seqLabeler, SequenceLabelerEvaluationMonitor ... listeners) {
+
+  public SequenceLabelerEvaluator(
+      final ObjectStream<SequenceLabelSample> trainSamples,
+      final String aCorpusFormat, final SequenceLabeler seqLabeler,
+      final SequenceLabelerEvaluationMonitor... listeners) {
     super(listeners);
     this.corpusFormat = aCorpusFormat;
     this.sequenceLabeler = seqLabeler;
@@ -69,110 +73,113 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
   /**
    * Evaluates the given reference {@link SequenceLabelSample} object.
    *
-   * This is done by finding the sequences with the
-   * {@link SequenceLabeler} in the sentence from the reference
-   * {@link SequenceLabelSample}. The found sequences are then used to
-   * calculate and update the scores.
+   * This is done by finding the sequences with the {@link SequenceLabeler} in
+   * the sentence from the reference {@link SequenceLabelSample}. The found
+   * sequences are then used to calculate and update the scores.
    *
-   * @param reference the reference {@link SequenceLabelSample}.
+   * @param reference
+   *          the reference {@link SequenceLabelSample}.
    *
    * @return the predicted {@link SequenceLabelSample}.
    */
   @Override
-  protected SequenceLabelSample processSample(SequenceLabelSample reference) {
+  protected SequenceLabelSample processSample(
+      final SequenceLabelSample reference) {
 
     if (reference.isClearAdaptiveDataSet()) {
-      sequenceLabeler.clearAdaptiveData();
+      this.sequenceLabeler.clearAdaptiveData();
     }
-    String[] referenceTokens = reference.getTokens();
-    Span[] predictedNames = sequenceLabeler.tag(referenceTokens);
-    Span[] references = reference.getSequences();
+    final String[] referenceTokens = reference.getTokens();
+    final Span[] predictedNames = this.sequenceLabeler.tag(referenceTokens);
+    final Span[] references = reference.getSequences();
     // OPENNLP-396 When evaluating with a file in the old format
     // the type of the span is null, but must be set to default to match
     // the output of the name finder.
     for (int i = 0; i < references.length; i++) {
       if (references[i].getType() == null) {
-        references[i] = new Span(references[i].getStart(), references[i].getEnd(), "default");
+        references[i] = new Span(references[i].getStart(),
+            references[i].getEnd(), "default");
       }
     }
-    if (corpusFormat.equalsIgnoreCase("lemmatizer") || corpusFormat.equalsIgnoreCase("tabulated")) {
+    if (this.corpusFormat.equalsIgnoreCase("lemmatizer")
+        || this.corpusFormat.equalsIgnoreCase("tabulated")) {
       updateAccuracyScores(referenceTokens, references, predictedNames);
     }
-    fmeasure.updateScores(references, predictedNames);
-    return new SequenceLabelSample(referenceTokens, predictedNames, reference.isClearAdaptiveDataSet());
+    this.fmeasure.updateScores(references, predictedNames);
+    return new SequenceLabelSample(referenceTokens, predictedNames,
+        reference.isClearAdaptiveDataSet());
   }
-  
+
   public FMeasure getFMeasure() {
-    return fmeasure;
-  }  
+    return this.fmeasure;
+  }
 
   /**
    * Retrieves the word accuracy.
    *
-   * This is defined as:
-   * word accuracy = correctly detected tags / total words
+   * This is defined as: word accuracy = correctly detected tags / total words
    *
    * @return the word accuracy
    */
   public double getWordAccuracy() {
-    return wordAccuracy.mean();
+    return this.wordAccuracy.mean();
   }
-  
+
   public double getSentenceAccuracy() {
-    return sentenceAccuracy.mean();
+    return this.sentenceAccuracy.mean();
   }
-  
+
   public double getUnknownWordAccuracy() {
-    return unknownAccuracy.mean();
+    return this.unknownAccuracy.mean();
   }
-  
+
   public double getKnownAccuracy() {
-    return knownAccuracy.mean();
+    return this.knownAccuracy.mean();
   }
-  
+
   /**
-   * Retrieves the total number of words considered
-   * in the evaluation.
+   * Retrieves the total number of words considered in the evaluation.
    *
    * @return the word count
    */
   public long getWordCount() {
-    return wordAccuracy.count();
+    return this.wordAccuracy.count();
   }
-  
-  public void updateAccuracyScores(final String[] referenceTokens, final Object[] references, final Object[] predictions) {
-    
+
+  public void updateAccuracyScores(final String[] referenceTokens,
+      final Object[] references, final Object[] predictions) {
+
     int fails = 0;
     for (int i = 0; i < references.length; i++) {
-      boolean isKnown = checkWordInSeenData(referenceTokens[i]);
+      final boolean isKnown = checkWordInSeenData(referenceTokens[i]);
       if (references[i].equals(predictions[i])) {
-        wordAccuracy.add(1);        
-          if (isKnown) {
-            knownAccuracy.add(1);
-          } else {
-            unknownAccuracy.add(1);
-          }
-      } else {
-        wordAccuracy.add(0);
-        fails++;
-          if (isKnown) {
-            knownAccuracy.add(0);
-          } else {
-          unknownAccuracy.add(0);
+        this.wordAccuracy.add(1);
+        if (isKnown) {
+          this.knownAccuracy.add(1);
+        } else {
+          this.unknownAccuracy.add(1);
         }
+      } else {
+        this.wordAccuracy.add(0);
+        fails++;
+        if (isKnown) {
+          this.knownAccuracy.add(0);
+        } else {
+          this.unknownAccuracy.add(0);
+        }
+      }
     }
-  }
     if (fails > 0) {
-      sentenceAccuracy.add(0);
+      this.sentenceAccuracy.add(0);
     } else {
-      sentenceAccuracy.add(1);
+      this.sentenceAccuracy.add(1);
     }
   }
-  
-  private boolean checkWordInSeenData(String referenceToken) {
+
+  private boolean checkWordInSeenData(final String referenceToken) {
     boolean isKnown = false;
-    if (!knownWords.isEmpty()) {
-      if (knownWords.contains(referenceToken)) {
+    if (!this.knownWords.isEmpty()) {
+      if (this.knownWords.contains(referenceToken)) {
         isKnown = true;
       } else {
         isKnown = false;
@@ -180,19 +187,19 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
     }
     return isKnown;
   }
-  
-  private void getKnownWords(ObjectStream<SequenceLabelSample> trainSamples) {
+
+  private void getKnownWords(
+      final ObjectStream<SequenceLabelSample> trainSamples) {
     SequenceLabelSample sample;
     try {
-      while ((sample = trainSamples.read()) != null) {  
-        for (String token : sample.getTokens()) {
-          knownWords.add(token);
+      while ((sample = trainSamples.read()) != null) {
+        for (final String token : sample.getTokens()) {
+          this.knownWords.add(token);
         }
       }
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
   }
 
 }
- 

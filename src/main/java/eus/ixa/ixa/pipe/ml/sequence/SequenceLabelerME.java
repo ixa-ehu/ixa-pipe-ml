@@ -48,12 +48,17 @@ public class SequenceLabelerME implements SequenceLabeler {
 
   private static String[][] EMPTY = new String[0][0];
   public static final int DEFAULT_BEAM_SIZE = 3;
-  private static final Pattern typedOutcomePattern = Pattern.compile("(.+)-\\w+");
-  
-  public static Pattern startPattern = Pattern.compile("(\\S+)-start", Pattern.UNICODE_CHARACTER_CLASS);
-  public static Pattern contPattern = Pattern.compile("(\\S+)-cont", Pattern.UNICODE_CHARACTER_CLASS);
-  public static Pattern lastPattern = Pattern.compile("(\\S+)-last", Pattern.UNICODE_CHARACTER_CLASS);
-  public static Pattern unitPattern = Pattern.compile("(\\S+)-unit", Pattern.UNICODE_CHARACTER_CLASS);
+  private static final Pattern typedOutcomePattern = Pattern
+      .compile("(.+)-\\w+");
+
+  public static Pattern startPattern = Pattern.compile("(\\S+)-start",
+      Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern contPattern = Pattern.compile("(\\S+)-cont",
+      Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern lastPattern = Pattern.compile("(\\S+)-last",
+      Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern unitPattern = Pattern.compile("(\\S+)-unit",
+      Pattern.UNICODE_CHARACTER_CLASS);
   public static Pattern otherPattern = Pattern.compile("other");
 
   private SequenceLabelerCodec<String> seqCodec = new BioCodec();
@@ -63,84 +68,96 @@ public class SequenceLabelerME implements SequenceLabeler {
   protected SequenceLabelerContextGenerator contextGenerator;
   private Sequence bestSequence;
 
-  private AdditionalContextFeatureGenerator additionalContextFeatureGenerator
-          = new AdditionalContextFeatureGenerator();
-  private SequenceValidator<String> sequenceValidator;
+  private final AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
+  private final SequenceValidator<String> sequenceValidator;
 
-  public SequenceLabelerME(SequenceLabelerModel model) {
+  public SequenceLabelerME(final SequenceLabelerModel model) {
 
-    SequenceLabelerFactory factory = model.getFactory();
+    final SequenceLabelerFactory factory = model.getFactory();
 
-    seqCodec = factory.createSequenceCodec();
-    sequenceValidator = seqCodec.createSequenceValidator();
+    this.seqCodec = factory.createSequenceCodec();
+    this.sequenceValidator = this.seqCodec.createSequenceValidator();
     this.model = model.getSequenceLabelerModel();
-    contextGenerator = factory.createContextGenerator();
+    this.contextGenerator = factory.createContextGenerator();
 
     // TODO: We should deprecate this. And come up with a better solution!
-    contextGenerator.addFeatureGenerator(
-            new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
+    this.contextGenerator.addFeatureGenerator(new WindowFeatureGenerator(
+        this.additionalContextFeatureGenerator, 8, 8));
   }
 
-  public Span[] tag(String[] tokens) {
+  @Override
+  public Span[] tag(final String[] tokens) {
     return tag(tokens, EMPTY);
   }
-  
+
   /**
-   * Generates sequence tags for the given sequence, returning
-   * spans for any identified sequences.
+   * Generates sequence tags for the given sequence, returning spans for any
+   * identified sequences.
    *
-   * @param tokens an array of the tokens or words, typically a
-   * sentence.
-   * @param additionalContext features which are based on context outside of the
-   * sentence but which should also be used.
+   * @param tokens
+   *          an array of the tokens or words, typically a sentence.
+   * @param additionalContext
+   *          features which are based on context outside of the sentence but
+   *          which should also be used.
    *
    * @return an array of spans for each of the names identified.
    */
-  public Span[] tag(String[] tokens, String[][] additionalContext) {
-    additionalContextFeatureGenerator.setCurrentContext(additionalContext);
-    bestSequence = model.bestSequence(tokens, additionalContext, contextGenerator, sequenceValidator);
-    List<String> c = bestSequence.getOutcomes();
-    contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
-    Span[] spans = seqCodec.decode(c);
+  public Span[] tag(final String[] tokens, final String[][] additionalContext) {
+    this.additionalContextFeatureGenerator.setCurrentContext(additionalContext);
+    this.bestSequence = this.model.bestSequence(tokens, additionalContext,
+        this.contextGenerator, this.sequenceValidator);
+    final List<String> c = this.bestSequence.getOutcomes();
+    this.contextGenerator.updateAdaptiveData(tokens,
+        c.toArray(new String[c.size()]));
+    Span[] spans = this.seqCodec.decode(c);
     spans = setProbs(spans);
     return spans;
   }
-  
-  public String[] tagToStrings(String[] tokens) {
-    bestSequence = model.bestSequence(tokens, null, contextGenerator, sequenceValidator);
-    List<String> c = bestSequence.getOutcomes();
-    contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
+
+  public String[] tagToStrings(final String[] tokens) {
+    this.bestSequence = this.model.bestSequence(tokens, null,
+        this.contextGenerator, this.sequenceValidator);
+    final List<String> c = this.bestSequence.getOutcomes();
+    this.contextGenerator.updateAdaptiveData(tokens,
+        c.toArray(new String[c.size()]));
     return c.toArray(new String[c.size()]);
   }
-  
+
   /**
-   * Returns at most the specified number of taggings for the specified sentence.
+   * Returns at most the specified number of taggings for the specified
+   * sentence.
    *
-   * @param numTaggings the number of labels to be returned.
-   * @param tokens an array of tokens which make up a sentence.
+   * @param numTaggings
+   *          the number of labels to be returned.
+   * @param tokens
+   *          an array of tokens which make up a sentence.
    *
    * @return at most the specified number of labels for the specified sentence.
    */
-  public Span[][] tag(int numTaggings, String[] tokens) {
-    Sequence[] bestSequences = model.bestSequences(numTaggings, tokens, null,
-        contextGenerator, sequenceValidator);
-    Span[][] tags = new Span[bestSequences.length][];
+  public Span[][] tag(final int numTaggings, final String[] tokens) {
+    final Sequence[] bestSequences = this.model.bestSequences(numTaggings,
+        tokens, null, this.contextGenerator, this.sequenceValidator);
+    final Span[][] tags = new Span[bestSequences.length][];
     for (int i = 0; i < tags.length; i++) {
-      List<String> c = bestSequences[i].getOutcomes();
-      contextGenerator.updateAdaptiveData(tokens, c.toArray(new String[c.size()]));
-      Span[] spans = seqCodec.decode(c);
+      final List<String> c = bestSequences[i].getOutcomes();
+      this.contextGenerator.updateAdaptiveData(tokens,
+          c.toArray(new String[c.size()]));
+      final Span[] spans = this.seqCodec.decode(c);
       tags[i] = spans;
     }
     return tags;
   }
-  
-  public Sequence[] topKSequences(String[] tokens) {
-    return model.bestSequences(DEFAULT_BEAM_SIZE, tokens, null, contextGenerator, sequenceValidator);
+
+  public Sequence[] topKSequences(final String[] tokens) {
+    return this.model.bestSequences(DEFAULT_BEAM_SIZE, tokens, null,
+        this.contextGenerator, this.sequenceValidator);
   }
-  
-  public Sequence[] topKSequences(String[] tokens, String[] tags, double minSequenceScore) {
-    return model.bestSequences(DEFAULT_BEAM_SIZE, tokens, new Object[] { tags }, minSequenceScore,
-        contextGenerator, sequenceValidator);
+
+  public Sequence[] topKSequences(final String[] tokens, final String[] tags,
+      final double minSequenceScore) {
+    return this.model.bestSequences(DEFAULT_BEAM_SIZE, tokens,
+        new Object[] { tags }, minSequenceScore, this.contextGenerator,
+        this.sequenceValidator);
   }
 
   /**
@@ -149,8 +166,9 @@ public class SequenceLabelerME implements SequenceLabeler {
    *
    * This method is typical called at the end of a document.
    */
+  @Override
   public void clearAdaptiveData() {
-    contextGenerator.clearAdaptiveData();
+    this.contextGenerator.clearAdaptiveData();
   }
 
   /**
@@ -159,11 +177,12 @@ public class SequenceLabelerME implements SequenceLabeler {
    * <code>chunk</code>. The specified array should be at least as large as the
    * number of tokens in the previous call to <code>chunk</code>.
    *
-   * @param probs An array used to hold the probabilities of the last decoded
-   * sequence.
+   * @param probs
+   *          An array used to hold the probabilities of the last decoded
+   *          sequence.
    */
-  public void probs(double[] probs) {
-    bestSequence.getProbs(probs);
+  public void probs(final double[] probs) {
+    this.bestSequence.getProbs(probs);
   }
 
   /**
@@ -171,10 +190,10 @@ public class SequenceLabelerME implements SequenceLabeler {
    * sequence was determined based on the previous call to <code>chunk</code>.
    *
    * @return An array with the same number of probabilities as tokens were sent
-   * to <code>chunk</code> when it was last called.
+   *         to <code>chunk</code> when it was last called.
    */
   public double[] probs() {
-    return bestSequence.getProbs();
+    return this.bestSequence.getProbs();
   }
 
   /**
@@ -183,13 +202,13 @@ public class SequenceLabelerME implements SequenceLabeler {
    * @param spans
    * @return
    */
-  private Span[] setProbs(Span[] spans) {
-     double[] probs = probs(spans);
-     if (probs != null) {
+  private Span[] setProbs(final Span[] spans) {
+    final double[] probs = probs(spans);
+    if (probs != null) {
 
       for (int i = 0; i < probs.length; i++) {
-        double prob = probs[i];
-        spans[i]= new Span(spans[i], prob);
+        final double prob = probs[i];
+        spans[i] = new Span(spans[i], prob);
       }
     }
     return spans;
@@ -200,14 +219,15 @@ public class SequenceLabelerME implements SequenceLabeler {
    * the arithmetic mean of the probabilities for each of the outcomes which
    * make up the span.
    *
-   * @param spans The spans of the names for which probabilities are desired.
+   * @param spans
+   *          The spans of the names for which probabilities are desired.
    *
    * @return an array of probabilities for each of the specified spans.
    */
-  public double[] probs(Span[] spans) {
+  public double[] probs(final Span[] spans) {
 
-    double[] sprobs = new double[spans.length];
-    double[] probs = bestSequence.getProbs();
+    final double[] sprobs = new double[spans.length];
+    final double[] probs = this.bestSequence.getProbs();
 
     for (int si = 0; si < spans.length; si++) {
       double p = 0;
@@ -221,66 +241,79 @@ public class SequenceLabelerME implements SequenceLabeler {
     return sprobs;
   }
 
-  public static SequenceLabelerModel train(String languageCode, ObjectStream<SequenceLabelSample> samples, TrainingParameters trainParams,
-          SequenceLabelerFactory factory) throws IOException {
-    String beamSizeString = trainParams.getSettings().get(BeamSearch.BEAM_SIZE_PARAMETER);
+  public static SequenceLabelerModel train(final String languageCode,
+      final ObjectStream<SequenceLabelSample> samples,
+      final TrainingParameters trainParams,
+      final SequenceLabelerFactory factory) throws IOException {
+    final String beamSizeString = trainParams.getSettings()
+        .get(BeamSearch.BEAM_SIZE_PARAMETER);
 
     int beamSize = SequenceLabelerME.DEFAULT_BEAM_SIZE;
     if (beamSizeString != null) {
       beamSize = Integer.parseInt(beamSizeString);
     }
 
-    Map<String, String> manifestInfoEntries = new HashMap<String, String>();
+    final Map<String, String> manifestInfoEntries = new HashMap<String, String>();
 
     MaxentModel nameFinderModel = null;
 
     SequenceClassificationModel<String> seqModel = null;
 
-    TrainerType trainerType = TrainerFactory.getTrainerType(trainParams.getSettings());
+    final TrainerType trainerType = TrainerFactory
+        .getTrainerType(trainParams.getSettings());
 
     if (TrainerType.EVENT_MODEL_TRAINER.equals(trainerType)) {
-      ObjectStream<Event> eventStream = new SequenceLabelerEventStream(samples,
-              factory.createContextGenerator(), factory.createSequenceCodec());
+      final ObjectStream<Event> eventStream = new SequenceLabelerEventStream(
+          samples, factory.createContextGenerator(),
+          factory.createSequenceCodec());
 
-      EventTrainer trainer = TrainerFactory.getEventTrainer(trainParams.getSettings(), manifestInfoEntries);
+      final EventTrainer trainer = TrainerFactory
+          .getEventTrainer(trainParams.getSettings(), manifestInfoEntries);
       nameFinderModel = trainer.train(eventStream);
-    } // TODO: Maybe it is not a good idea, that these two don't use the context generator ?!
+    } // TODO: Maybe it is not a good idea, that these two don't use the context
+      // generator ?!
     // These also don't use the sequence codec ?!
     else if (TrainerType.EVENT_MODEL_SEQUENCE_TRAINER.equals(trainerType)) {
-      SequenceLabelerSequenceStream ss = new SequenceLabelerSequenceStream(samples, factory.createContextGenerator());
+      final SequenceLabelerSequenceStream ss = new SequenceLabelerSequenceStream(
+          samples, factory.createContextGenerator());
 
-      EventModelSequenceTrainer trainer = TrainerFactory.getEventModelSequenceTrainer(
-              trainParams.getSettings(), manifestInfoEntries);
+      final EventModelSequenceTrainer trainer = TrainerFactory
+          .getEventModelSequenceTrainer(trainParams.getSettings(),
+              manifestInfoEntries);
       nameFinderModel = trainer.train(ss);
     } else if (TrainerType.SEQUENCE_TRAINER.equals(trainerType)) {
-      SequenceTrainer trainer = TrainerFactory.getSequenceModelTrainer(
-              trainParams.getSettings(), manifestInfoEntries);
+      final SequenceTrainer trainer = TrainerFactory.getSequenceModelTrainer(
+          trainParams.getSettings(), manifestInfoEntries);
 
-      SequenceLabelerSequenceStream ss = new SequenceLabelerSequenceStream(samples, factory.createContextGenerator(), false);
+      final SequenceLabelerSequenceStream ss = new SequenceLabelerSequenceStream(
+          samples, factory.createContextGenerator(), false);
       seqModel = trainer.train(ss);
     } else {
       throw new IllegalStateException("Unexpected trainer type!");
     }
 
     if (seqModel != null) {
-      return new SequenceLabelerModel(languageCode, seqModel, factory.getFeatureGenerator(),
-              factory.getResources(), manifestInfoEntries, factory.getSequenceCodec(), factory);
+      return new SequenceLabelerModel(languageCode, seqModel,
+          factory.getFeatureGenerator(), factory.getResources(),
+          manifestInfoEntries, factory.getSequenceCodec(), factory);
     } else {
-      return new SequenceLabelerModel(languageCode, nameFinderModel, beamSize, factory.getFeatureGenerator(),
-              factory.getResources(), manifestInfoEntries, factory.getSequenceCodec(), factory);
+      return new SequenceLabelerModel(languageCode, nameFinderModel, beamSize,
+          factory.getFeatureGenerator(), factory.getResources(),
+          manifestInfoEntries, factory.getSequenceCodec(), factory);
     }
   }
 
   /**
    * Gets the name type from the outcome
    *
-   * @param outcome the outcome
+   * @param outcome
+   *          the outcome
    * @return the name type, or null if not set
    */
-  static final String extractNameType(String outcome) {
-    Matcher matcher = typedOutcomePattern.matcher(outcome);
+  static final String extractNameType(final String outcome) {
+    final Matcher matcher = typedOutcomePattern.matcher(outcome);
     if (matcher.matches()) {
-      String nameType = matcher.group(1);
+      final String nameType = matcher.group(1);
       return nameType;
     }
 
@@ -296,17 +329,18 @@ public class SequenceLabelerME implements SequenceLabeler {
    * Intersecting spans: The first span after sorting remains<br>
    * Contained spans: All spans which are contained by another are removed<br>
    *
-   * @param spans the spans
+   * @param spans
+   *          the spans
    *
    * @return non-overlapping spans
    */
-  public static Span[] dropOverlappingSpans(Span[] spans) {
+  public static Span[] dropOverlappingSpans(final Span[] spans) {
 
-    List<Span> sortedSpans = new ArrayList<Span>(spans.length);
+    final List<Span> sortedSpans = new ArrayList<Span>(spans.length);
     Collections.addAll(sortedSpans, spans);
     Collections.sort(sortedSpans);
 
-    Iterator<Span> it = sortedSpans.iterator();
+    final Iterator<Span> it = sortedSpans.iterator();
     Span lastSpan = null;
     while (it.hasNext()) {
       Span span = it.next();
@@ -321,14 +355,16 @@ public class SequenceLabelerME implements SequenceLabeler {
     }
     return sortedSpans.toArray(new Span[sortedSpans.size()]);
   }
-  
+
   /**
    * Decode Sequences from an array of Strings.
-   * @param preds the sequences in an string array.
+   * 
+   * @param preds
+   *          the sequences in an string array.
    * @return the decoded sequences
    */
-  public String[] decodeSequences(String[] preds) {
-    List<String> decodedSequences = new ArrayList<>();
+  public String[] decodeSequences(final String[] preds) {
+    final List<String> decodedSequences = new ArrayList<>();
     for (String pred : preds) {
       pred = startPattern.matcher(pred).replaceAll("B-$1");
       pred = contPattern.matcher(pred).replaceAll("I-$1");
@@ -339,6 +375,5 @@ public class SequenceLabelerME implements SequenceLabeler {
     }
     return decodedSequences.toArray(new String[decodedSequences.size()]);
   }
-  
-}
 
+}

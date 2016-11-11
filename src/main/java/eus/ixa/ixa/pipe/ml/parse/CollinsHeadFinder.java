@@ -21,14 +21,15 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
+
 /**
  * HeadFinder for constituent parse using Collins rules. These rules and the
  * getHead() method in the language specific HeadRules classes (adapted from
  * Collins' original head rules).
- * 
+ *
  * @author ragerri
  * @version 2016-05-03
- * 
+ *
  */
 public class CollinsHeadFinder implements HeadFinder {
 
@@ -65,19 +66,22 @@ public class CollinsHeadFinder implements HeadFinder {
 
     InputStream headsFileInputStream = null;
     if (lang.equals("en")) {
-      headsFileInputStream = getClass().getResourceAsStream("/parser/en-head-rules");
+      headsFileInputStream = getClass()
+          .getResourceAsStream("/parser/en-head-rules");
     } else if (lang.equals("es")) {
-      headsFileInputStream = getClass().getResourceAsStream("/parser/es-head-rules");
+      headsFileInputStream = getClass()
+          .getResourceAsStream("/parser/es-head-rules");
     }
     return headsFileInputStream;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see
    * eus.ixa.ixa.pipe.heads.HeadFinder#printHeads(opennlp.tools.parser.Parse)
    */
+  @Override
   public void printHeads(final Parse parse) {
     if (parse == null || parse.getChildCount() == 0) {
       throw new IllegalArgumentException(
@@ -92,8 +96,8 @@ public class CollinsHeadFinder implements HeadFinder {
       // so it '=H' has to be removed to match with the head rules
       final String type = currentNode.getType().replace(HEADMARK, "");
       if (DEBUG) {
-        System.err.println("-> Current Node: " + type + " "
-            + currentNode.toString());
+        System.err
+            .println("-> Current Node: " + type + " " + currentNode.toString());
       }
       final Parse[] children = currentNode.getChildren();
       Parse headChild = null;

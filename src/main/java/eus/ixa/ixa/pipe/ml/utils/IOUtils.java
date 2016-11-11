@@ -51,6 +51,7 @@ import opennlp.tools.util.TrainingParameters;
 
 /**
  * Utility functions to read and save ObjectStreams.
+ * 
  * @author ragerri
  * @version 2016-07-13
  */
@@ -59,43 +60,44 @@ public final class IOUtils {
   public static final int BUFFER_SIZE = 65536;
   public static final String SPACE_DELIMITER = " ";
   public static final String TAB_DELIMITER = "\t";
-  
+
   /**
    * Private constructor. This class should only be used statically.
    */
   private IOUtils() {
   }
-  
+
   /**
    * Remove punctuation.
-   * @param resource the dictionary path
+   * 
+   * @param resource
+   *          the dictionary path
    * @return the dictionary path without punctuation
    */
   public static final String normalizeLexiconName(String resource) {
     resource = resource.replaceAll("\\p{P}", "");
     return resource;
   }
-  
+
   /**
-   * Get an input stream from a resource name. This could be either an
-   * absolute path pointing to a resource in the classpath or a file
-   * or a directory in the file system. If found in the classpath
-   * that will be loaded first.
+   * Get an input stream from a resource name. This could be either an absolute
+   * path pointing to a resource in the classpath or a file or a directory in
+   * the file system. If found in the classpath that will be loaded first.
    *
    * @param resource
    *          the name of the resource (absolute path with no starting /)
    * @return the inputstream of the dictionary
    */
   public static final InputStream getDictionaryResource(final String resource) {
-    
+
     InputStream dictInputStream;
-    Path resourcePath = Paths.get(resource);
-    String normalizedPath = resourcePath.toString();
+    final Path resourcePath = Paths.get(resource);
+    final String normalizedPath = resourcePath.toString();
     dictInputStream = getStreamFromClassPath(normalizedPath);
     if (dictInputStream == null) {
       try {
         dictInputStream = new FileInputStream(normalizedPath);
-      } catch (FileNotFoundException e) {
+      } catch (final FileNotFoundException e) {
         e.printStackTrace();
       }
     }
@@ -104,19 +106,24 @@ public final class IOUtils {
 
   /**
    * Load a resource from the classpath.
-   * 
-   * @param normalizedPath the path normalized using {@code Paths} functions.
+   *
+   * @param normalizedPath
+   *          the path normalized using {@code Paths} functions.
    * @return the input stream of the resource
    */
-  private static InputStream getStreamFromClassPath(String normalizedPath) {
+  private static InputStream getStreamFromClassPath(
+      final String normalizedPath) {
     InputStream dictInputStream = null;
-    String[] dictPaths = normalizedPath.split("src/main/resources");
+    final String[] dictPaths = normalizedPath.split("src/main/resources");
     if (dictPaths.length == 2) {
-      dictInputStream = IOUtils.class.getClassLoader().getResourceAsStream(dictPaths[1]);
+      dictInputStream = IOUtils.class.getClassLoader()
+          .getResourceAsStream(dictPaths[1]);
     } else {
-      String[] windowsPaths = normalizedPath.split("src\\\\main\\\\resources\\\\");
+      final String[] windowsPaths = normalizedPath
+          .split("src\\\\main\\\\resources\\\\");
       if (windowsPaths.length == 2) {
-        dictInputStream = IOUtils.class.getClassLoader().getResourceAsStream(windowsPaths[1]);
+        dictInputStream = IOUtils.class.getClassLoader()
+            .getResourceAsStream(windowsPaths[1]);
       }
     }
     return dictInputStream;
@@ -124,6 +131,7 @@ public final class IOUtils {
 
   /**
    * Check input file integrity.
+   * 
    * @param name
    *          the name of the file
    * @param inFile
@@ -142,24 +150,26 @@ public final class IOUtils {
     }
 
     if (null != isFailure) {
-      throw new TerminateToolException(-1, isFailure + " Path: "
-          + inFile.getAbsolutePath());
+      throw new TerminateToolException(-1,
+          isFailure + " Path: " + inFile.getAbsolutePath());
     }
   }
 
   /**
    * Load the parameters in the {@code TrainingParameters} file.
+   * 
    * @param paramFile
    *          the training parameters file
    * @return default loading of the parameters
    */
-  public static TrainingParameters loadTrainingParameters(final String paramFile) {
+  public static TrainingParameters loadTrainingParameters(
+      final String paramFile) {
     return loadTrainingParameters(paramFile, false);
   }
 
   /**
    * Load the parameters in the {@code TrainingParameters} file.
-   * 
+   *
    * @param paramFile
    *          the parameter file
    * @param supportSequenceTraining
@@ -180,7 +190,7 @@ public final class IOUtils {
         paramsIn = new FileInputStream(new File(paramFile));
 
         params = new opennlp.tools.util.TrainingParameters(paramsIn);
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new TerminateToolException(-1,
             "Error during parameters loading: " + e.getMessage(), e);
       } finally {
@@ -188,14 +198,14 @@ public final class IOUtils {
           if (paramsIn != null) {
             paramsIn.close();
           }
-        } catch (IOException e) {
+        } catch (final IOException e) {
           System.err.println("Error closing the input stream");
         }
       }
 
       if (!TrainerFactory.isValid(params.getSettings())) {
-        throw new TerminateToolException(1, "Training parameters file '"
-            + paramFile + "' is invalid!");
+        throw new TerminateToolException(1,
+            "Training parameters file '" + paramFile + "' is invalid!");
       }
     }
 
@@ -204,161 +214,184 @@ public final class IOUtils {
 
   /**
    * Read the file into an {@code ObjectStream}.
-   * 
+   *
    * @param infile
    *          the string pointing to the file
    * @return the object stream
    */
-  public static ObjectStream<String> readFileIntoMarkableStreamFactory(final String infile) {
+  public static ObjectStream<String> readFileIntoMarkableStreamFactory(
+      final String infile) {
 
     InputStreamFactory inputStreamFactory = null;
     try {
-      inputStreamFactory = new MarkableFileInputStreamFactory(
-          new File(infile));
-    } catch (FileNotFoundException e) {
+      inputStreamFactory = new MarkableFileInputStreamFactory(new File(infile));
+    } catch (final FileNotFoundException e) {
       e.printStackTrace();
     }
     ObjectStream<String> lineStream = null;
     try {
-      lineStream = new PlainTextByLineStream(
-          (inputStreamFactory), "UTF-8");
-    } catch (IOException e) {
+      lineStream = new PlainTextByLineStream(inputStreamFactory, "UTF-8");
+    } catch (final IOException e) {
       CmdLineUtil.handleCreateObjectStreamError(e);
     }
     return lineStream;
   }
-  
-  public static <K, V> File writeClusterToFile(Map<K, V> tokenToClusterMap, String fileName, String delimiter) throws IOException {
-    File outFile = new File(fileName);
+
+  public static <K, V> File writeClusterToFile(
+      final Map<K, V> tokenToClusterMap, final String fileName,
+      final String delimiter) throws IOException {
+    final File outFile = new File(fileName);
     OutputStream outputStream = new FileOutputStream(outFile);
     if (fileName.endsWith(".gz")) {
       outputStream = new GZIPOutputStream(outputStream);
     }
-    Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+    final Writer writer = new BufferedWriter(
+        new OutputStreamWriter(outputStream, "UTF-8"));
 
-    for (Entry<K, V> entry : tokenToClusterMap.entrySet()) {
+    for (final Entry<K, V> entry : tokenToClusterMap.entrySet()) {
       writer.write(entry.getKey() + delimiter + entry.getValue() + "\n");
     }
     writer.close();
     return outFile;
   }
-  
-  public static <K, V> File writeMultimapToFile(ListMultimap<K, V> tokenToClusterMap, String fileName, String delimiter) throws IOException {
-    File outFile = new File(fileName);
+
+  public static <K, V> File writeMultimapToFile(
+      final ListMultimap<K, V> tokenToClusterMap, final String fileName,
+      final String delimiter) throws IOException {
+    final File outFile = new File(fileName);
     OutputStream outputStream = new FileOutputStream(outFile);
     if (fileName.endsWith(".gz")) {
       outputStream = new GZIPOutputStream(outputStream);
     }
-    Writer writer = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+    final Writer writer = new BufferedWriter(
+        new OutputStreamWriter(outputStream, "UTF-8"));
 
-    for (Map.Entry<K, V> entry : tokenToClusterMap.entries()) {
+    for (final Map.Entry<K, V> entry : tokenToClusterMap.entries()) {
       writer.write(entry.getKey() + delimiter + entry.getValue() + "\n");
     }
     writer.close();
     return outFile;
   }
-  
-  public static File writeDictionaryLemmatizerToFile(Map<List<String>, String> dictMap, String fileName, String delimiter) throws IOException {
-    File outFile = new File(fileName);
+
+  public static File writeDictionaryLemmatizerToFile(
+      final Map<List<String>, String> dictMap, final String fileName,
+      final String delimiter) throws IOException {
+    final File outFile = new File(fileName);
     OutputStream out = new FileOutputStream(outFile);
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
     if (fileName.endsWith(".gz")) {
       out = new GZIPOutputStream(out);
     }
-    for (Map.Entry<List<String>, String> entry : dictMap.entrySet()) {
-      writer.write(entry.getKey().get(0) + delimiter + entry.getKey().get(1) + delimiter + entry.getValue() + "\n");
+    for (final Map.Entry<List<String>, String> entry : dictMap.entrySet()) {
+      writer.write(entry.getKey().get(0) + delimiter + entry.getKey().get(1)
+          + delimiter + entry.getValue() + "\n");
     }
     writer.close();
     return outFile;
   }
-  
+
   /**
    * Serialize java object to a file.
-   * @param o the java object
-   * @param fileName the name of the file
+   * 
+   * @param o
+   *          the java object
+   * @param fileName
+   *          the name of the file
    * @return the file
-   * @throws IOException if io problems
+   * @throws IOException
+   *           if io problems
    */
-  public static File writeObjectToFile(Object o, String fileName) throws IOException {
-    File outFile = new File(fileName);
+  public static File writeObjectToFile(final Object o, final String fileName)
+      throws IOException {
+    final File outFile = new File(fileName);
     OutputStream outputStream = new FileOutputStream(outFile);
     if (fileName.endsWith(".gz")) {
       outputStream = new GZIPOutputStream(outputStream);
     }
     outputStream = new BufferedOutputStream(outputStream);
-    ObjectOutputStream oos = new ObjectOutputStream(outputStream);
+    final ObjectOutputStream oos = new ObjectOutputStream(outputStream);
     oos.writeObject(o);
     oos.close();
     return outFile;
   }
-  
+
   /**
-   * Serialized gzipped java object to an ObjectOutputStream. The stream
-   * remains open.
-   * @param o the java object
-   * @param out the output stream
+   * Serialized gzipped java object to an ObjectOutputStream. The stream remains
+   * open.
+   * 
+   * @param o
+   *          the java object
+   * @param out
+   *          the output stream
    */
-  public static void writeGzipObjectToStream(Object o, OutputStream out) {
+  public static void writeGzipObjectToStream(final Object o, OutputStream out) {
     out = new BufferedOutputStream(out);
     try {
       out = new GZIPOutputStream(out, true);
-      ObjectOutputStream oos = new ObjectOutputStream(out);
+      final ObjectOutputStream oos = new ObjectOutputStream(out);
       oos.writeObject(o);
       oos.flush();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
   }
-  
+
   /**
-   * Serialize java object to an ObjectOutputStream. The stream remains
-   * open.
-   * @param o the java object
-   * @param out the output stream
+   * Serialize java object to an ObjectOutputStream. The stream remains open.
+   * 
+   * @param o
+   *          the java object
+   * @param out
+   *          the output stream
    */
-  public static void writeObjectToStream(Object o, OutputStream out) {
+  public static void writeObjectToStream(final Object o, OutputStream out) {
     out = new BufferedOutputStream(out);
     try {
-      ObjectOutputStream oos = new ObjectOutputStream(out);
+      final ObjectOutputStream oos = new ObjectOutputStream(out);
       oos.writeObject(o);
       oos.flush();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
   }
-  
+
   /**
    * Open file to an input stream.
-   * @param file the file
+   * 
+   * @param file
+   *          the file
    * @return the input stream
    */
-  public static InputStream openFromFile(File file) {
+  public static InputStream openFromFile(final File file) {
     try {
-      InputStream is = new BufferedInputStream(new FileInputStream(file), BUFFER_SIZE);
+      InputStream is = new BufferedInputStream(new FileInputStream(file),
+          BUFFER_SIZE);
       if (file.getName().endsWith(".gz") || file.getName().endsWith("gz")) {
-       is = new GZIPInputStream(is, BUFFER_SIZE);
+        is = new GZIPInputStream(is, BUFFER_SIZE);
       }
       return is;
-    } catch (IOException e) {
-      throw new TerminateToolException(-1, "File '" + file + "' cannot be found", e);
+    } catch (final IOException e) {
+      throw new TerminateToolException(-1,
+          "File '" + file + "' cannot be found", e);
     }
   }
-  
+
   @SuppressWarnings("unchecked")
-  public static <T> T readObjectFromInputStream(InputStream is) throws IOException,
-  ClassNotFoundException {
+  public static <T> T readObjectFromInputStream(InputStream is)
+      throws IOException, ClassNotFoundException {
     is = new BufferedInputStream(is, BUFFER_SIZE);
-    ObjectInputStream ois = new ObjectInputStream(is);
-    Object readObject = ois.readObject();
-  return (T) readObject;
-}
-  @SuppressWarnings("unchecked")
-  public static <T> T readGzipObjectFromInputStream(InputStream is) throws IOException,
-  ClassNotFoundException {
-    is = new BufferedInputStream(is, BUFFER_SIZE);
-    GZIPInputStream zis = new GZIPInputStream(is, BUFFER_SIZE);
-    ObjectInputStream ois = new ObjectInputStream(zis);
-    Object readObject = ois.readObject();
+    final ObjectInputStream ois = new ObjectInputStream(is);
+    final Object readObject = ois.readObject();
     return (T) readObject;
-}
+  }
+
+  @SuppressWarnings("unchecked")
+  public static <T> T readGzipObjectFromInputStream(InputStream is)
+      throws IOException, ClassNotFoundException {
+    is = new BufferedInputStream(is, BUFFER_SIZE);
+    final GZIPInputStream zis = new GZIPInputStream(is, BUFFER_SIZE);
+    final ObjectInputStream ois = new ObjectInputStream(zis);
+    final Object readObject = ois.readObject();
+    return (T) readObject;
+  }
 }

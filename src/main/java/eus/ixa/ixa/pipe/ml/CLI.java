@@ -22,6 +22,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import com.google.common.io.Files;
+
+import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
+import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
+import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
+import eus.ixa.ixa.pipe.ml.parse.ParserModel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
+import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
@@ -31,31 +40,21 @@ import net.sourceforge.argparse4j.inf.Subparsers;
 import opennlp.tools.cmdline.CmdLineUtil;
 import opennlp.tools.util.TrainingParameters;
 
-import com.google.common.io.Files;
-
-import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
-import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
-import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
-import eus.ixa.ixa.pipe.ml.parse.ParserModel;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
-import eus.ixa.ixa.pipe.ml.utils.IOUtils;
-
 /**
  * Main class of ixa-pipe-ml, the IXA pipes (ixa2.si.ehu.es/ixa-pipes) Machine
  * Learning library.
- * 
+ *
  * @author ragerri
  * @version 2016-04-01
- * 
+ *
  */
 public class CLI {
 
   /**
-   * Get dynamically the version of ixa-pipe-ml by looking at the MANIFEST
-   * file.
+   * Get dynamically the version of ixa-pipe-ml by looking at the MANIFEST file.
    */
-  private final String version = CLI.class.getPackage().getImplementationVersion();
+  private final String version = CLI.class.getPackage()
+      .getImplementationVersion();
   /**
    * Name space of the arguments provided at the CLI.
    */
@@ -63,61 +62,68 @@ public class CLI {
   /**
    * Argument parser instance.
    */
-  private ArgumentParser argParser = ArgumentParsers.newArgumentParser(
-      "ixa-pipe-ml-" + version + "-exec.jar").description(
-      "ixa-pipe-ml-" + version
+  private final ArgumentParser argParser = ArgumentParsers
+      .newArgumentParser("ixa-pipe-ml-" + this.version + "-exec.jar")
+      .description("ixa-pipe-ml-" + this.version
           + " is a Machine Learning component to train and evaluate models for various IXA pipes tasks.\n");
   /**
    * Sub parser instance.
    */
-  private Subparsers subParsers = argParser.addSubparsers().help("sub-command help");
+  private final Subparsers subParsers = this.argParser.addSubparsers()
+      .help("sub-command help");
   /**
    * The parser that manages the SequenceLabeler training sub-command.
    */
-  private Subparser seqTrainerParser;
+  private final Subparser seqTrainerParser;
   /**
    * The subparser that manages the Constituent Parser training sub-command.
    */
-  private Subparser parserTrainerParser;
+  private final Subparser parserTrainerParser;
   /**
    * The parser that manages the SequenceLabeler evaluation sub-command.
    */
-  private Subparser evalParser;
+  private final Subparser evalParser;
   /**
    * The parser to manage the parsing evaluation.
    */
-  private Subparser parsevalParser;
+  private final Subparser parsevalParser;
   /**
    * The parser that manages the cross validation sub-command.
    */
-  private Subparser crossValidateParser;
- 
+  private final Subparser crossValidateParser;
+
   public static final String SEQ_TRAINER_NAME = "sequenceTrainer";
   public static final String PARSE_TRAINER_NAME = "parserTrainer";
   public static final String EVAL_PARSER_NAME = "eval";
   public static final String PARSEVAL_PARSER_NAME = "parseval";
   public static final String CROSS_PARSER_NAME = "cross";
+
   /**
-   * Construct a CLI object with the sub-parsers to manage the command
-   * line parameters.
+   * Construct a CLI object with the sub-parsers to manage the command line
+   * parameters.
    */
   public CLI() {
-    
-    seqTrainerParser = subParsers.addParser(SEQ_TRAINER_NAME).help("Sequence Labeler training CLI");
+
+    this.seqTrainerParser = this.subParsers.addParser(SEQ_TRAINER_NAME)
+        .help("Sequence Labeler training CLI");
     loadSeqLabelerTrainingParameters();
-    parserTrainerParser = subParsers.addParser(PARSE_TRAINER_NAME).help("Constituent Parser training CLI");
+    this.parserTrainerParser = this.subParsers.addParser(PARSE_TRAINER_NAME)
+        .help("Constituent Parser training CLI");
     loadParserTrainingParameters();
-    evalParser = subParsers.addParser(EVAL_PARSER_NAME).help("Evaluation CLI");
+    this.evalParser = this.subParsers.addParser(EVAL_PARSER_NAME)
+        .help("Evaluation CLI");
     loadEvalParameters();
-    parsevalParser = subParsers.addParser(PARSEVAL_PARSER_NAME).help("Parseval CLI");
+    this.parsevalParser = this.subParsers.addParser(PARSEVAL_PARSER_NAME)
+        .help("Parseval CLI");
     loadParsevalParameters();
-    crossValidateParser = subParsers.addParser(CROSS_PARSER_NAME).help("Cross validation CLI");
+    this.crossValidateParser = this.subParsers.addParser(CROSS_PARSER_NAME)
+        .help("Cross validation CLI");
     loadCrossValidateParameters();
-    }
+  }
 
   /**
    * Main entry point of ixa-pipe-ml.
-   * 
+   *
    * @param args
    *          the arguments passed through the CLI
    * @throws IOException
@@ -125,13 +131,13 @@ public class CLI {
    */
   public static void main(final String[] args) throws IOException {
 
-    CLI cmdLine = new CLI();
+    final CLI cmdLine = new CLI();
     cmdLine.parseCLI(args);
   }
 
   /**
    * Parse the command interface parameters with the argParser.
-   * 
+   *
    * @param args
    *          the arguments passed through the CLI
    * @throws IOException
@@ -139,8 +145,8 @@ public class CLI {
    */
   public final void parseCLI(final String[] args) throws IOException {
     try {
-      parsedArguments = argParser.parseArgs(args);
-      System.err.println("CLI options: " + parsedArguments);
+      this.parsedArguments = this.argParser.parseArgs(args);
+      System.err.println("CLI options: " + this.parsedArguments);
       if (args[0].equals(EVAL_PARSER_NAME)) {
         eval();
       } else if (args[0].equals(PARSEVAL_PARSER_NAME)) {
@@ -152,69 +158,76 @@ public class CLI {
       } else if (args[0].equals("CROSS_PARSER_NAME")) {
         crossValidate();
       }
-    } catch (ArgumentParserException e) {
-      argParser.handleError(e);
-      System.out.println("Run java -jar target/ixa-pipe-ml-" + version
-          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|eval|parseval|cross) -help for details");
+    } catch (final ArgumentParserException e) {
+      this.argParser.handleError(e);
+      System.out.println("Run java -jar target/ixa-pipe-ml-" + this.version
+          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME
+          + "|eval|parseval|cross) -help for details");
       System.exit(1);
     }
   }
-  
+
   /**
    * Main access to the Sequence Labeler train functionalities.
-   * 
+   *
    * @throws IOException
    *           input output exception if problems with corpora
    */
   public final void seqTrain() throws IOException {
 
     // load training parameters file
-    String paramFile = parsedArguments.getString("params");
-    TrainingParameters params = IOUtils
-        .loadTrainingParameters(paramFile);
+    final String paramFile = this.parsedArguments.getString("params");
+    final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
     String outModel = null;
-    if (params.getSettings().get("OutputModel") == null || params.getSettings().get("OutputModel").length() == 0) {
+    if (params.getSettings().get("OutputModel") == null
+        || params.getSettings().get("OutputModel").length() == 0) {
       outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
       params.put("OutputModel", outModel);
-    }
-    else {
+    } else {
       outModel = Flags.getModel(params);
     }
-    SequenceLabelerTrainer nercTrainer = new SequenceLabelerTrainer(params);
-    SequenceLabelerModel trainedModel = nercTrainer.train(params);
+    final SequenceLabelerTrainer nercTrainer = new SequenceLabelerTrainer(
+        params);
+    final SequenceLabelerModel trainedModel = nercTrainer.train(params);
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
-  
+
   /**
    * Main access to the ShiftReduceParser train functionalities.
-   * 
+   *
    * @throws IOException
    *           input output exception if problems with corpora
    */
   public final void parserTrain() throws IOException {
 
     // load training parameters file
-    String paramFile = parsedArguments.getString("params");
-    String taggerParamsFile = parsedArguments.getString("taggerParams");
-    String chunkerParamsFile = parsedArguments.getString("chunkerParams");
-    TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
-    TrainingParameters chunkerParams = IOUtils.loadTrainingParameters(chunkerParamsFile);
+    final String paramFile = this.parsedArguments.getString("params");
+    final String taggerParamsFile = this.parsedArguments
+        .getString("taggerParams");
+    final String chunkerParamsFile = this.parsedArguments
+        .getString("chunkerParams");
+    final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
+    final TrainingParameters chunkerParams = IOUtils
+        .loadTrainingParameters(chunkerParamsFile);
     ParserModel trainedModel;
     String outModel = null;
-    if (params.getSettings().get("OutputModel") == null || params.getSettings().get("OutputModel").length() == 0) {
+    if (params.getSettings().get("OutputModel") == null
+        || params.getSettings().get("OutputModel").length() == 0) {
       outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
       params.put("OutputModel", outModel);
-    }
-    else {
+    } else {
       outModel = Flags.getModel(params);
     }
     if (taggerParamsFile.endsWith(".bin")) {
-      InputStream posModel = new FileInputStream(taggerParamsFile);
-      ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, chunkerParams);
+      final InputStream posModel = new FileInputStream(taggerParamsFile);
+      final ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(
+          params, chunkerParams);
       trainedModel = parserTrainer.train(params, posModel, chunkerParams);
     } else {
-      TrainingParameters taggerParams = IOUtils.loadTrainingParameters(taggerParamsFile);
-      ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(params, taggerParams, chunkerParams);
+      final TrainingParameters taggerParams = IOUtils
+          .loadTrainingParameters(taggerParamsFile);
+      final ShiftReduceParserTrainer parserTrainer = new ShiftReduceParserTrainer(
+          params, taggerParams, chunkerParams);
       trainedModel = parserTrainer.train(params, taggerParams, chunkerParams);
     }
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
@@ -222,34 +235,39 @@ public class CLI {
 
   /**
    * Main evaluation entry point.
-   * 
+   *
    * @throws IOException
    *           throws exception if test set not available
    */
   public final void eval() throws IOException {
 
-    String metric = parsedArguments.getString("metric");
-    String lang = parsedArguments.getString("language");
-    String model = parsedArguments.getString("model");
-    String testset = parsedArguments.getString("testset");
-    String corpusFormat = parsedArguments.getString("corpusFormat");
-    String netypes = parsedArguments.getString("types");
-    String clearFeatures = parsedArguments.getString("clearFeatures");
-    String unknownAccuracy = parsedArguments.getString("unknownAccuracy");
-    Properties props = setEvalProperties(lang, model, testset, corpusFormat, netypes, clearFeatures, unknownAccuracy);
-    SequenceLabelerEvaluate evaluator = new SequenceLabelerEvaluate(props);
-    
+    final String metric = this.parsedArguments.getString("metric");
+    final String lang = this.parsedArguments.getString("language");
+    final String model = this.parsedArguments.getString("model");
+    final String testset = this.parsedArguments.getString("testset");
+    final String corpusFormat = this.parsedArguments.getString("corpusFormat");
+    final String netypes = this.parsedArguments.getString("types");
+    final String clearFeatures = this.parsedArguments
+        .getString("clearFeatures");
+    final String unknownAccuracy = this.parsedArguments
+        .getString("unknownAccuracy");
+    final Properties props = setEvalProperties(lang, model, testset,
+        corpusFormat, netypes, clearFeatures, unknownAccuracy);
+    final SequenceLabelerEvaluate evaluator = new SequenceLabelerEvaluate(
+        props);
+
     if (metric.equalsIgnoreCase("accuracy")) {
       evaluator.evaluateAccuracy();
     } else {
-      if (parsedArguments.getString("evalReport") != null) {
-        if (parsedArguments.getString("evalReport").equalsIgnoreCase("brief")) {
+      if (this.parsedArguments.getString("evalReport") != null) {
+        if (this.parsedArguments.getString("evalReport")
+            .equalsIgnoreCase("brief")) {
           evaluator.evaluate();
-        } else if (parsedArguments.getString("evalReport").equalsIgnoreCase(
-            "error")) {
+        } else if (this.parsedArguments.getString("evalReport")
+            .equalsIgnoreCase("error")) {
           evaluator.evalError();
-        } else if (parsedArguments.getString("evalReport").equalsIgnoreCase(
-            "detailed")) {
+        } else if (this.parsedArguments.getString("evalReport")
+            .equalsIgnoreCase("detailed")) {
           evaluator.detailEvaluate();
         }
       } else {
@@ -257,150 +275,135 @@ public class CLI {
       }
     }
   }
-  
+
   /**
    * Main evaluation entry point.
-   * 
+   *
    * @throws IOException
    *           throws exception if test set not available
    */
   public final void parseval() throws IOException {
 
-    String lang = parsedArguments.getString("language");
-    String model = parsedArguments.getString("model");
-    String testset = parsedArguments.getString("testset");
-    Properties props = setParsevalProperties(lang, model, testset);
-    
-    ParserEvaluate parserEvaluator = new ParserEvaluate(props);
+    final String lang = this.parsedArguments.getString("language");
+    final String model = this.parsedArguments.getString("model");
+    final String testset = this.parsedArguments.getString("testset");
+    final Properties props = setParsevalProperties(lang, model, testset);
+
+    final ParserEvaluate parserEvaluator = new ParserEvaluate(props);
     parserEvaluator.evaluate();
-      
+
   }
-  
+
   /**
    * Main access to the cross validation.
-   * 
+   *
    * @throws IOException
    *           input output exception if problems with corpora
    */
   public final void crossValidate() throws IOException {
 
-    String paramFile = parsedArguments.getString("params");
-    TrainingParameters params = IOUtils
-        .loadTrainingParameters(paramFile);
-    CrossValidator crossValidator = new CrossValidator(params);
+    final String paramFile = this.parsedArguments.getString("params");
+    final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
+    final CrossValidator crossValidator = new CrossValidator(params);
     crossValidator.crossValidate(params);
   }
- 
+
   /**
    * Create the main parameters available for training sequence labeling models.
    */
   private void loadSeqLabelerTrainingParameters() {
-    seqTrainerParser.addArgument("-p", "--params")
-        .required(true)
+    this.seqTrainerParser.addArgument("-p", "--params").required(true)
         .help("Load the training parameters file\n");
   }
-  
+
   /**
    * Create the main parameters available for training ShiftReduceParse models.
    */
   private void loadParserTrainingParameters() {
-    parserTrainerParser.addArgument("-p", "--params")
-        .required(true)
+    this.parserTrainerParser.addArgument("-p", "--params").required(true)
         .help("Load the parsing training parameters file.\n");
-    parserTrainerParser.addArgument("-t", "--taggerParams")
-        .required(false)
+    this.parserTrainerParser.addArgument("-t", "--taggerParams").required(false)
         .help("Load the tagger training parameters file.\n");
-    parserTrainerParser.addArgument("-c", "--chunkerParams")
-        .required(false)
-        .help("Load the chunker training parameters file.\n");
+    this.parserTrainerParser.addArgument("-c", "--chunkerParams")
+        .required(false).help("Load the chunker training parameters file.\n");
   }
 
   /**
    * Create the parameters available for evaluation.
    */
   private void loadEvalParameters() {
-    evalParser.addArgument("--metric")
-        .required(false)
-        .choices("accuracy", "fmeasure")
-        .setDefault("fmeasure")
-        .help("Choose evaluation metric for Sequence Labeler; it defaults to fmeasure.\n");
-    evalParser.addArgument("-l", "--language")
-        .required(true)
-        .choices("de", "en", "es", "eu", "it", "nl")
-        .help("Choose language.\n");
-    evalParser.addArgument("-m", "--model")
-        .required(false)
+    this.evalParser.addArgument("--metric").required(false)
+        .choices("accuracy", "fmeasure").setDefault("fmeasure").help(
+            "Choose evaluation metric for Sequence Labeler; it defaults to fmeasure.\n");
+    this.evalParser.addArgument("-l", "--language").required(true)
+        .choices("de", "en", "es", "eu", "it", "nl").help("Choose language.\n");
+    this.evalParser.addArgument("-m", "--model").required(false)
         .setDefault(Flags.DEFAULT_EVALUATE_MODEL)
         .help("Pass the model to evaluate as a parameter.\n");
-    evalParser.addArgument("-t", "--testset")
-        .required(true)
+    this.evalParser.addArgument("-t", "--testset").required(true)
         .help("The test or reference corpus.\n");
-    evalParser.addArgument("--clearFeatures")
-        .required(false)
-        .choices("yes", "no", "docstart")
-        .setDefault(Flags.DEFAULT_FEATURE_FLAG)
+    this.evalParser.addArgument("--clearFeatures").required(false)
+        .choices("yes", "no", "docstart").setDefault(Flags.DEFAULT_FEATURE_FLAG)
         .help("Reset the adaptive features; defaults to 'no'.\n");
-    evalParser.addArgument("-f","--corpusFormat")
-        .required(false)
+    this.evalParser.addArgument("-f", "--corpusFormat").required(false)
         .choices("conll02", "conll03", "lemmatizer", "tabulated")
-        .setDefault(Flags.DEFAULT_EVAL_FORMAT)
-        .help("Choose format of reference corpus; it defaults to conll02 format.\n");
-    evalParser.addArgument("--evalReport")
-        .required(false)
-        .choices("brief", "detailed", "error")
-        .help("Choose level of detail of evaluation report; it defaults to detailed evaluation.\n");
-    evalParser.addArgument("--types")
-        .required(false)
-        .setDefault(Flags.DEFAULT_SEQUENCE_TYPES)
-        .help("Choose which Sequence types used for evaluation; the argument must be a comma separated" +
-        		" string; e.g., 'person,organization'.\n");
-    evalParser.addArgument("-u","--unknownAccuracy")
-        .required(false)
-        .setDefault(Flags.DEFAULT_FEATURE_FLAG)
-        .help("Pass the model training set to evaluate unknown and known word accuracy.\n");
+        .setDefault(Flags.DEFAULT_EVAL_FORMAT).help(
+            "Choose format of reference corpus; it defaults to conll02 format.\n");
+    this.evalParser.addArgument("--evalReport").required(false)
+        .choices("brief", "detailed", "error").help(
+            "Choose level of detail of evaluation report; it defaults to detailed evaluation.\n");
+    this.evalParser.addArgument("--types").required(false)
+        .setDefault(Flags.DEFAULT_SEQUENCE_TYPES).help(
+            "Choose which Sequence types used for evaluation; the argument must be a comma separated"
+                + " string; e.g., 'person,organization'.\n");
+    this.evalParser.addArgument("-u", "--unknownAccuracy").required(false)
+        .setDefault(Flags.DEFAULT_FEATURE_FLAG).help(
+            "Pass the model training set to evaluate unknown and known word accuracy.\n");
   }
-  
+
   /**
    * Create the parameters available for evaluation.
    */
   private void loadParsevalParameters() {
-    parsevalParser.addArgument("-l", "--language")
-        .required(true)
+    this.parsevalParser.addArgument("-l", "--language").required(true)
         .choices("ca", "de", "en", "es", "eu", "fr", "it")
         .help("Choose language.\n");
-    parsevalParser.addArgument("-m", "--model")
-        .required(false)
+    this.parsevalParser.addArgument("-m", "--model").required(false)
         .setDefault(Flags.DEFAULT_EVALUATE_MODEL)
         .help("Pass the model to evaluate as a parameter.\n");
-    parsevalParser.addArgument("-t", "--testset")
-        .required(true)
+    this.parsevalParser.addArgument("-t", "--testset").required(true)
         .help("The test or reference corpus.\n");
-    parsevalParser.addArgument("--clearFeatures")
-        .required(false)
-        .choices("yes", "no", "docstart")
-        .setDefault(Flags.DEFAULT_FEATURE_FLAG)
+    this.parsevalParser.addArgument("--clearFeatures").required(false)
+        .choices("yes", "no", "docstart").setDefault(Flags.DEFAULT_FEATURE_FLAG)
         .help("Reset the adaptive features; defaults to 'no'.\n");
   }
-  
+
   /**
    * Create the main parameters available for training NERC models.
    */
   private void loadCrossValidateParameters() {
-    crossValidateParser.addArgument("-p", "--params").required(true)
+    this.crossValidateParser.addArgument("-p", "--params").required(true)
         .help("Load the Cross validation parameters file\n");
   }
-  
-  
+
   /**
    * Set a Properties object with the CLI parameters for evaluation.
-   * @param model the model parameter
-   * @param testset the reference set
-   * @param corpusFormat the format of the testset
-   * @param netypes the ne types to use in the evaluation
+   * 
+   * @param model
+   *          the model parameter
+   * @param testset
+   *          the reference set
+   * @param corpusFormat
+   *          the format of the testset
+   * @param netypes
+   *          the ne types to use in the evaluation
    * @return the properties object
    */
-  private Properties setEvalProperties(String language, String model, String testset, String corpusFormat, String netypes, String clearFeatures, String unknownAccuracy) {
-    Properties evalProperties = new Properties();
+  private Properties setEvalProperties(final String language,
+      final String model, final String testset, final String corpusFormat,
+      final String netypes, final String clearFeatures,
+      final String unknownAccuracy) {
+    final Properties evalProperties = new Properties();
     evalProperties.setProperty("language", language);
     evalProperties.setProperty("model", model);
     evalProperties.setProperty("testset", testset);
@@ -410,22 +413,27 @@ public class CLI {
     evalProperties.setProperty("unknownAccuracy", unknownAccuracy);
     return evalProperties;
   }
-  
+
   /**
    * Set a Properties object with the CLI parameters for evaluation.
-   * @param model the model parameter
-   * @param testset the reference set
-   * @param corpusFormat the format of the testset
-   * @param netypes the ne types to use in the evaluation
+   * 
+   * @param model
+   *          the model parameter
+   * @param testset
+   *          the reference set
+   * @param corpusFormat
+   *          the format of the testset
+   * @param netypes
+   *          the ne types to use in the evaluation
    * @return the properties object
    */
-  private Properties setParsevalProperties(String language, String model, String testset) {
-    Properties parsevalProperties = new Properties();
+  private Properties setParsevalProperties(final String language,
+      final String model, final String testset) {
+    final Properties parsevalProperties = new Properties();
     parsevalProperties.setProperty("language", language);
     parsevalProperties.setProperty("model", model);
     parsevalProperties.setProperty("testset", testset);
     return parsevalProperties;
   }
-
 
 }

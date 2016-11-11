@@ -28,25 +28,29 @@ public class SentenceFeatureGenerator extends CustomFeatureGenerator {
   public SentenceFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
 
-    if (properties.get("begin").equalsIgnoreCase("true") && index == 0) {
+    if (this.properties.get("begin").equalsIgnoreCase("true") && index == 0) {
       features.add("S=begin");
     }
 
-    if (properties.get("end").equalsIgnoreCase("true") && tokens.length == index + 1) {
+    if (this.properties.get("end").equalsIgnoreCase("true")
+        && tokens.length == index + 1) {
       features.add("S=end");
     }
   }
 
-  public void init(Map<String, String> attributes, FeatureGeneratorResourceProvider resourceProvider) {
+  @Override
+  public void init(final Map<String, String> attributes,
+      final FeatureGeneratorResourceProvider resourceProvider) {
     this.properties = attributes;
   }
 
-
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
 
   }
 

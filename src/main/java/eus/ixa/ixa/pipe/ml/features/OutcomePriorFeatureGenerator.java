@@ -22,7 +22,6 @@ import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
-
 /**
  * The definition feature maps the underlying distribution of outcomes.
  */
@@ -30,22 +29,23 @@ public class OutcomePriorFeatureGenerator extends CustomFeatureGenerator {
 
   public static final String OUTCOME_PRIOR_FEATURE = "def";
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
     features.add(OUTCOME_PRIOR_FEATURE);
   }
-  
+
   @Override
   public void clearAdaptiveData() {
   }
 
   @Override
-  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  public void updateAdaptiveData(final String[] arg0, final String[] arg1) {
   }
 
   @Override
-  public void init(Map<String, String> arg0,
-      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
-  } 
+  public void init(final Map<String, String> arg0,
+      final FeatureGeneratorResourceProvider arg1)
+      throws InvalidFormatException {
+  }
 }
-

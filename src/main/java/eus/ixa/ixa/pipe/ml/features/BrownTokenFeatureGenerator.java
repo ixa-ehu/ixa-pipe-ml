@@ -20,15 +20,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.resources.WordCluster;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.WordCluster;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
 
-public class BrownTokenFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
+public class BrownTokenFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
 
   private WordCluster brownLexicon;
   private Map<String, String> attributes;
@@ -36,40 +37,46 @@ public class BrownTokenFeatureGenerator extends CustomFeatureGenerator implement
 
   public BrownTokenFeatureGenerator() {
   }
-  
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    
-    List<String> wordClasses = BrownTokenClasses.getWordClasses(tokens[index], brownLexicon);
+
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+
+    final List<String> wordClasses = BrownTokenClasses
+        .getWordClasses(tokens[index], this.brownLexicon);
     if (DEBUG) {
       BrownTokenClasses.printList(wordClasses);
     }
     for (int i = 0; i < wordClasses.size(); i++) {
-      features.add(attributes.get("dict") + "=" + wordClasses.get(i));
+      features.add(this.attributes.get("dict") + "=" + wordClasses.get(i));
       if (Flags.DEBUG) {
-        System.err.println("-> " + tokens[index] + ": " + attributes.get("dict") + "=" + wordClasses.get(i));
+        System.err.println("-> " + tokens[index] + ": "
+            + this.attributes.get("dict") + "=" + wordClasses.get(i));
       }
     }
   }
 
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
+
   }
 
   @Override
   public void clearAdaptiveData() {
-    
+
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     this.attributes = properties;
-    Object dictResource = resourceProvider.getResource(properties.get("dict"));
+    final Object dictResource = resourceProvider
+        .getResource(properties.get("dict"));
     if (!(dictResource instanceof WordCluster)) {
-      throw new InvalidFormatException("Not a ClusterLexicon resource for key: " + properties.get("dict"));
+      throw new InvalidFormatException(
+          "Not a ClusterLexicon resource for key: " + properties.get("dict"));
     }
     this.brownLexicon = (WordCluster) dictResource;
     this.attributes = properties;
@@ -77,11 +84,9 @@ public class BrownTokenFeatureGenerator extends CustomFeatureGenerator implement
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
     mapping.put("brownserializer", new WordCluster.WordClusterSerializer());
     return Collections.unmodifiableMap(mapping);
   }
-
-  
 
 }

@@ -30,19 +30,29 @@ import opennlp.tools.util.featuregen.WindowFeatureGenerator;
  * Class for creating an event stream out of data files for training an name
  * finder.
  */
-public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEventStream<SequenceLabelSample> {
+public class SequenceLabelerEventStream
+    extends opennlp.tools.util.AbstractEventStream<SequenceLabelSample> {
 
-  private SequenceLabelerContextGenerator contextGenerator;
-  private AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
+  private final SequenceLabelerContextGenerator contextGenerator;
+  private final AdditionalContextFeatureGenerator additionalContextFeatureGenerator = new AdditionalContextFeatureGenerator();
   private SequenceLabelerCodec<String> codec;
 
   /**
-   * Creates a new name finder event stream using the specified data stream and context generator.
-   * @param dataStream The data stream of events.
-   * @param contextGenerator The context generator used to generate features for the event stream.
-   * @param codec the encoding
+   * Creates a new name finder event stream using the specified data stream and
+   * context generator.
+   * 
+   * @param dataStream
+   *          The data stream of events.
+   * @param contextGenerator
+   *          The context generator used to generate features for the event
+   *          stream.
+   * @param codec
+   *          the encoding
    */
-  public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream, SequenceLabelerContextGenerator contextGenerator, SequenceLabelerCodec<String> codec) {
+  public SequenceLabelerEventStream(
+      final ObjectStream<SequenceLabelSample> dataStream,
+      final SequenceLabelerContextGenerator contextGenerator,
+      final SequenceLabelerCodec<String> codec) {
     super(dataStream);
 
     this.codec = codec;
@@ -50,54 +60,63 @@ public class SequenceLabelerEventStream extends opennlp.tools.util.AbstractEvent
       this.codec = new BioCodec();
     }
     this.contextGenerator = contextGenerator;
-    this.contextGenerator.addFeatureGenerator(new WindowFeatureGenerator(additionalContextFeatureGenerator, 8, 8));
+    this.contextGenerator.addFeatureGenerator(new WindowFeatureGenerator(
+        this.additionalContextFeatureGenerator, 8, 8));
   }
 
-  public SequenceLabelerEventStream(ObjectStream<SequenceLabelSample> dataStream) {
+  public SequenceLabelerEventStream(
+      final ObjectStream<SequenceLabelSample> dataStream) {
     this(dataStream, new DefaultSequenceLabelerContextGenerator(), null);
   }
 
-  public static List<Event> generateEvents(String[] sentence, String[] outcomes, SequenceLabelerContextGenerator cg) {
-    List<Event> events = new ArrayList<Event>(outcomes.length);
+  public static List<Event> generateEvents(final String[] sentence,
+      final String[] outcomes, final SequenceLabelerContextGenerator cg) {
+    final List<Event> events = new ArrayList<Event>(outcomes.length);
     for (int i = 0; i < outcomes.length; i++) {
-      events.add(new Event(outcomes[i], cg.getContext(i, sentence, outcomes,null)));
+      events.add(
+          new Event(outcomes[i], cg.getContext(i, sentence, outcomes, null)));
     }
     cg.updateAdaptiveData(sentence, outcomes);
     return events;
   }
 
   @Override
-  protected Iterator<Event> createEvents(SequenceLabelSample sample) {
+  protected Iterator<Event> createEvents(final SequenceLabelSample sample) {
 
     if (sample.isClearAdaptiveDataSet()) {
-      contextGenerator.clearAdaptiveData();
+      this.contextGenerator.clearAdaptiveData();
     }
-    String outcomes[] = codec.encode(sample.getSequences(), sample.getTokens().length);
-    additionalContextFeatureGenerator.setCurrentContext(sample.getAdditionalContext());
-    String[] tokens = new String[sample.getTokens().length];
+    final String outcomes[] = this.codec.encode(sample.getSequences(),
+        sample.getTokens().length);
+    this.additionalContextFeatureGenerator
+        .setCurrentContext(sample.getAdditionalContext());
+    final String[] tokens = new String[sample.getTokens().length];
 
     for (int i = 0; i < sample.getTokens().length; i++) {
       tokens[i] = sample.getTokens()[i];
     }
 
-    return generateEvents(tokens, outcomes, contextGenerator).iterator();
+    return generateEvents(tokens, outcomes, this.contextGenerator).iterator();
   }
 
-
   /**
-   * Generated previous decision features for each token based on contents of the specified map.
-   * @param tokens The token for which the context is generated.
-   * @param prevMap A mapping of tokens to their previous decisions.
+   * Generated previous decision features for each token based on contents of
+   * the specified map.
+   * 
+   * @param tokens
+   *          The token for which the context is generated.
+   * @param prevMap
+   *          A mapping of tokens to their previous decisions.
    * @return An additional context array with features for each token.
    */
-  public static String[][] additionalContext(String[] tokens, Map<String, String> prevMap) {
-    String[][] ac = new String[tokens.length][1];
-    for (int ti=0;ti<tokens.length;ti++) {
-      String pt = prevMap.get(tokens[ti]);
-      ac[ti][0]="pd="+pt;
+  public static String[][] additionalContext(final String[] tokens,
+      final Map<String, String> prevMap) {
+    final String[][] ac = new String[tokens.length][1];
+    for (int ti = 0; ti < tokens.length; ti++) {
+      final String pt = prevMap.get(tokens[ti]);
+      ac[ti][0] = "pd=" + pt;
     }
     return ac;
 
   }
 }
-

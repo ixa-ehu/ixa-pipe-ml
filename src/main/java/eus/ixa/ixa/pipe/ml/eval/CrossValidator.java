@@ -22,40 +22,41 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.TrainingParameters;
-import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.SequenceLabelerTrainer;
 import eus.ixa.ixa.pipe.ml.features.XMLFeatureDescriptor;
 import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
 import eus.ixa.ixa.pipe.ml.sequence.BilouCodec;
 import eus.ixa.ixa.pipe.ml.sequence.BioCodec;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCrossValidator;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCodec;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerCrossValidator;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationMonitor;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerFactory;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
+import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.TrainingParameters;
+import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
  * Abstract class for common training functionalities. Every other trainer class
  * needs to extend this class.
+ * 
  * @author ragerri
  * @version 2014-04-17
  */
 public class CrossValidator {
-  
+
   /**
    * The language.
    */
-  private String lang;
+  private final String lang;
   /**
    * String holding the training data.
    */
-  private String trainData;
+  private final String trainData;
   /**
    * ObjectStream of the training data.
    */
@@ -63,19 +64,19 @@ public class CrossValidator {
   /**
    * beamsize value needs to be established in any class extending this one.
    */
-  private int beamSize;
+  private final int beamSize;
   /**
    * The folds value for cross validation.
    */
-  private int folds;
+  private final int folds;
   /**
    * The sequence encoding of the named entity spans, e.g., BIO or BILOU.
    */
-  private SequenceLabelerCodec<String> sequenceCodec;
+  private final SequenceLabelerCodec<String> sequenceCodec;
   /**
    * The corpus format: conll02, conll03.
    */
-  private String corpusFormat;
+  private final String corpusFormat;
   /**
    * features needs to be implemented by any class extending this one.
    */
@@ -83,98 +84,104 @@ public class CrossValidator {
   /**
    * The evaluation listeners.
    */
-  private List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
+  private final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
   SequenceLabelerDetailedFMeasureListener detailedFListener;
 
-  
   public CrossValidator(final TrainingParameters params) throws IOException {
-    
+
     this.lang = Flags.getLanguage(params);
-    String clearFeatures = Flags.getClearTrainingFeatures(params);
+    final String clearFeatures = Flags.getClearTrainingFeatures(params);
     this.corpusFormat = Flags.getCorpusFormat(params);
     this.trainData = params.getSettings().get("TrainSet");
-    trainSamples = SequenceLabelerTrainer.getSequenceStream(trainData, clearFeatures, corpusFormat);
+    this.trainSamples = SequenceLabelerTrainer.getSequenceStream(this.trainData,
+        clearFeatures, this.corpusFormat);
     this.beamSize = Flags.getBeamsize(params);
     this.folds = Flags.getFolds(params);
-    this.sequenceCodec =  SequenceLabelerFactory.instantiateSequenceCodec(getSequenceCodec(Flags.getSequenceCodec(params)));
+    this.sequenceCodec = SequenceLabelerFactory.instantiateSequenceCodec(
+        getSequenceCodec(Flags.getSequenceCodec(params)));
     if (params.getSettings().get("Types") != null) {
-      String netypes = params.getSettings().get("Types");
-      String[] neTypes = netypes.split(",");
-      trainSamples = new SequenceLabelSampleTypeFilter(neTypes, trainSamples);
+      final String netypes = params.getSettings().get("Types");
+      final String[] neTypes = netypes.split(",");
+      this.trainSamples = new SequenceLabelSampleTypeFilter(neTypes,
+          this.trainSamples);
     }
     createNameFactory(params);
     getEvalListeners(params);
   }
 
-  private void createNameFactory(TrainingParameters params) throws IOException {
-    String featureDescription = XMLFeatureDescriptor
+  private void createNameFactory(final TrainingParameters params)
+      throws IOException {
+    final String featureDescription = XMLFeatureDescriptor
         .createXMLFeatureDescriptor(params);
     System.err.println(featureDescription);
-    byte[] featureGeneratorBytes = featureDescription.getBytes(Charset
-        .forName("UTF-8"));
-    Map<String, Object> resources = LoadModelResources.loadSequenceResources(params);
+    final byte[] featureGeneratorBytes = featureDescription
+        .getBytes(Charset.forName("UTF-8"));
+    final Map<String, Object> resources = LoadModelResources
+        .loadSequenceResources(params);
     this.nameClassifierFactory = SequenceLabelerFactory.create(
         SequenceLabelerFactory.class.getName(), featureGeneratorBytes,
-        resources, sequenceCodec);
+        resources, this.sequenceCodec);
   }
-  
-  private void getEvalListeners(TrainingParameters params) {
+
+  private void getEvalListeners(final TrainingParameters params) {
     if (params.getSettings().get("EvaluationType").equalsIgnoreCase("error")) {
-      listeners.add(new SequenceLabelerEvaluationErrorListener());
+      this.listeners.add(new SequenceLabelerEvaluationErrorListener());
     }
-    if (params.getSettings().get("EvaluationType").equalsIgnoreCase("detailed")) {
-      detailedFListener = new SequenceLabelerDetailedFMeasureListener();
-      listeners.add(detailedFListener);
+    if (params.getSettings().get("EvaluationType")
+        .equalsIgnoreCase("detailed")) {
+      this.detailedFListener = new SequenceLabelerDetailedFMeasureListener();
+      this.listeners.add(this.detailedFListener);
     }
   }
-  
+
   public final void crossValidate(final TrainingParameters params) {
-    if (nameClassifierFactory == null) {
+    if (this.nameClassifierFactory == null) {
       throw new IllegalStateException(
           "Classes derived from AbstractNameFinderTrainer must create and fill the AdaptiveFeatureGenerator features!");
     }
     SequenceLabelerCrossValidator validator = null;
     try {
-      validator = new SequenceLabelerCrossValidator(lang, params, nameClassifierFactory,
-          listeners.toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
-      validator.evaluate(trainSamples, folds);
-    } catch (IOException e) {
+      validator = new SequenceLabelerCrossValidator(this.lang, params,
+          this.nameClassifierFactory, this.listeners.toArray(
+              new SequenceLabelerEvaluationMonitor[this.listeners.size()]));
+      validator.evaluate(this.trainSamples, this.folds);
+    } catch (final IOException e) {
       System.err.println("IO error while loading training set!");
       e.printStackTrace();
       System.exit(1);
     } finally {
       try {
-        trainSamples.close();
-      } catch (IOException e) {
+        this.trainSamples.close();
+      } catch (final IOException e) {
         System.err.println("IO error with the train samples!");
       }
     }
-    if (detailedFListener == null) {
+    if (this.detailedFListener == null) {
       System.out.println(validator.getFMeasure());
     } else {
-      System.out.println(detailedFListener.toString());
+      System.out.println(this.detailedFListener.toString());
     }
   }
-  
+
   /**
    * Get the Sequence codec.
-   * @param seqCodecOption the codec chosen
+   * 
+   * @param seqCodecOption
+   *          the codec chosen
    * @return the sequence codec
    */
-  public final String getSequenceCodec(String seqCodecOption) {
+  public final String getSequenceCodec(final String seqCodecOption) {
     String seqCodec = null;
     if ("BIO".equals(seqCodecOption)) {
       seqCodec = BioCodec.class.getName();
-    }
-    else if ("BILOU".equals(seqCodecOption)) {
+    } else if ("BILOU".equals(seqCodecOption)) {
       seqCodec = BilouCodec.class.getName();
     }
     return seqCodec;
   }
-  
+
   public final int getBeamSize() {
-    return beamSize;
+    return this.beamSize;
   }
 
 }
-

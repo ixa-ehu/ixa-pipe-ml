@@ -25,6 +25,7 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
  * A baseline context generator for the POS Tagger.
+ * 
  * @author ragerri
  * @version 2016-05-12
  */
@@ -34,25 +35,28 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
   /**
    * Has capital regexp.
    */
-  private static Pattern hasCap = Pattern.compile("\\p{Upper}", Pattern.UNICODE_CHARACTER_CLASS);
+  private static Pattern hasCap = Pattern.compile("\\p{Upper}",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Has number regexp.
    */
-  private static Pattern hasNum = Pattern.compile("\\p{Digit}", Pattern.UNICODE_CHARACTER_CLASS);
-  
-  public POSBaselineContextGenerator() {  
+  private static Pattern hasNum = Pattern.compile("\\p{Digit}",
+      Pattern.UNICODE_CHARACTER_CLASS);
+
+  public POSBaselineContextGenerator() {
   }
-  
+
   /**
    * Obtain prefixes for each token.
+   * 
    * @param lex
    *          the current word
    * @return the prefixes
    */
   private String[] getPrefixes(final String lex) {
-    Integer start = Integer.parseInt(attributes.get("prefBegin"));
-    Integer end = Integer.parseInt(attributes.get("prefEnd"));
-    String[] prefs = new String[end];
+    final Integer start = Integer.parseInt(this.attributes.get("prefBegin"));
+    final Integer end = Integer.parseInt(this.attributes.get("prefEnd"));
+    final String[] prefs = new String[end];
     for (int li = start, ll = end; li < ll; li++) {
       prefs[li] = lex.substring(0, Math.min(li + 1, lex.length()));
     }
@@ -61,28 +65,30 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
 
   /**
    * Obtain suffixes for each token.
+   * 
    * @param lex
    *          the word
    * @return the suffixes
    */
   private String[] getSuffixes(final String lex) {
-    Integer start = Integer.parseInt(attributes.get("sufBegin"));
-    Integer end = Integer.parseInt(attributes.get("sufEnd"));
-    String[] suffs = new String[end];
+    final Integer start = Integer.parseInt(this.attributes.get("sufBegin"));
+    final Integer end = Integer.parseInt(this.attributes.get("sufEnd"));
+    final String[] suffs = new String[end];
     for (int li = start, ll = end; li < ll; li++) {
       suffs[li] = lex.substring(Math.max(lex.length() - li - 1, 0));
     }
     return suffs;
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    
-    //words in a five word window
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+
+    // words in a five word window
     String w_1, w0, w1;
-    //previous predictions
+    // previous predictions
     String p_2, p_1;
-    
+
     if (index < 2) {
       p_2 = "bos";
     } else {
@@ -95,15 +101,15 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
       w_1 = tokens[index - 1];
       p_1 = previousOutcomes[index - 1];
     }
-    
+
     w0 = tokens[index];
-    
+
     if (index + 1 >= tokens.length) {
       w1 = "eos";
     } else {
       w1 = tokens[index + 1];
     }
-    
+
     features.add("w_1=" + w_1);
     features.add("w0=" + w0);
     features.add("w1=" + w1);
@@ -112,18 +118,19 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
     features.add("p_1,p_2=" + p_1 + "," + p_2);
     addTokenShapeFeatures(features, w0);
   }
-  
-  private void addTokenShapeFeatures(List<String> features, String lex) {
+
+  private void addTokenShapeFeatures(final List<String> features,
+      final String lex) {
     // do some basic suffix analysis
-    String[] suffs = getSuffixes(lex);
-    for (int i = 0; i < suffs.length; i++) {
-      features.add("suf=" + suffs[i]);
+    final String[] suffs = getSuffixes(lex);
+    for (final String suff : suffs) {
+      features.add("suf=" + suff);
     }
-    
-    String[] prefs = getPrefixes(lex);
-    
-    for (int i = 0; i < prefs.length; i++) {
-      features.add("pre=" + prefs[i]);
+
+    final String[] prefs = getPrefixes(lex);
+
+    for (final String pref : prefs) {
+      features.add("pre=" + pref);
     }
     // see if the word has any special characters
     if (lex.indexOf('-') != -1) {
@@ -136,9 +143,10 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
       features.add("d");
     }
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
 
   }
 
@@ -146,13 +154,12 @@ public class POSBaselineContextGenerator extends CustomFeatureGenerator {
   public void clearAdaptiveData() {
 
   }
-  
+
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    attributes = properties;
+    this.attributes = properties;
   }
 
 }
-

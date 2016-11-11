@@ -24,25 +24,25 @@ import java.util.Arrays;
 import java.util.List;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
-
 import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
  * <b>Note:</b> Do not use this class, internal use only!
  */
-public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> {
+public abstract class EvaluationErrorPrinter<T>
+    implements EvaluationMonitor<T> {
 
-  private PrintStream printStream;
+  private final PrintStream printStream;
 
-  protected EvaluationErrorPrinter(OutputStream outputStream) {
+  protected EvaluationErrorPrinter(final OutputStream outputStream) {
     this.printStream = new PrintStream(outputStream);
   }
 
   // for the sentence detector
-  protected void printError(Span references[], Span predictions[],
-      T referenceSample, T predictedSample, String sentence) {
-    List<Span> falseNegatives = new ArrayList<Span>();
-    List<Span> falsePositives = new ArrayList<Span>();
+  protected void printError(final Span references[], final Span predictions[],
+      final T referenceSample, final T predictedSample, final String sentence) {
+    final List<Span> falseNegatives = new ArrayList<Span>();
+    final List<Span> falsePositives = new ArrayList<Span>();
 
     findErrors(references, predictions, falseNegatives, falsePositives);
 
@@ -56,17 +56,18 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
   }
 
   // for namefinder, chunker...
-  protected void printError(String id, Span references[], Span predictions[],
-      T referenceSample, T predictedSample, String[] sentenceTokens) {
-    List<Span> falseNegatives = new ArrayList<Span>();
-    List<Span> falsePositives = new ArrayList<Span>();
+  protected void printError(final String id, final Span references[],
+      final Span predictions[], final T referenceSample,
+      final T predictedSample, final String[] sentenceTokens) {
+    final List<Span> falseNegatives = new ArrayList<Span>();
+    final List<Span> falsePositives = new ArrayList<Span>();
 
     findErrors(references, predictions, falseNegatives, falsePositives);
 
     if (falsePositives.size() + falseNegatives.size() > 0) {
 
       if (id != null) {
-        printStream.println("Id: {" + id + "}");
+        this.printStream.println("Id: {" + id + "}");
       }
 
       printSamples(referenceSample, predictedSample);
@@ -76,17 +77,20 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
     }
   }
 
-  protected void printError(Span references[], Span predictions[],
-      T referenceSample, T predictedSample, String[] sentenceTokens) {
-    printError(null, references, predictions, referenceSample, predictedSample, sentenceTokens);
+  protected void printError(final Span references[], final Span predictions[],
+      final T referenceSample, final T predictedSample,
+      final String[] sentenceTokens) {
+    printError(null, references, predictions, referenceSample, predictedSample,
+        sentenceTokens);
   }
 
   // for pos tagger
-  protected void printError(String references[], String predictions[],
-      T referenceSample, T predictedSample, String[] sentenceTokens) {
-    List<String> filteredDoc = new ArrayList<String>();
-    List<String> filteredRefs = new ArrayList<String>();
-    List<String> filteredPreds = new ArrayList<String>();
+  protected void printError(final String references[],
+      final String predictions[], final T referenceSample,
+      final T predictedSample, final String[] sentenceTokens) {
+    final List<String> filteredDoc = new ArrayList<String>();
+    final List<String> filteredRefs = new ArrayList<String>();
+    final List<String> filteredPreds = new ArrayList<String>();
 
     for (int i = 0; i < references.length; i++) {
       if (!references[i].equals(predictions[i])) {
@@ -106,9 +110,9 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
   }
 
   // for others
-  protected void printError(T referenceSample, T predictedSample) {
-      printSamples(referenceSample, predictedSample);
-      printStream.println();
+  protected void printError(final T referenceSample, final T predictedSample) {
+    printSamples(referenceSample, predictedSample);
+    this.printStream.println();
   }
 
   /**
@@ -121,16 +125,16 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
    * @param filteredPreds
    *          the predicted tags
    */
-  private void printErrors(List<String> filteredDoc, List<String> filteredRefs,
-      List<String> filteredPreds) {
-    printStream.println("Errors: {");
-    printStream.println("Tok: Ref | Pred");
-    printStream.println("---------------");
+  private void printErrors(final List<String> filteredDoc,
+      final List<String> filteredRefs, final List<String> filteredPreds) {
+    this.printStream.println("Errors: {");
+    this.printStream.println("Tok: Ref | Pred");
+    this.printStream.println("---------------");
     for (int i = 0; i < filteredDoc.size(); i++) {
-      printStream.println(filteredDoc.get(i) + ": " + filteredRefs.get(i)
+      this.printStream.println(filteredDoc.get(i) + ": " + filteredRefs.get(i)
           + " | " + filteredPreds.get(i));
     }
-    printStream.println("}\n");
+    this.printStream.println("}\n");
   }
 
   /**
@@ -143,17 +147,17 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
    * @param doc
    *          the document text
    */
-  private void printErrors(List<Span> falsePositives,
-      List<Span> falseNegatives, String doc) {
-    printStream.println("False positives: {");
-    for (Span span : falsePositives) {
-      printStream.println(span.getCoveredText(doc));
+  private void printErrors(final List<Span> falsePositives,
+      final List<Span> falseNegatives, final String doc) {
+    this.printStream.println("False positives: {");
+    for (final Span span : falsePositives) {
+      this.printStream.println(span.getCoveredText(doc));
     }
-    printStream.println("} False negatives: {");
-    for (Span span : falseNegatives) {
-      printStream.println(span.getCoveredText(doc));
+    this.printStream.println("} False negatives: {");
+    for (final Span span : falseNegatives) {
+      this.printStream.println(span.getCoveredText(doc));
     }
-    printStream.println("}\n");
+    this.printStream.println("}\n");
   }
 
   /**
@@ -166,13 +170,13 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
    * @param toks
    *          the document tokens
    */
-  private void printErrors(List<Span> falsePositives,
-      List<Span> falseNegatives, String[] toks) {
-    printStream.println("False positives: {");
-    printStream.println(print(falsePositives, toks));
-    printStream.println("} False negatives: {");
-    printStream.println(print(falseNegatives, toks));
-    printStream.println("}\n");
+  private void printErrors(final List<Span> falsePositives,
+      final List<Span> falseNegatives, final String[] toks) {
+    this.printStream.println("False positives: {");
+    this.printStream.println(print(falsePositives, toks));
+    this.printStream.println("} False negatives: {");
+    this.printStream.println(print(falseNegatives, toks));
+    this.printStream.println("}\n");
   }
 
   /**
@@ -184,9 +188,9 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
    *          the tokens array
    * @return the spans as string
    */
-  private String print(List<Span> spans, String[] toks) {
-    return Arrays.toString(Span.spansToStrings(
-        spans.toArray(new Span[spans.size()]), toks));
+  private String print(final List<Span> spans, final String[] toks) {
+    return Arrays.toString(
+        Span.spansToStrings(spans.toArray(new Span[spans.size()]), toks));
   }
 
   /**
@@ -197,10 +201,11 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
    * @param predictedSample
    *          the predicted sample
    */
-  private <S> void printSamples(S referenceSample, S predictedSample) {
-    String details = "Expected: {\n" + referenceSample + "}\nPredicted: {\n"
-        + predictedSample + "}";
-    printStream.println(details);
+  private <S> void printSamples(final S referenceSample,
+      final S predictedSample) {
+    final String details = "Expected: {\n" + referenceSample
+        + "}\nPredicted: {\n" + predictedSample + "}";
+    this.printStream.println(details);
   }
 
   /**
@@ -214,31 +219,30 @@ public abstract class EvaluationErrorPrinter<T> implements EvaluationMonitor<T> 
    * @param falsePositives
    *          [out] the false positives list
    */
-  private void findErrors(Span references[], Span predictions[],
-      List<Span> falseNegatives, List<Span> falsePositives) {
+  private void findErrors(final Span references[], final Span predictions[],
+      final List<Span> falseNegatives, final List<Span> falsePositives) {
 
     falseNegatives.addAll(Arrays.asList(references));
     falsePositives.addAll(Arrays.asList(predictions));
 
-    for (int referenceIndex = 0; referenceIndex < references.length; referenceIndex++) {
+    for (final Span referenceName : references) {
 
-      Span referenceName = references[referenceIndex];
-
-      for (int predictedIndex = 0; predictedIndex < predictions.length; predictedIndex++) {
-        if (referenceName.equals(predictions[predictedIndex])) {
+      for (final Span prediction : predictions) {
+        if (referenceName.equals(prediction)) {
           // got it, remove from fn and fp
           falseNegatives.remove(referenceName);
-          falsePositives.remove(predictions[predictedIndex]);
+          falsePositives.remove(prediction);
         }
       }
     }
   }
 
-  public void correctlyClassified(T reference, T prediction) {
+  @Override
+  public void correctlyClassified(final T reference, final T prediction) {
     // do nothing
   }
 
-  public abstract void missclassified(T reference, T prediction) ;
+  @Override
+  public abstract void missclassified(T reference, T prediction);
 
 }
-

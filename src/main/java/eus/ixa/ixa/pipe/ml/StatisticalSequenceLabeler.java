@@ -46,15 +46,14 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 public class StatisticalSequenceLabeler {
 
   /**
-   * The models to use for every language. The keys of the hash are the
-   * language codes, the values the models.
+   * The models to use for every language. The keys of the hash are the language
+   * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels =
-      new ConcurrentHashMap<String, SequenceLabelerModel>();
+  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels = new ConcurrentHashMap<String, SequenceLabelerModel>();
   /**
    * The sequence labeler.
    */
-  private SequenceLabelerME sequenceLabeler;
+  private final SequenceLabelerME sequenceLabeler;
   /**
    * The Sequence factory.
    */
@@ -62,73 +61,89 @@ public class StatisticalSequenceLabeler {
 
   /**
    * Construct a probabilistic sequence labeler.
-   * @param props the properties to be loaded
+   * 
+   * @param props
+   *          the properties to be loaded
    */
   public StatisticalSequenceLabeler(final Properties props) {
-    String lang = props.getProperty("language");
-    String model = props.getProperty("model");
-    SequenceLabelerModel seqModel = loadModel(lang, model);
-    sequenceLabeler = new SequenceLabelerME(seqModel);
-  }
-  
-  /**
-   * Construct a StatisticalSequenceLabeler specifying the model to be used.
-   * @param model the specific model to be used.
-   * @param lang the language
-   */
-  public StatisticalSequenceLabeler(final String model, final String lang) {
-    SequenceLabelerModel seqModel = loadModel(lang, model);
-    sequenceLabeler = new SequenceLabelerME(seqModel);
+    final String lang = props.getProperty("language");
+    final String model = props.getProperty("model");
+    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
   /**
-   * Construct a StatisticalSequenceLabeler specifying the factory to
-   * be used.
-   *
-   * @param props the properties
-   * @param aSeqFactory the name factory to construct Name objects
+   * Construct a StatisticalSequenceLabeler specifying the model to be used.
+   * 
+   * @param model
+   *          the specific model to be used.
+   * @param lang
+   *          the language
    */
-  public StatisticalSequenceLabeler(final Properties props, final SequenceLabelFactory aSeqFactory) {
-    String lang = props.getProperty("language");
-    String model = props.getProperty("model");
-    this.sequenceFactory = aSeqFactory;
-    SequenceLabelerModel seqModel = loadModel(lang, model);
-    sequenceLabeler = new SequenceLabelerME(seqModel);
+  public StatisticalSequenceLabeler(final String model, final String lang) {
+    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
-  
+
   /**
-   * Construct a StatisticalSequenceLabeler specifying the model and the
-   * factory to be used.
-   * @param model the specific model to be used.
-   * @param lang the language
-   * @param aSeqFactory the factory
+   * Construct a StatisticalSequenceLabeler specifying the factory to be used.
+   *
+   * @param props
+   *          the properties
+   * @param aSeqFactory
+   *          the name factory to construct Name objects
    */
-  public StatisticalSequenceLabeler(final String model, final String lang, final SequenceLabelFactory aSeqFactory) {
+  public StatisticalSequenceLabeler(final Properties props,
+      final SequenceLabelFactory aSeqFactory) {
+    final String lang = props.getProperty("language");
+    final String model = props.getProperty("model");
     this.sequenceFactory = aSeqFactory;
-    SequenceLabelerModel seqModel = loadModel(lang, model);
-    sequenceLabeler = new SequenceLabelerME(seqModel);
+    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
-  
+
+  /**
+   * Construct a StatisticalSequenceLabeler specifying the model and the factory
+   * to be used.
+   * 
+   * @param model
+   *          the specific model to be used.
+   * @param lang
+   *          the language
+   * @param aSeqFactory
+   *          the factory
+   */
+  public StatisticalSequenceLabeler(final String model, final String lang,
+      final SequenceLabelFactory aSeqFactory) {
+    this.sequenceFactory = aSeqFactory;
+    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    this.sequenceLabeler = new SequenceLabelerME(seqModel);
+  }
+
   /**
    * Get array of Spans from a list of tokens.
-   * @param tokens the sentence tokens
+   * 
+   * @param tokens
+   *          the sentence tokens
    * @return the array of Sequence Spans
    */
   public final Span[] seqToSpans(final String[] tokens) {
-    Span[] annotatedText = sequenceLabeler.tag(tokens);
-    List<Span> probSpans = new ArrayList<Span>(Arrays.asList(annotatedText));
+    final Span[] annotatedText = this.sequenceLabeler.tag(tokens);
+    final List<Span> probSpans = new ArrayList<Span>(
+        Arrays.asList(annotatedText));
     return probSpans.toArray(new Span[probSpans.size()]);
   }
-  
+
   public final Span[] lemmatizeToSpans(final String[] tokens) {
-    Span[] seqSpans = sequenceLabeler.tag(tokens);
+    final Span[] seqSpans = this.sequenceLabeler.tag(tokens);
     StringUtils.decodeLemmasToSpans(tokens, seqSpans);
     return seqSpans;
   }
-  
+
   public final String[] seqToStrings(final String[] tokens) {
-    String[] seqStrings = sequenceLabeler.tagToStrings(tokens);
-    String[] decodedStringSequences = sequenceLabeler.decodeSequences(seqStrings);
+    final String[] seqStrings = this.sequenceLabeler.tagToStrings(tokens);
+    final String[] decodedStringSequences = this.sequenceLabeler
+        .decodeSequences(seqStrings);
     return decodedStringSequences;
   }
 
@@ -136,89 +151,106 @@ public class StatisticalSequenceLabeler {
    * Produce a list of the {@link SequenceLabel} objects classified by the
    * probabilistic model.
    *
-   * Takes an array of tokens, calls seqToSpans function for probabilistic Sequence
-   * Labeling and returns a List of {@link SequenceLabel} objects containing the string, the
-   * type and the {@link Span}.
+   * Takes an array of tokens, calls seqToSpans function for probabilistic
+   * Sequence Labeling and returns a List of {@link SequenceLabel} objects
+   * containing the string, the type and the {@link Span}.
    *
    * @param tokens
    *          an array of tokenized text
    * @return a List of sequences
    */
   public final List<SequenceLabel> getSequences(final String[] tokens) {
-    Span[] origSpans = sequenceLabeler.tag(tokens);
-    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<SequenceLabel> sequences = getSequencesFromSpans(tokens, seqSpans);
+    final Span[] origSpans = this.sequenceLabeler.tag(tokens);
+    final Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    final List<SequenceLabel> sequences = getSequencesFromSpans(tokens,
+        seqSpans);
     return sequences;
   }
-  
+
   public final List<SequenceLabel> getLemmaSequences(final String[] tokens) {
-    Span[] origSpans = sequenceLabeler.tag(tokens);
-    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<SequenceLabel> sequences = getLemmaSequencesFromSpans(tokens, seqSpans);
+    final Span[] origSpans = this.sequenceLabeler.tag(tokens);
+    final Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    final List<SequenceLabel> sequences = getLemmaSequencesFromSpans(tokens,
+        seqSpans);
     return sequences;
   }
-  
+
   /**
    * Creates a list of {@link SequenceLabel} objects from spans and tokens.
    *
-   * @param seqSpans the sequence spans of a sentence
-   * @param tokens the tokens in the sentence
+   * @param seqSpans
+   *          the sequence spans of a sentence
+   * @param tokens
+   *          the tokens in the sentence
    * @return a list of {@link SequenceLabel} objects
    */
-  public final List<SequenceLabel> getSequencesFromSpans(final String[] tokens, final Span[] seqSpans) {
-    List<SequenceLabel> sequences = new ArrayList<SequenceLabel>();
-    for (Span seqSpan : seqSpans) {
-      String seqString = seqSpan.getCoveredText(tokens);
-      String seqType = seqSpan.getType();
-      SequenceLabel sequence = sequenceFactory.createSequence(seqString, seqType, seqSpan);
+  public final List<SequenceLabel> getSequencesFromSpans(final String[] tokens,
+      final Span[] seqSpans) {
+    final List<SequenceLabel> sequences = new ArrayList<SequenceLabel>();
+    for (final Span seqSpan : seqSpans) {
+      final String seqString = seqSpan.getCoveredText(tokens);
+      final String seqType = seqSpan.getType();
+      final SequenceLabel sequence = this.sequenceFactory
+          .createSequence(seqString, seqType, seqSpan);
       sequences.add(sequence);
     }
     return sequences;
   }
-  
-  public final List<SequenceLabel> getLemmaSequencesFromSpans(final String[] tokens, Span[] seqSpans) {
-    List<SequenceLabel> sequences = new ArrayList<>();
-    for (Span seqSpan : seqSpans) {
-      String seqString = seqSpan.getCoveredText(tokens);
-      String decodedLemma = StringUtils.decodeShortestEditScript(seqString.toLowerCase(), seqSpan.getType());
+
+  public final List<SequenceLabel> getLemmaSequencesFromSpans(
+      final String[] tokens, final Span[] seqSpans) {
+    final List<SequenceLabel> sequences = new ArrayList<>();
+    for (final Span seqSpan : seqSpans) {
+      final String seqString = seqSpan.getCoveredText(tokens);
+      final String decodedLemma = StringUtils
+          .decodeShortestEditScript(seqString.toLowerCase(), seqSpan.getType());
       seqSpan.setType(decodedLemma);
-      SequenceLabel sequence = sequenceFactory.createSequence(seqString, decodedLemma, seqSpan);
+      final SequenceLabel sequence = this.sequenceFactory
+          .createSequence(seqString, decodedLemma, seqSpan);
       sequences.add(sequence);
     }
     return sequences;
   }
-  
+
   /**
-   * Produces a multidimensional array containing all the taggings
-   * possible for a given sentence.
-   * @param tokens the tokens
+   * Produces a multidimensional array containing all the taggings possible for
+   * a given sentence.
+   * 
+   * @param tokens
+   *          the tokens
    * @return the array containing for each row the tags
    */
   public final Span[][] getAllTags(final String[] tokens) {
     final Span[][] allPosTags = this.sequenceLabeler.tag(13, tokens);
     return allPosTags;
   }
-  
+
   /**
    * Takes a sentence with multiple tags alternatives for each word and produces
    * a lemma for each of the word-tag combinations.
-   * @param tokens the sentence tokens
-   * @param posTags the alternative postags
-   * @return the ordered map containing all the possible tag#lemma values for token
+   * 
+   * @param tokens
+   *          the sentence tokens
+   * @param posTags
+   *          the alternative postags
+   * @return the ordered map containing all the possible tag#lemma values for
+   *         token
    */
-  public ListMultimap<String, String> getMultipleLemmas(String[] tokens, Span[][] posTags) {
-    
-    ListMultimap<String, String> morphMap = ArrayListMultimap.create();
-    for (int i = 0; i < posTags.length; i++) {
-      Span[] rowLemmas = this.sequenceLabeler.tag(tokens);
-      String[] decodedLemmas = StringUtils.decodeLemmas(tokens, rowLemmas);
+  public ListMultimap<String, String> getMultipleLemmas(final String[] tokens,
+      final Span[][] posTags) {
+
+    final ListMultimap<String, String> morphMap = ArrayListMultimap.create();
+    for (final Span[] posTag : posTags) {
+      final Span[] rowLemmas = this.sequenceLabeler.tag(tokens);
+      final String[] decodedLemmas = StringUtils.decodeLemmas(tokens,
+          rowLemmas);
       for (int j = 0; j < decodedLemmas.length; j++) {
-        morphMap.put(tokens[j], posTags[i][j].getType() + "#" + decodedLemmas[j]);
+        morphMap.put(tokens[j], posTag[j].getType() + "#" + decodedLemmas[j]);
       }
     }
     return morphMap;
   }
-  
+
   /**
    * Forgets all adaptive data which was collected during previous calls to one
    * of the find methods. This method is typically called at the end of a
@@ -230,32 +262,36 @@ public class StatisticalSequenceLabeler {
    * after a few documents."
    */
   public final void clearAdaptiveData() {
-    sequenceLabeler.clearAdaptiveData();
+    this.sequenceLabeler.clearAdaptiveData();
   }
 
   /**
    * Loads statically the probabilistic model. Every instance of this finder
    * will share the same model.
    *
-   * @param lang the language
-   * @param model the model to be loaded
+   * @param lang
+   *          the language
+   * @param model
+   *          the model to be loaded
    * @return the model as a {@link SequenceLabelerModel} object
    */
-  private final SequenceLabelerModel loadModel(final String lang, final String model) {
-    long lStartTime = new Date().getTime();
+  private final SequenceLabelerModel loadModel(final String lang,
+      final String model) {
+    final long lStartTime = new Date().getTime();
     try {
       synchronized (seqModels) {
-        if (!seqModels.containsKey(lang+model)) {
-          seqModels.put(lang+model, new SequenceLabelerModel(new FileInputStream(model)));
+        if (!seqModels.containsKey(lang + model)) {
+          seqModels.put(lang + model,
+              new SequenceLabelerModel(new FileInputStream(model)));
         }
       }
-    } catch (IOException e) {
+    } catch (final IOException e) {
       e.printStackTrace();
     }
-    long lEndTime = new Date().getTime();
-    long difference = lEndTime - lStartTime;
+    final long lEndTime = new Date().getTime();
+    final long difference = lEndTime - lStartTime;
     System.err.println("IXA pipes Sequence model loaded in: " + difference
         + " miliseconds ... [DONE]");
-    return seqModels.get(lang+model);
+    return seqModels.get(lang + model);
   }
 }

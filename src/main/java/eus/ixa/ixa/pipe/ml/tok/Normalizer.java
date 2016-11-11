@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 /**
  * Normalizer class for converting punctuation mostly following various corpora
  * conventions such as Penn TreeBank, Ancora, Tutpenn, Tiger and CTAG.
+ * 
  * @author ragerri
  * @version 2015-04-13
  */
@@ -47,99 +48,115 @@ public class Normalizer {
   private static final Pattern cents = Pattern.compile("\u00A2");
   private static final Pattern sterling = Pattern.compile("\u00A3");
 
-  public static final Pattern apostrophe = Pattern.compile("['\u0027\u0092\u2019]");
-  public static final Pattern leftSingleQuote = Pattern.compile("[\u0091\u201B\u2018\u2039]");
-  public static final Pattern rightSingleQuote = Pattern.compile("[\u0027\u0092\u203A\u2019]");
-  public static final Pattern leftDoubleQuote = Pattern.compile("[\u00AB\u0093\u201C]");
-  public static final Pattern rightDoubleQuote = Pattern.compile("[\u00BB\u0094\u201D]");
+  public static final Pattern apostrophe = Pattern
+      .compile("['\u0027\u0092\u2019]");
+  public static final Pattern leftSingleQuote = Pattern
+      .compile("[\u0091\u201B\u2018\u2039]");
+  public static final Pattern rightSingleQuote = Pattern
+      .compile("[\u0027\u0092\u203A\u2019]");
+  public static final Pattern leftDoubleQuote = Pattern
+      .compile("[\u00AB\u0093\u201C]");
+  public static final Pattern rightDoubleQuote = Pattern
+      .compile("[\u00BB\u0094\u201D]");
   public static final Pattern singleAsciiQuote = Pattern.compile("'|\u0027");
-  public static final Pattern invertSingleAsciiQuote = Pattern.compile("([\\p{Alpha}])([^\\p{Space}])", Pattern.UNICODE_CHARACTER_CLASS);
+  public static final Pattern invertSingleAsciiQuote = Pattern.compile(
+      "([\\p{Alpha}])([^\\p{Space}])", Pattern.UNICODE_CHARACTER_CLASS);
   public static final Pattern doubleAsciiQuote = Pattern.compile("\"");
-  public static final Pattern doubleAsciiQuoteAlphaNumeric = Pattern.compile("([\\p{Alpha}\\p{Digit}$])", Pattern.UNICODE_CHARACTER_CLASS);
+  public static final Pattern doubleAsciiQuoteAlphaNumeric = Pattern
+      .compile("([\\p{Alpha}\\p{Digit}$])", Pattern.UNICODE_CHARACTER_CLASS);
 
   public static final String TO_ASCII_SINGLE_QUOTE = "[\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039]";
-  public static final Pattern toAsciiSingleQuote = Pattern.compile("[\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039]");
-  public static final Pattern toAsciiDoubleQuote = Pattern.compile("[\u00AB\u00BB\u0093\u0094\u201C\u201D\u201E\"]");
+  public static final Pattern toAsciiSingleQuote = Pattern
+      .compile("[\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039]");
+  public static final Pattern toAsciiDoubleQuote = Pattern
+      .compile("[\u00AB\u00BB\u0093\u0094\u201C\u201D\u201E\"]");
 
   /**
-   * Converts non-unicode and other strings into their unicode
-   * counterparts.
-   * @param sentence the list of tokens
-   * @param lang the language
+   * Converts non-unicode and other strings into their unicode counterparts.
+   * 
+   * @param sentence
+   *          the list of tokens
+   * @param lang
+   *          the language
    */
   public static void convertNonCanonicalStrings(final List<Token> sentence,
       final String lang) {
     // System.err.println((int)'’');
     for (final Token token : sentence) {
-      token.setTokenValue(apostrophe.matcher(token.getTokenValue()).replaceAll(
-          "'"));
-      token.setTokenValue(ellipsis.matcher(token.getTokenValue()).replaceAll(
-          THREE_DOTS));
-      token.setTokenValue(longDash.matcher(token.getTokenValue()).replaceAll(
-          "--"));
+      token.setTokenValue(
+          apostrophe.matcher(token.getTokenValue()).replaceAll("'"));
+      token.setTokenValue(
+          ellipsis.matcher(token.getTokenValue()).replaceAll(THREE_DOTS));
+      token.setTokenValue(
+          longDash.matcher(token.getTokenValue()).replaceAll("--"));
       if (lang.equalsIgnoreCase("en")) {
-        token.setTokenValue(oneFourth.matcher(token.getTokenValue())
-            .replaceAll("1\\\\/4"));
-        token.setTokenValue(oneThird.matcher(token.getTokenValue()).replaceAll(
-            "1\\\\/3"));
-        token.setTokenValue(oneHalf.matcher(token.getTokenValue()).replaceAll(
-            "1\\\\/2"));
-        token.setTokenValue(threeQuarters.matcher(token.getTokenValue())
-            .replaceAll("3\\\\/4"));
-        token.setTokenValue(sterling.matcher(token.getTokenValue()).replaceAll(
-            "#"));
+        token.setTokenValue(
+            oneFourth.matcher(token.getTokenValue()).replaceAll("1\\\\/4"));
+        token.setTokenValue(
+            oneThird.matcher(token.getTokenValue()).replaceAll("1\\\\/3"));
+        token.setTokenValue(
+            oneHalf.matcher(token.getTokenValue()).replaceAll("1\\\\/2"));
+        token.setTokenValue(
+            threeQuarters.matcher(token.getTokenValue()).replaceAll("3\\\\/4"));
+        token.setTokenValue(
+            sterling.matcher(token.getTokenValue()).replaceAll("#"));
       }
-      token.setTokenValue(oneFourth.matcher(token.getTokenValue()).replaceAll(
-          "1/4"));
-      token.setTokenValue(oneThird.matcher(token.getTokenValue()).replaceAll(
-          "1/3"));
-      token.setTokenValue(oneHalf.matcher(token.getTokenValue()).replaceAll(
-          "1/2"));
-      token.setTokenValue(twoThirds.matcher(token.getTokenValue()).replaceAll(
-          "2/3"));
-      token.setTokenValue(threeQuarters.matcher(token.getTokenValue())
-          .replaceAll("3/4"));
-      token.setTokenValue(cents.matcher(token.getTokenValue()).replaceAll(
-          "cents"));
+      token.setTokenValue(
+          oneFourth.matcher(token.getTokenValue()).replaceAll("1/4"));
+      token.setTokenValue(
+          oneThird.matcher(token.getTokenValue()).replaceAll("1/3"));
+      token.setTokenValue(
+          oneHalf.matcher(token.getTokenValue()).replaceAll("1/2"));
+      token.setTokenValue(
+          twoThirds.matcher(token.getTokenValue()).replaceAll("2/3"));
+      token.setTokenValue(
+          threeQuarters.matcher(token.getTokenValue()).replaceAll("3/4"));
+      token.setTokenValue(
+          cents.matcher(token.getTokenValue()).replaceAll("cents"));
     }
   }
 
   /**
    * Normalizes non-ambiguous quotes according to language and corpus.
-   * @param sentence the list of tokens
-   * @param lang the language
+   * 
+   * @param sentence
+   *          the list of tokens
+   * @param lang
+   *          the language
    */
   public static void normalizeQuotes(final List<Token> sentence,
       final String lang) {
 
     for (final Token token : sentence) {
       if (lang.equalsIgnoreCase("en")) {
-        token.setTokenValue(leftSingleQuote.matcher(token.getTokenValue())
-            .replaceAll("`"));
-        token.setTokenValue(rightSingleQuote.matcher(token.getTokenValue())
-            .replaceAll("'"));
-        token.setTokenValue(leftDoubleQuote.matcher(token.getTokenValue())
-            .replaceAll("``"));
-        token.setTokenValue(rightDoubleQuote.matcher(token.getTokenValue())
-            .replaceAll("''"));
-      } else if (lang.equalsIgnoreCase("ca") || lang.equalsIgnoreCase("de") || lang.equalsIgnoreCase("es")
-          || lang.equalsIgnoreCase("eu") || lang.equalsIgnoreCase("fr")
-          || lang.equalsIgnoreCase("gl") || lang.equalsIgnoreCase("it")
-          || lang.equalsIgnoreCase("nl") || lang.equalsIgnoreCase("pt") ||
-          lang.equalsIgnoreCase("ru")) {
-        token.setTokenValue(toAsciiSingleQuote.matcher(token.getTokenValue())
-            .replaceAll("'"));
-        token.setTokenValue(toAsciiDoubleQuote.matcher(token.getTokenValue())
-            .replaceAll("\""));
+        token.setTokenValue(
+            leftSingleQuote.matcher(token.getTokenValue()).replaceAll("`"));
+        token.setTokenValue(
+            rightSingleQuote.matcher(token.getTokenValue()).replaceAll("'"));
+        token.setTokenValue(
+            leftDoubleQuote.matcher(token.getTokenValue()).replaceAll("``"));
+        token.setTokenValue(
+            rightDoubleQuote.matcher(token.getTokenValue()).replaceAll("''"));
+      } else if (lang.equalsIgnoreCase("ca") || lang.equalsIgnoreCase("de")
+          || lang.equalsIgnoreCase("es") || lang.equalsIgnoreCase("eu")
+          || lang.equalsIgnoreCase("fr") || lang.equalsIgnoreCase("gl")
+          || lang.equalsIgnoreCase("it") || lang.equalsIgnoreCase("nl")
+          || lang.equalsIgnoreCase("pt") || lang.equalsIgnoreCase("ru")) {
+        token.setTokenValue(
+            toAsciiSingleQuote.matcher(token.getTokenValue()).replaceAll("'"));
+        token.setTokenValue(
+            toAsciiDoubleQuote.matcher(token.getTokenValue()).replaceAll("\""));
       }
     }
   }
 
   /**
-   * Normalizes double and ambiguous quotes according to language
-   * and corpus.
-   * @param sentence the list of tokens
-   * @param lang the language
+   * Normalizes double and ambiguous quotes according to language and corpus.
+   * 
+   * @param sentence
+   *          the list of tokens
+   * @param lang
+   *          the language
    */
   public static void normalizeDoubleQuotes(final List<Token> sentence,
       final String lang) {
@@ -153,10 +170,8 @@ public class Normalizer {
             .matcher(sentence.get(i).getTokenValue());
         // if current token is "
         if (doubleAsciiQuoteMatcher.find()) {
-          if (isLeft
-              && i < sentence.size() - 1
-              && doubleAsciiQuoteAlphaNumeric.matcher(
-                  sentence.get(i + 1).getTokenValue()).find()) {
+          if (isLeft && i < sentence.size() - 1 && doubleAsciiQuoteAlphaNumeric
+              .matcher(sentence.get(i + 1).getTokenValue()).find()) {
             sentence.get(i).setTokenValue("``");
             isLeft = false;
           } else if (!isLeft) {

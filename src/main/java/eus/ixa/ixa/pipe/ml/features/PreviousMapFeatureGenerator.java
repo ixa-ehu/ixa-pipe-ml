@@ -24,36 +24,45 @@ import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
-
 public class PreviousMapFeatureGenerator extends CustomFeatureGenerator {
 
- private Map<String, String> previousMap = new HashMap<String, String>();
+  private final Map<String, String> previousMap = new HashMap<String, String>();
 
- public void createFeatures(List<String> features, String[] tokens, int index, String[] preds) {
-   features.add("pd=" + previousMap.get(tokens[index]));
-   if (Flags.DEBUG) {
-     System.err.println("-> " + tokens[index] + ": pd=" + previousMap.get(tokens[index]));
-   }
- }
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
+    features.add("pd=" + this.previousMap.get(tokens[index]));
+    if (Flags.DEBUG) {
+      System.err.println("-> " + tokens[index] + ": pd="
+          + this.previousMap.get(tokens[index]));
+    }
+  }
 
- /**
-  * Generates previous decision features for the token based on contents of the previous map.
-  */
- public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  /**
+   * Generates previous decision features for the token based on contents of the
+   * previous map.
+   */
+  @Override
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
 
-   for (int i = 0; i < tokens.length; i++) {
-     previousMap.put(tokens[i], outcomes[i]);
-   }
- }
- /**
-  * Clears the previous map.
-  */
- public void clearAdaptiveData() {
-   previousMap.clear();
- }
- 
- @Override
- public void init(Map<String, String> arg0, FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
- }
+    for (int i = 0; i < tokens.length; i++) {
+      this.previousMap.put(tokens[i], outcomes[i]);
+    }
+  }
+
+  /**
+   * Clears the previous map.
+   */
+  @Override
+  public void clearAdaptiveData() {
+    this.previousMap.clear();
+  }
+
+  @Override
+  public void init(final Map<String, String> arg0,
+      final FeatureGeneratorResourceProvider arg1)
+      throws InvalidFormatException {
+  }
 
 }

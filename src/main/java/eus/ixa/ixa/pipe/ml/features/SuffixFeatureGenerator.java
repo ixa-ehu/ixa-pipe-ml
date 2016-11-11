@@ -18,51 +18,52 @@ package eus.ixa.ixa.pipe.ml.features;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
-
 
 public class SuffixFeatureGenerator extends CustomFeatureGenerator {
-  
+
   private Map<String, String> attributes;
-  
-  public String[] getSuffixes(String lex) {
-    Integer start = Integer.parseInt(attributes.get("begin"));
-    Integer end = Integer.parseInt(attributes.get("end"));
-    String[] suffs = new String[end];
+
+  public String[] getSuffixes(final String lex) {
+    final Integer start = Integer.parseInt(this.attributes.get("begin"));
+    final Integer end = Integer.parseInt(this.attributes.get("end"));
+    final String[] suffs = new String[end];
     for (int i = start, l = end; i < l; i++) {
       suffs[i] = lex.substring(Math.max(lex.length() - i - 1, 0));
     }
     return suffs;
   }
-  
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    String[] suffs = getSuffixes(tokens[index]);
-    for (String suff : suffs) {
+
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+    final String[] suffs = getSuffixes(tokens[index]);
+    for (final String suff : suffs) {
       features.add("suf=" + suff);
       if (Flags.DEBUG) {
         System.err.println("-> " + tokens[index] + ": suf=" + suff);
       }
     }
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
+
   }
 
   @Override
   public void clearAdaptiveData() {
-    
+
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    attributes = properties;
+    this.attributes = properties;
   }
 }

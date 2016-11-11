@@ -38,78 +38,88 @@ import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
 /**
- * Dictionary class which reads a serialized HashMap String, String from 
- * a tab separated file name\tclass\t.
- * 
+ * Dictionary class which reads a serialized HashMap String, String from a tab
+ * separated file name\tclass\t.
+ *
  * @author ragerri
  * @version 2016-07-13
- * 
+ *
  */
 public class Dictionary implements SerializableArtifact {
-  
+
   private final static char tabDelimiter = '\t';
 
-  public static class DictionarySerializer implements ArtifactSerializer<Dictionary> {
+  public static class DictionarySerializer
+      implements ArtifactSerializer<Dictionary> {
 
-    public Dictionary create(InputStream in) throws IOException,
-        InvalidFormatException {
+    @Override
+    public Dictionary create(final InputStream in)
+        throws IOException, InvalidFormatException {
       return new Dictionary(in);
     }
 
-    public void serialize(Dictionary artifact, OutputStream out)
+    @Override
+    public void serialize(final Dictionary artifact, final OutputStream out)
         throws IOException {
       artifact.serialize(out);
     }
   }
-  
-  private Map<String, String> dictionary = new HashMap<String, String>();
 
-  public Dictionary(InputStream in) throws IOException {
+  private final Map<String, String> dictionary = new HashMap<String, String>();
 
-    BufferedReader breader = new BufferedReader(new InputStreamReader(new BufferedInputStream(in), Charset.forName("UTF-8")));
+  public Dictionary(final InputStream in) throws IOException {
+
+    final BufferedReader breader = new BufferedReader(new InputStreamReader(
+        new BufferedInputStream(in), Charset.forName("UTF-8")));
     String line;
     while ((line = breader.readLine()) != null) {
-      int index = line.indexOf(tabDelimiter);
-      String token = line.substring(0, index);
-      String tokenClass = line.substring(index + 1).intern();
-      dictionary.put(token, tokenClass);
+      final int index = line.indexOf(tabDelimiter);
+      final String token = line.substring(0, index);
+      final String tokenClass = line.substring(index + 1).intern();
+      this.dictionary.put(token, tokenClass);
     }
-    
+
   }
 
   /**
    * Look up a string in the dictionary.
-   * @param string the string to be searched
+   * 
+   * @param string
+   *          the string to be searched
    * @return the string found
    */
-  public String lookup(String string) {
-    return dictionary.get(string);
+  public String lookup(final String string) {
+    return this.dictionary.get(string);
   }
-  
+
   /**
    * Get the key,value size of the dictionary.
+   * 
    * @return maximum token count in the dictionary
    */
   public int getMaxTokenCount() {
-    return dictionary.size();
+    return this.dictionary.size();
   }
-  
+
   /**
    * Get the Map String, String dictionary.
+   * 
    * @return the dictionary map
    */
   public final Map<String, String> getDict() {
-    return dictionary;
+    return this.dictionary;
   }
-  
+
   /**
    * Performs gazetteer match in a bio encoding.
-   * @param tokens the sentence
+   * 
+   * @param tokens
+   *          the sentence
    * @return the list of named entities in the current sentence
    */
-  public List<String> getBioDictionaryMatch(String[] tokens) {
+  public List<String> getBioDictionaryMatch(final String[] tokens) {
 
-    List<String> entitiesList = new ArrayList<String>();
+    final List<String> entitiesList = new ArrayList<String>();
 
     String prefix = "-" + BioCodec.START;
     String gazEntry = null;
@@ -120,7 +130,8 @@ public class Dictionary implements SerializableArtifact {
       int j;
       // iterate over tokens from the end
       for (j = tokens.length - 1; j >= i; j--) {
-        // create span for search in dictionary Map; the first search takes as span
+        // create span for search in dictionary Map; the first search takes as
+        // span
         // the whole sentence
         searchSpan = createSpan(tokens, i, j);
         gazEntry = lookup(searchSpan.toLowerCase());
@@ -146,15 +157,17 @@ public class Dictionary implements SerializableArtifact {
     }
     return entitiesList;
   }
-  
+
   /**
    * Performs gazetteer match in a bilou encoding.
-   * @param tokens the sentence
+   * 
+   * @param tokens
+   *          the sentence
    * @return the list of named entities in the current sentence
    */
-  public List<String> getBilouDictionaryMatch(String[] tokens) {
+  public List<String> getBilouDictionaryMatch(final String[] tokens) {
 
-    List<String> entitiesList = new ArrayList<String>();
+    final List<String> entitiesList = new ArrayList<String>();
 
     String prefix = "-" + BilouCodec.START;
     String gazClass = null;
@@ -165,7 +178,8 @@ public class Dictionary implements SerializableArtifact {
       int j;
       // iterate over tokens from the end
       for (j = tokens.length - 1; j >= i; j--) {
-        // create span for search in dictionary Map; the first search takes as span
+        // create span for search in dictionary Map; the first search takes as
+        // span
         // the whole sentence
         searchSpan = createSpan(tokens, i, j);
         gazClass = lookup(searchSpan.toLowerCase());
@@ -188,22 +202,27 @@ public class Dictionary implements SerializableArtifact {
           entitiesList.add((gazClass + "-" + BilouCodec.UNIT).intern());
         } else if (prefix.equals("-" + BilouCodec.CONTINUE)) {
           entitiesList.add((gazClass + "-" + BilouCodec.LAST).intern());
-        }       
+        }
       } else {
         entitiesList.add(BilouCodec.OTHER);
       }
     }
     return entitiesList;
   }
-  
+
   /**
    * Create a multi token entry search in the dictionary Map.
-   * @param tokens the sentence
-   * @param from the start index
-   * @param to the end index
+   * 
+   * @param tokens
+   *          the sentence
+   * @param from
+   *          the start index
+   * @param to
+   *          the end index
    * @return the string representing the possibly multi token entity
    */
-  private String createSpan(String[] tokens, int from, int to) {
+  private String createSpan(final String[] tokens, final int from,
+      final int to) {
     String tokenSpan = "";
     for (int i = from; i < to; i++) {
       tokenSpan += tokens[i] + " ";
@@ -212,14 +231,17 @@ public class Dictionary implements SerializableArtifact {
     return tokenSpan;
   }
 
-  public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out, "UTF-8"));
-    for (Map.Entry<String, String> entry : dictionary.entrySet()) {
-      writer.write(entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue() + "\n");
+  public void serialize(final OutputStream out) throws IOException {
+    final Writer writer = new BufferedWriter(
+        new OutputStreamWriter(out, "UTF-8"));
+    for (final Map.Entry<String, String> entry : this.dictionary.entrySet()) {
+      writer.write(
+          entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue() + "\n");
     }
     writer.flush();
   }
 
+  @Override
   public Class<?> getArtifactSerializerClass() {
     return DictionarySerializer.class;
   }

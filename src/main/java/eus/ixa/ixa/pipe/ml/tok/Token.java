@@ -19,7 +19,7 @@ package eus.ixa.ixa.pipe.ml.tok;
  * A <code>Token</code> object contains a single String, a startOffset and the
  * length of the String. These attributes are set or returned in response to
  * requests.
- * 
+ *
  * @author ragerri
  * @version 2015-04-14
  */
@@ -45,12 +45,12 @@ public class Token {
   }
 
   public Token(final String str) {
-    token = str;
+    this.token = str;
   }
 
   /**
    * Creates a new <code>Token</code> with the given content.
-   * 
+   *
    * @param str
    *          The new token's value
    * @param startOffset
@@ -59,60 +59,66 @@ public class Token {
    *          End offset in original text
    */
   public Token(final String str, final int startOffset, final int tokenLength) {
-    token = str;
+    this.token = str;
     setStartOffset(startOffset);
     setTokenLength(tokenLength);
   }
 
   public String getTokenValue() {
-    return token;
+    return this.token;
   }
 
   /**
    * Set the value for the token.
-   * 
+   *
    * @param value
    *          The value for the token
    */
   public void setTokenValue(final String value) {
-    token = value;
+    this.token = value;
   }
 
   @Override
   public String toString() {
-    return token;
+    return this.token;
   }
 
   /**
    * Get the token starting offset.
+   * 
    * @return the offset
    */
   public int startOffset() {
-    return startOffset;
+    return this.startOffset;
   }
 
   /**
    * Get the token length.
+   * 
    * @return the length
    */
   public int tokenLength() {
-    return tokenLength;
+    return this.tokenLength;
   }
 
   /**
    * Set the token offset.
-   * @param beginPosition the startOffset
+   * 
+   * @param beginPosition
+   *          the startOffset
    */
   public void setStartOffset(final int beginPosition) {
-    startOffset = beginPosition;
+    this.startOffset = beginPosition;
   }
 
   /**
    * Set the length of the token.
-   * @param tokLength the length
+   * 
+   * @param tokLength
+   *          the length
    */
   public void setTokenLength(final int tokLength) {
-    tokenLength = tokLength;
+    this.tokenLength = tokLength;
   }
 
 }

@@ -21,51 +21,55 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
+import eus.ixa.ixa.pipe.ml.utils.Flags;
+import eus.ixa.ixa.pipe.ml.utils.Span;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
-import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
  * This feature generator can also be placed in a sliding window.
+ * 
  * @author ragerri
  * @version 2015-03-12
  */
-public class POSTagModelFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
-  
+public class POSTagModelFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
+
   private SequenceModelResource posModelResource;
   private String[] currentSentence;
   private Span[] currentTags;
   private boolean isPos;
   private boolean isPosClass;
-  
+
   public POSTagModelFeatureGenerator() {
   }
-  
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    
-    //cache annotations for each sentence
-    if (currentSentence != tokens) {
-      currentSentence = tokens;
-      currentTags = posModelResource.seqToSpans(tokens);
+
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+
+    // cache annotations for each sentence
+    if (this.currentSentence != tokens) {
+      this.currentSentence = tokens;
+      this.currentTags = this.posModelResource.seqToSpans(tokens);
     }
-    String posTag = currentTags[index].getType();
-    if (isPos) {
+    final String posTag = this.currentTags[index].getType();
+    if (this.isPos) {
       features.add("posTag=" + posTag);
     }
-    if (isPosClass) {
-      String posTagClass = posTag.substring(0, 1);
+    if (this.isPosClass) {
+      final String posTagClass = posTag.substring(0, 1);
       features.add("posTagClass=" + posTagClass);
     }
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
   }
 
   @Override
@@ -73,40 +77,42 @@ public class POSTagModelFeatureGenerator extends CustomFeatureGenerator implemen
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    Object posResource = resourceProvider.getResource(properties.get("model"));
+    final Object posResource = resourceProvider
+        .getResource(properties.get("model"));
     if (!(posResource instanceof SequenceModelResource)) {
-      throw new InvalidFormatException("Not a SequenceModelResource for key: " + properties.get("model"));
+      throw new InvalidFormatException(
+          "Not a SequenceModelResource for key: " + properties.get("model"));
     }
     this.posModelResource = (SequenceModelResource) posResource;
     processRangeOptions(properties);
   }
-  
+
   /**
    * Process the options of which kind of features are to be generated.
-   * @param properties the properties map
+   * 
+   * @param properties
+   *          the properties map
    */
-  private void processRangeOptions(Map<String, String> properties) {
-    String featuresRange = properties.get("range");
-    String[] rangeArray = Flags.processPOSTagModelFeaturesRange(featuresRange);
+  private void processRangeOptions(final Map<String, String> properties) {
+    final String featuresRange = properties.get("range");
+    final String[] rangeArray = Flags
+        .processPOSTagModelFeaturesRange(featuresRange);
     if (rangeArray[0].equalsIgnoreCase("pos")) {
-      isPos = true;
+      this.isPos = true;
     }
     if (rangeArray[1].equalsIgnoreCase("posclass")) {
-      isPosClass = true;
+      this.isPosClass = true;
     }
   }
-  
-  
+
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("seqmodelserializer", new SequenceModelResource.SequenceModelResourceSerializer());
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    mapping.put("seqmodelserializer",
+        new SequenceModelResource.SequenceModelResourceSerializer());
     return Collections.unmodifiableMap(mapping);
   }
 }
-
-
-

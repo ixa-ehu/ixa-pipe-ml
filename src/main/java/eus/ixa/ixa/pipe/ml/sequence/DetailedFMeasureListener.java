@@ -28,42 +28,43 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import eus.ixa.ixa.pipe.ml.utils.Span;
-
 import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
- * This listener will gather detailed information about the sample under evaluation and will
- * allow detailed FMeasure for each outcome.
+ * This listener will gather detailed information about the sample under
+ * evaluation and will allow detailed FMeasure for each outcome.
  * <p>
  * <b>Note:</b> Do not use this class, internal use only!
  */
-public abstract class DetailedFMeasureListener<T> implements
-    EvaluationMonitor<T> {
+public abstract class DetailedFMeasureListener<T>
+    implements EvaluationMonitor<T> {
 
   private int samples = 0;
-  private Stats generalStats = new Stats();
-  private Map<String, Stats> statsForOutcome = new HashMap<String, Stats>();
+  private final Stats generalStats = new Stats();
+  private final Map<String, Stats> statsForOutcome = new HashMap<String, Stats>();
 
   protected abstract Span[] asSpanArray(T sample);
 
-  public void correctlyClassified(T reference, T prediction) {
-    samples++;
+  @Override
+  public void correctlyClassified(final T reference, final T prediction) {
+    this.samples++;
     // add all true positives!
-    Span[] spans = asSpanArray(reference);
-    for (Span span : spans) {
+    final Span[] spans = asSpanArray(reference);
+    for (final Span span : spans) {
       addTruePositive(span.getType());
     }
   }
 
-  public void missclassified(T reference, T prediction) {
-    samples++;
-    Span[] references = asSpanArray(reference);
-    Span[] predictions = asSpanArray(prediction);
+  @Override
+  public void missclassified(final T reference, final T prediction) {
+    this.samples++;
+    final Span[] references = asSpanArray(reference);
+    final Span[] predictions = asSpanArray(prediction);
 
-    Set<Span> refSet = new HashSet<Span>(Arrays.asList(references));
-    Set<Span> predSet = new HashSet<Span>(Arrays.asList(predictions));
+    final Set<Span> refSet = new HashSet<Span>(Arrays.asList(references));
+    final Set<Span> predSet = new HashSet<Span>(Arrays.asList(predictions));
 
-    for (Span ref : refSet) {
+    for (final Span ref : refSet) {
       if (predSet.contains(ref)) {
         addTruePositive(ref.getType());
       } else {
@@ -71,40 +72,40 @@ public abstract class DetailedFMeasureListener<T> implements
       }
     }
 
-    for (Span pred : predSet) {
+    for (final Span pred : predSet) {
       if (!refSet.contains(pred)) {
         addFalsePositive(pred.getType());
       }
     }
   }
 
-  private void addTruePositive(String type) {
-    Stats s = initStatsForOutcomeAndGet(type);
+  private void addTruePositive(final String type) {
+    final Stats s = initStatsForOutcomeAndGet(type);
     s.incrementTruePositive();
     s.incrementTarget();
 
-    generalStats.incrementTruePositive();
-    generalStats.incrementTarget();
+    this.generalStats.incrementTruePositive();
+    this.generalStats.incrementTarget();
   }
 
-  private void addFalsePositive(String type) {
-    Stats s = initStatsForOutcomeAndGet(type);
+  private void addFalsePositive(final String type) {
+    final Stats s = initStatsForOutcomeAndGet(type);
     s.incrementFalsePositive();
-    generalStats.incrementFalsePositive();
+    this.generalStats.incrementFalsePositive();
   }
 
-  private void addFalseNegative(String type) {
-    Stats s = initStatsForOutcomeAndGet(type);
+  private void addFalseNegative(final String type) {
+    final Stats s = initStatsForOutcomeAndGet(type);
     s.incrementTarget();
-    generalStats.incrementTarget();
+    this.generalStats.incrementTarget();
 
   }
 
-  private Stats initStatsForOutcomeAndGet(String type) {
-    if (!statsForOutcome.containsKey(type)) {
-      statsForOutcome.put(type, new Stats());
+  private Stats initStatsForOutcomeAndGet(final String type) {
+    if (!this.statsForOutcome.containsKey(type)) {
+      this.statsForOutcome.put(type, new Stats());
     }
-    return statsForOutcome.get(type);
+    return this.statsForOutcome.get(type);
   }
 
   private static final String PERCENT = "%\u00207.2f%%";
@@ -117,30 +118,31 @@ public abstract class DetailedFMeasureListener<T> implements
     return createReport(Locale.getDefault());
   }
 
-  public String createReport(Locale locale) {
-    StringBuilder ret = new StringBuilder();
-    int tp = generalStats.getTruePositives();
-    int found = generalStats.getFalsePositives() + tp;
-    ret.append("Evaluated " + samples + " samples with "
-        + generalStats.getTarget() + " entities; found: " + found
+  public String createReport(final Locale locale) {
+    final StringBuilder ret = new StringBuilder();
+    final int tp = this.generalStats.getTruePositives();
+    final int found = this.generalStats.getFalsePositives() + tp;
+    ret.append("Evaluated " + this.samples + " samples with "
+        + this.generalStats.getTarget() + " entities; found: " + found
         + " entities; correct: " + tp + ".\n");
 
     ret.append(String.format(locale, FORMAT, "TOTAL",
-        zeroOrPositive(generalStats.getPrecisionScore() * 100),
-        zeroOrPositive(generalStats.getRecallScore() * 100),
-        zeroOrPositive(generalStats.getFMeasure() * 100)));
+        zeroOrPositive(this.generalStats.getPrecisionScore() * 100),
+        zeroOrPositive(this.generalStats.getRecallScore() * 100),
+        zeroOrPositive(this.generalStats.getFMeasure() * 100)));
     ret.append("\n");
-    SortedSet<String> set = new TreeSet<String>(new F1Comparator());
-    set.addAll(statsForOutcome.keySet());
-    for (String type : set) {
+    final SortedSet<String> set = new TreeSet<String>(new F1Comparator());
+    set.addAll(this.statsForOutcome.keySet());
+    for (final String type : set) {
 
       ret.append(String.format(locale, FORMAT_EXTRA, type,
-          zeroOrPositive(statsForOutcome.get(type).getPrecisionScore() * 100),
-          zeroOrPositive(statsForOutcome.get(type).getRecallScore() * 100),
-          zeroOrPositive(statsForOutcome.get(type).getFMeasure() * 100),
-          statsForOutcome.get(type).getTarget(), statsForOutcome.get(type)
-              .getTruePositives(), statsForOutcome.get(type)
-              .getFalsePositives()));
+          zeroOrPositive(
+              this.statsForOutcome.get(type).getPrecisionScore() * 100),
+          zeroOrPositive(this.statsForOutcome.get(type).getRecallScore() * 100),
+          zeroOrPositive(this.statsForOutcome.get(type).getFMeasure() * 100),
+          this.statsForOutcome.get(type).getTarget(),
+          this.statsForOutcome.get(type).getTruePositives(),
+          this.statsForOutcome.get(type).getFalsePositives()));
       ret.append("\n");
     }
 
@@ -152,7 +154,7 @@ public abstract class DetailedFMeasureListener<T> implements
     return createReport();
   }
 
-  private double zeroOrPositive(double v) {
+  private double zeroOrPositive(final double v) {
     if (v < 0) {
       return 0;
     }
@@ -160,23 +162,30 @@ public abstract class DetailedFMeasureListener<T> implements
   }
 
   private class F1Comparator implements Comparator<String> {
-    public int compare(String o1, String o2) {
-      if (o1.equals(o2))
+    @Override
+    public int compare(final String o1, final String o2) {
+      if (o1.equals(o2)) {
         return 0;
+      }
       double t1 = 0;
       double t2 = 0;
 
-      if (statsForOutcome.containsKey(o1))
-        t1 += statsForOutcome.get(o1).getFMeasure();
-      if (statsForOutcome.containsKey(o2))
-        t2 += statsForOutcome.get(o2).getFMeasure();
+      if (DetailedFMeasureListener.this.statsForOutcome.containsKey(o1)) {
+        t1 += DetailedFMeasureListener.this.statsForOutcome.get(o1)
+            .getFMeasure();
+      }
+      if (DetailedFMeasureListener.this.statsForOutcome.containsKey(o2)) {
+        t2 += DetailedFMeasureListener.this.statsForOutcome.get(o2)
+            .getFMeasure();
+      }
 
       t1 = zeroOrPositive(t1);
       t2 = zeroOrPositive(t2);
 
       if (t1 + t2 > 0d) {
-        if (t1 > t2)
+        if (t1 > t2) {
           return -1;
+        }
         return 1;
       }
       return o1.compareTo(o2);
@@ -197,27 +206,27 @@ public abstract class DetailedFMeasureListener<T> implements
     private int targetCounter = 0;
 
     public void incrementFalsePositive() {
-      falsePositiveCounter++;
+      this.falsePositiveCounter++;
     }
 
     public void incrementTruePositive() {
-      truePositiveCounter++;
+      this.truePositiveCounter++;
     }
 
     public void incrementTarget() {
-      targetCounter++;
+      this.targetCounter++;
     }
 
     public int getFalsePositives() {
-      return falsePositiveCounter;
+      return this.falsePositiveCounter;
     }
 
     public int getTruePositives() {
-      return truePositiveCounter;
+      return this.truePositiveCounter;
     }
 
     public int getTarget() {
-      return targetCounter;
+      return this.targetCounter;
     }
 
     /**
@@ -227,8 +236,8 @@ public abstract class DetailedFMeasureListener<T> implements
      * @return the arithmetic mean of all precision scores
      */
     public double getPrecisionScore() {
-      int tp = getTruePositives();
-      int selected = tp + getFalsePositives();
+      final int tp = getTruePositives();
+      final int selected = tp + getFalsePositives();
       return selected > 0 ? (double) tp / (double) selected : 0;
     }
 
@@ -239,8 +248,8 @@ public abstract class DetailedFMeasureListener<T> implements
      * @return the arithmetic mean of all recall scores
      */
     public double getRecallScore() {
-      int target = getTarget();
-      int tp = getTruePositives();
+      final int target = getTarget();
+      final int tp = getTruePositives();
       return target > 0 ? (double) tp / (double) target : 0;
     }
 
@@ -265,4 +274,3 @@ public abstract class DetailedFMeasureListener<T> implements
   }
 
 }
-

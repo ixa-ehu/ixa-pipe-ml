@@ -31,37 +31,40 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.model.ArtifactSerializer;
-import opennlp.tools.util.model.SerializableArtifact;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.model.ArtifactSerializer;
+import opennlp.tools.util.model.SerializableArtifact;
 
 /**
- * Lemmatize by simple dictionary lookup into a serialized hashmap built from a file
- * containing, for each line, word\tablemma\tabpostag.
- * 
+ * Lemmatize by simple dictionary lookup into a serialized hashmap built from a
+ * file containing, for each line, word\tablemma\tabpostag.
+ *
  * @author ragerri
  * @version 2016-07-19
  */
 public class DictionaryLemmatizer implements SerializableArtifact {
-  
-  private final static char tabDelimiter = '\t';
-  
-  public static class DictionaryLemmatizerSerializer implements ArtifactSerializer<DictionaryLemmatizer> {
 
-    public DictionaryLemmatizer create(InputStream in) throws IOException,
-        InvalidFormatException {
+  private final static char tabDelimiter = '\t';
+
+  public static class DictionaryLemmatizerSerializer
+      implements ArtifactSerializer<DictionaryLemmatizer> {
+
+    @Override
+    public DictionaryLemmatizer create(final InputStream in)
+        throws IOException, InvalidFormatException {
       return new DictionaryLemmatizer(in);
     }
 
-    public void serialize(DictionaryLemmatizer artifact, OutputStream out)
-        throws IOException {
+    @Override
+    public void serialize(final DictionaryLemmatizer artifact,
+        final OutputStream out) throws IOException {
       artifact.serialize(out);
     }
   }
-  
+
   /**
    * The hashmap containing the dictionary.
    */
@@ -70,26 +73,29 @@ public class DictionaryLemmatizer implements SerializableArtifact {
 
   /**
    * Construct a hashmap from the input tab separated dictionary.
-   * 
+   *
    * The input file should have, for each line, word\tablemma\tabpostag
-   * 
+   *
    * @param in
    *          the input dictionary via inputstream
-   * @throws IOException if io problems
+   * @throws IOException
+   *           if io problems
    */
   public DictionaryLemmatizer(final InputStream in) throws IOException {
-    
-    BufferedReader breader = new BufferedReader(new InputStreamReader(new BufferedInputStream(in), Charset.forName("UTF-8")));
+
+    final BufferedReader breader = new BufferedReader(new InputStreamReader(
+        new BufferedInputStream(in), Charset.forName("UTF-8")));
     String line;
     while ((line = breader.readLine()) != null) {
-      StringUtils.splitLine(line, tabDelimiter, splitted);
-      dictMap.put(Arrays.asList(splitted[0], splitted[2]), splitted[1]);
+      StringUtils.splitLine(line, tabDelimiter, this.splitted);
+      this.dictMap.put(Arrays.asList(this.splitted[0], this.splitted[2]),
+          this.splitted[1]);
     }
   }
 
   /**
    * Get the Map containing the dictionary.
-   * 
+   *
    * @return dictMap the Map
    */
   public Map<List<String>, String> getDictMap() {
@@ -98,7 +104,7 @@ public class DictionaryLemmatizer implements SerializableArtifact {
 
   /**
    * Get the dictionary keys (word and postag).
-   * 
+   *
    * @param word
    *          the surface form word
    * @param postag
@@ -110,19 +116,22 @@ public class DictionaryLemmatizer implements SerializableArtifact {
     keys.addAll(Arrays.asList(word.toLowerCase(), postag));
     return keys;
   }
-  
+
   public List<String> lemmatize(final String[] tokens, final Span[] postags) {
-    List<String> lemmas = new ArrayList<String>();
+    final List<String> lemmas = new ArrayList<String>();
     for (int i = 0; i < tokens.length; i++) {
-      lemmas.add(this.apply(tokens[i], postags[i].getType())); 
+      lemmas.add(this.apply(tokens[i], postags[i].getType()));
     }
     return lemmas;
   }
 
   /**
    * Lookup lemma in a dictionary. Outputs "O" if not found.
-   * @param word the token
-   * @param postag the postag
+   * 
+   * @param word
+   *          the token
+   * @param postag
+   *          the postag
    * @return the lemma
    */
   public String apply(final String word, final String postag) {
@@ -137,19 +146,22 @@ public class DictionaryLemmatizer implements SerializableArtifact {
     }
     return lemma;
   }
-  
-  public void serialize(OutputStream out) throws IOException {
-    
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-    for (Map.Entry<List<String>, String> entry : dictMap.entrySet()) {
-      writer.write(entry.getKey().get(0) + IOUtils.TAB_DELIMITER + entry.getValue() + IOUtils.TAB_DELIMITER + entry.getKey().get(1) +"\n");
+
+  public void serialize(final OutputStream out) throws IOException {
+
+    final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    for (final Map.Entry<List<String>, String> entry : this.dictMap
+        .entrySet()) {
+      writer.write(
+          entry.getKey().get(0) + IOUtils.TAB_DELIMITER + entry.getValue()
+              + IOUtils.TAB_DELIMITER + entry.getKey().get(1) + "\n");
     }
     writer.flush();
   }
 
+  @Override
   public Class<?> getArtifactSerializerClass() {
     return DictionaryLemmatizerSerializer.class;
   }
-  
-}
 
+}

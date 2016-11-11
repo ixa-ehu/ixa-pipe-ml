@@ -25,44 +25,61 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 /**
  * Adds fivegram features based on tokens and token class using
  * {@code TokenClassFeatureGenerator}.
- * 
+ *
  * @author ragerri
- * 
+ *
  */
 public class FivegramClassFeatureGenerator extends CustomFeatureGenerator {
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    String wc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index]);
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+    final String wc = TokenClassFeatureGenerator
+        .tokenShapeFeature(tokens[index]);
     // fivegram features
     if (index > 3) {
-      features.add("ppppw,pppw,ppw,pw,w=" + tokens[index - 4] + "," + tokens[index - 3] + "," + tokens[index - 2] + "," + tokens[index - 1] + "," + tokens[index]);
-      String pwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 1]);
-      String ppwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 2]);
-      String pppwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 3]);
-      String ppppwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 4]);
-      features.add("pppwc,ppwc,pwc,wc=" + ppppwc + "," + pppwc + "," + ppwc + "," + pwc + "," + wc);
+      features.add("ppppw,pppw,ppw,pw,w=" + tokens[index - 4] + ","
+          + tokens[index - 3] + "," + tokens[index - 2] + ","
+          + tokens[index - 1] + "," + tokens[index]);
+      final String pwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 1]);
+      final String ppwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 2]);
+      final String pppwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 3]);
+      final String ppppwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 4]);
+      features.add("pppwc,ppwc,pwc,wc=" + ppppwc + "," + pppwc + "," + ppwc
+          + "," + pwc + "," + wc);
     }
     if (index + 4 < tokens.length) {
-      features.add("w,nw,nnw,nnnw,nnnnw=" + tokens[index] + "," + tokens[index + 1] + "," + tokens[index + 2] + "," + tokens[index + 3] + "," + tokens[index + 4]);
-      String nwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 1]);
-      String nnwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 2]);
-      String nnnwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 3]);
-      String nnnnwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 4]);
-      features.add("wc,nwc,nnwc,nnnwc=" + wc + "," + nwc + "," + nnwc + "," + nnnwc + "," + nnnnwc);
+      features.add("w,nw,nnw,nnnw,nnnnw=" + tokens[index] + ","
+          + tokens[index + 1] + "," + tokens[index + 2] + ","
+          + tokens[index + 3] + "," + tokens[index + 4]);
+      final String nwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 1]);
+      final String nnwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 2]);
+      final String nnnwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 3]);
+      final String nnnnwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 4]);
+      features.add("wc,nwc,nnwc,nnnwc=" + wc + "," + nwc + "," + nnwc + ","
+          + nnnwc + "," + nnnnwc);
     }
   }
-  
+
   @Override
   public void clearAdaptiveData() {
   }
 
   @Override
-  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  public void updateAdaptiveData(final String[] arg0, final String[] arg1) {
   }
 
   @Override
-  public void init(Map<String, String> arg0,
-      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
-  } 
+  public void init(final Map<String, String> arg0,
+      final FeatureGeneratorResourceProvider arg1)
+      throws InvalidFormatException {
+  }
 }

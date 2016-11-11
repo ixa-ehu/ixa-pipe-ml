@@ -26,7 +26,7 @@ import java.util.HashMap;
  * POS tag by simple dictionary lookup into a hashmap built from a file
  * containing, for each line, word\tablemma\tabpostag. This is originally
  * thought to work with monosemic dictionaries.
- * 
+ *
  * @author ragerri
  * @version 2016-04-20
  */
@@ -39,16 +39,16 @@ public class SimpleDictionaryTagger implements DictionaryTagger {
 
   /**
    * Construct a hashmap from the input tab separated dictionary.
-   * 
+   *
    * The input file should have, for each line, word\tablemma\tabpostag
-   * 
+   *
    * @param dictionary
    *          the input dictionary via inputstream
    */
   public SimpleDictionaryTagger(final InputStream dictionary) {
     this.dictMap = new HashMap<String, String>();
-    final BufferedReader breader = new BufferedReader(new InputStreamReader(
-        dictionary));
+    final BufferedReader breader = new BufferedReader(
+        new InputStreamReader(dictionary));
     String line;
     try {
       while ((line = breader.readLine()) != null) {
@@ -62,10 +62,11 @@ public class SimpleDictionaryTagger implements DictionaryTagger {
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see es.ehu.si.ixa.ixa.pipe.pos.dict.DictionaryTagger#tag(java.lang.String,
    * java.lang.String)
    */
+  @Override
   public String tag(final String word, final String postag) {
     // lookup postag as value of the map
     String newPosTag = this.dictMap.get(word.toLowerCase());

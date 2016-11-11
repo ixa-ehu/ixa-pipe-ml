@@ -16,6 +16,7 @@
  */
 
 package eus.ixa.ixa.pipe.ml.parse;
+
 /**
  * Class to hold feature information about a specific parse node.
  */
@@ -26,7 +27,8 @@ public class Cons {
   final int index;
   final boolean unigram;
 
-  public Cons(String cons, String consbo, int index, boolean unigram) {
+  public Cons(final String cons, final String consbo, final int index,
+      final boolean unigram) {
     this.cons = cons;
     this.consbo = consbo;
     this.index = index;

@@ -18,7 +18,7 @@ package eus.ixa.ixa.pipe.ml.parse;
 
 /**
  * HeadFinder interface.
- * 
+ *
  * @author ragerri
  * @version 2015-05-05
  */
@@ -27,7 +27,7 @@ public interface HeadFinder {
   /**
    * Reads a Parse object and adds the heads for each constituent following some
    * head rules.
-   * 
+   *
    * @param parse
    *          the parse object
    */

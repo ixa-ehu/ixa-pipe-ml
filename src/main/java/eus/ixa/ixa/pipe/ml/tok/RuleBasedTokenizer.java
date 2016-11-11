@@ -22,32 +22,33 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-
 /**
- * This class provides a multilingual rule based tokenizer. The
- * input of the tokenizer must be a list of already segmented
- * sentences. Additionally, the tokenizer normalizes according
- * to language and corpus.
+ * This class provides a multilingual rule based tokenizer. The input of the
+ * tokenizer must be a list of already segmented sentences. Additionally, the
+ * tokenizer normalizes according to language and corpus.
  *
  * @author ragerri
  * @version 2015-04-14
- * 
+ *
  */
 public class RuleBasedTokenizer implements Tokenizer {
 
   /**
    * Unicode replacement character.
    */
-  public static Pattern replacement = Pattern.compile("\uFFFD", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern replacement = Pattern.compile("\uFFFD",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Non printable control characters.
    */
-  public static Pattern asciiHex = Pattern.compile("[\u0000-\u0020\u007F-\u00A0]", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern asciiHex = Pattern
+      .compile("[\u0000-\u0020\u007F-\u00A0]", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Non printable punctuation characters.
    */
-  public static Pattern generalBlankPunctuation = Pattern.compile("[\u2000-\u200F\u2028-\u202F\u205F-\u206F]", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern generalBlankPunctuation = Pattern.compile(
+      "[\u2000-\u200F\u2028-\u202F\u205F-\u206F]",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * One or more spaces.
    */
@@ -55,10 +56,9 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * Tokenize everything but these characters.
    */
-  public static Pattern specials = Pattern
-      .compile(
-          "([^\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039])",
-          Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern specials = Pattern.compile(
+      "([^\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039])",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Question and exclamation marks (do not separate if multiple).
    */
@@ -109,13 +109,14 @@ public class RuleBasedTokenizer implements Tokenizer {
    */
   public static Pattern wrongLink = Pattern.compile(
       "((http|ftp)\\s:\\s//\\s*[\\s\\p{Alpha}\\p{Digit}+&@#/%?=~_|!:,.;-]+("
-          + TLD + "))", Pattern.UNICODE_CHARACTER_CLASS);
+          + TLD + "))",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Re-tokenize beginning of link.
    */
   public static Pattern beginLink = Pattern
       .compile("(http|ftp)(\\s:\\s)(/\\s*/\\s*)");
-  
+
   public static Pattern endLink = Pattern.compile("(" + TLD + ")\\s+(/)");
   /**
    * No alphabetic apostrophe and no alphabetic.
@@ -126,27 +127,27 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * Non alpha, digit, apostrophe and alpha.
    */
-  public static Pattern noAlphaDigitAposAlpha = Pattern.compile(
-      "([^\\p{Alpha}\\d])(" + Normalizer.TO_ASCII_SINGLE_QUOTE
+  public static Pattern noAlphaDigitAposAlpha = Pattern
+      .compile("([^\\p{Alpha}\\d])(" + Normalizer.TO_ASCII_SINGLE_QUOTE
           + ")(\\p{Alpha})", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Alphabetic apostrophe and non alpha.
    */
-  public static Pattern alphaAposNonAlpha = Pattern.compile("(\\p{Alpha})("
-      + Normalizer.TO_ASCII_SINGLE_QUOTE + ")([^\\p{Alpha}])",
+  public static Pattern alphaAposNonAlpha = Pattern.compile(
+      "(\\p{Alpha})(" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")([^\\p{Alpha}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Alphabetic apostrophe and alphabetic. Mostly for romance languages
    * separation.
    */
-  public static Pattern AlphaAposAlpha = Pattern.compile("(\\p{Alpha})("
-      + Normalizer.TO_ASCII_SINGLE_QUOTE + ")(\\p{Alpha})",
+  public static Pattern AlphaAposAlpha = Pattern.compile(
+      "(\\p{Alpha})(" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")(\\p{Alpha})",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Split English negative contractions.
    */
-  public static Pattern englishNegations = Pattern.compile("(\\p{Alpha})(n"
-      + Normalizer.TO_ASCII_SINGLE_QUOTE + ")([t])",
+  public static Pattern englishNegations = Pattern.compile(
+      "(\\p{Alpha})(n" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")([t])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Split English apostrophes.
@@ -157,23 +158,25 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * Digit apostrophe and s (for 1990's).
    */
-  public static Pattern yearApos = Pattern.compile("([\\p{Digit}])("
-      + Normalizer.TO_ASCII_SINGLE_QUOTE + ")([s])",
+  public static Pattern yearApos = Pattern.compile(
+      "([\\p{Digit}])(" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")([s])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Tokenize apostrophes occurring at the end of the string.
    */
-  public static Pattern endOfSentenceApos = Pattern.compile("([^\\p{Alpha}])("
-      + Normalizer.TO_ASCII_SINGLE_QUOTE + ")$");
+  public static Pattern endOfSentenceApos = Pattern
+      .compile("([^\\p{Alpha}])(" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")$");
   /**
    * Detokenize wrongly tokenize n't English contractions.
    */
-  public static Pattern deTokenEnglishNegation = Pattern.compile("([n])(" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")\\s+([t])", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern deTokenEnglishNegation = Pattern.compile(
+      "([n])(" + Normalizer.TO_ASCII_SINGLE_QUOTE + ")\\s+([t])",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * De-tokenize paragraph marks.
    */
-  public static Pattern detokenParagraphs = Pattern.compile(
-      "(\u00B6)[\\ ]*(\u00B6)", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern detokenParagraphs = Pattern
+      .compile("(\u00B6)[\\ ]*(\u00B6)", Pattern.UNICODE_CHARACTER_CLASS);
 
   private static boolean DEBUG = false;
 
@@ -185,35 +188,36 @@ public class RuleBasedTokenizer implements Tokenizer {
 
   /**
    * Construct a rule based tokenizer.
-   * 
+   *
    * @param text
    *          the the breader used for offset calculation
    * @param properties
    *          the options
    */
   public RuleBasedTokenizer(final String text, final Properties properties) {
-    lang = properties.getProperty("language");
+    this.lang = properties.getProperty("language");
     printUntokenizable(properties);
-    nonBreaker = new NonPeriodBreaker(properties);
-    tokenFactory = new TokenFactory();
+    this.nonBreaker = new NonPeriodBreaker(properties);
+    this.tokenFactory = new TokenFactory();
     // TODO improve this
-    originalText = text;
+    this.originalText = text;
   }
 
   /*
    * (non-Javadoc)
-   * 
+   *
    * @see eus.ixa.ixa.pipe.tok.Tokenizer#tokenize(java.lang.String[])
    */
+  @Override
   public List<List<Token>> tokenize(final String[] sentences) {
     final long start = System.nanoTime();
     int noTokens = 0;
     int prevIndex = 0;
     int curIndex = 0;
-    final String language = lang;
+    final String language = this.lang;
     final List<List<Token>> result = new ArrayList<List<Token>>();
     // TODO improve this
-    final String offsetText = originalText;
+    final String offsetText = this.originalText;
     for (final String sentence : sentences) {
       if (DEBUG) {
         System.err.println("-> Segmented:" + sentence);
@@ -226,9 +230,9 @@ public class RuleBasedTokenizer implements Tokenizer {
         if (curIndex == -1) {
           curIndex = prevIndex + 1;
         }
-        final Token curToken = tokenFactory.createToken(arrayToken, curIndex,
-            arrayToken.length());
-        //exceptions to WFs
+        final Token curToken = this.tokenFactory.createToken(arrayToken,
+            curIndex, arrayToken.length());
+        // exceptions to WFs
         addTokens(curToken, tokens);
         if (DEBUG) {
           System.err.println("-> Token:" + arrayToken + " curIndex: " + curIndex
@@ -250,7 +254,7 @@ public class RuleBasedTokenizer implements Tokenizer {
 
   /**
    * Actual tokenization function.
-   * 
+   *
    * @param line
    *          the sentence to be tokenized
    * @return an array containing the tokens for the sentence
@@ -260,10 +264,10 @@ public class RuleBasedTokenizer implements Tokenizer {
     // these are fine because they do not affect offsets
     line = line.trim();
     line = doubleSpaces.matcher(line).replaceAll(" ");
-    //remove non printable stuff
+    // remove non printable stuff
     line = asciiHex.matcher(line).replaceAll(" ");
     line = generalBlankPunctuation.matcher(line).replaceAll(" ");
-    
+
     // separate question and exclamation marks
     line = qexc.matcher(line).replaceAll(" $1 ");
     // separate dash if before or after space
@@ -284,7 +288,7 @@ public class RuleBasedTokenizer implements Tokenizer {
     // contractions it's, l'agila, c'est, don't
     line = treatContractions(line);
     // exceptions for period tokenization
-    line = nonBreaker.TokenizerNonBreaker(line);
+    line = this.nonBreaker.TokenizerNonBreaker(line);
 
     // restore multidots
     line = restoreMultidots(line);
@@ -309,7 +313,7 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * This function normalizes multi-period expressions (...) to make
    * tokenization easier.
-   * 
+   *
    * @param line
    * @return string
    */
@@ -330,7 +334,7 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * Restores the normalized multidots to its original state and it tokenizes
    * them.
-   * 
+   *
    * @param line
    *          the line
    * @return the tokenized multidots
@@ -346,7 +350,7 @@ public class RuleBasedTokenizer implements Tokenizer {
 
   /**
    * Separate apostrophes.
-   * 
+   *
    * @param line
    *          the sentence
    * @return the tokenized paragraphs
@@ -356,8 +360,8 @@ public class RuleBasedTokenizer implements Tokenizer {
     line = noAlphaAposNoAlpha.matcher(line).replaceAll("$1 $2 $3");
     line = noAlphaDigitAposAlpha.matcher(line).replaceAll("$1 $2 $3");
     line = alphaAposNonAlpha.matcher(line).replaceAll("$1 $2 $3");
-    if (lang.equalsIgnoreCase("en")) {
-      line = englishNegations.matcher(line).replaceAll("$1 $2$3"); 
+    if (this.lang.equalsIgnoreCase("en")) {
+      line = englishNegations.matcher(line).replaceAll("$1 $2$3");
     }
     line = englishApos.matcher(line).replaceAll("$1 $2$3");
     line = yearApos.matcher(line).replaceAll("$1 $2$3");
@@ -370,7 +374,7 @@ public class RuleBasedTokenizer implements Tokenizer {
 
   /**
    * De-tokenize wrongly tokenized URLs.
-   * 
+   *
    * @param line
    *          the sentence
    * @return the sentence containing the correct URL
@@ -386,32 +390,37 @@ public class RuleBasedTokenizer implements Tokenizer {
     line = sb.toString();
     return line;
   }
-  
+
   /**
    * Process the untokenizable CLI option.
-   * @param properties the configuration properties
+   * 
+   * @param properties
+   *          the configuration properties
    */
-  private void printUntokenizable(Properties properties) {
-    String untokenizable = properties.getProperty("untokenizable");
+  private void printUntokenizable(final Properties properties) {
+    final String untokenizable = properties.getProperty("untokenizable");
     if (untokenizable.equalsIgnoreCase("yes")) {
-      unTokenizable = true;
+      this.unTokenizable = true;
     } else {
-      unTokenizable = false;
+      this.unTokenizable = false;
     }
   }
-  
+
   /**
    * Add tokens if certain conditions are met.
-   * @param curToken the token to be added
-   * @param tokens the list of tokens
+   * 
+   * @param curToken
+   *          the token to be added
+   * @param tokens
+   *          the list of tokens
    */
-  private void addTokens(Token curToken, List<Token> tokens) {
+  private void addTokens(final Token curToken, final List<Token> tokens) {
     if (curToken.tokenLength() != 0) {
-      if (unTokenizable) {
+      if (this.unTokenizable) {
         tokens.add(curToken);
-      } else if (!unTokenizable) {
+      } else if (!this.unTokenizable) {
         if (!replacement.matcher(curToken.getTokenValue()).matches()) {
-         tokens.add(curToken);
+          tokens.add(curToken);
         }
       }
     }
@@ -421,7 +430,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    * Set as value of the token its normalized counterpart. Normalization is done
    * following languages and corpora (Penn TreeBank, Ancora, Tiger, Tutpenn,
    * etc.) conventions.
-   * 
+   *
    * @param tokens
    *          the tokens
    * @param lang

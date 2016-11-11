@@ -27,96 +27,104 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
-
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
-
-
 /**
- * This class loads a SequenceLabeler model required for
- * the Feature Generation. It also provides the serializer
- * required to add it as a resource to the final target model
- * model.
+ * This class loads a SequenceLabeler model required for the Feature Generation.
+ * It also provides the serializer required to add it as a resource to the final
+ * target model model.
+ * 
  * @author ragerri
  * @version 2016-04-07
- * 
+ *
  */
 public class SequenceModelResource implements SerializableArtifact {
-  
-  public static class SequenceModelResourceSerializer implements ArtifactSerializer<SequenceModelResource> {
 
-    public SequenceModelResource create(InputStream in) throws IOException,
-        InvalidFormatException {
+  public static class SequenceModelResourceSerializer
+      implements ArtifactSerializer<SequenceModelResource> {
+
+    @Override
+    public SequenceModelResource create(final InputStream in)
+        throws IOException, InvalidFormatException {
       return new SequenceModelResource(in);
     }
 
-    public void serialize(SequenceModelResource artifact, OutputStream out)
-        throws IOException {
+    @Override
+    public void serialize(final SequenceModelResource artifact,
+        final OutputStream out) throws IOException {
       artifact.serialize(out);
     }
   }
-  
+
   /**
    * The Sequence Labeler model.
    */
-  private SequenceLabelerModel seqModel;
+  private final SequenceLabelerModel seqModel;
   /**
    * The SequenceLabeler.
    */
-  private SequenceLabelerME sequenceLabeler;
-  
+  private final SequenceLabelerME sequenceLabeler;
+
   /**
    * Construct the SequenceModelResource from the inputstream.
-   * @param in the input stream
-   * @throws IOException io exception
+   * 
+   * @param in
+   *          the input stream
+   * @throws IOException
+   *           io exception
    */
-  public SequenceModelResource(InputStream in) throws IOException {
-    seqModel = new SequenceLabelerModel(in);
-    sequenceLabeler = new SequenceLabelerME(seqModel);
+  public SequenceModelResource(final InputStream in) throws IOException {
+    this.seqModel = new SequenceLabelerModel(in);
+    this.sequenceLabeler = new SequenceLabelerME(this.seqModel);
   }
-  
+
   /**
    * Tag the current sentence.
-   * @param tokens the current sentence
+   * 
+   * @param tokens
+   *          the current sentence
    * @return the array of span sequences
    */
-  public Span[] seqToSpans(String[] tokens) {
-    Span[] origSpans = sequenceLabeler.tag(tokens);
-    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+  public Span[] seqToSpans(final String[] tokens) {
+    final Span[] origSpans = this.sequenceLabeler.tag(tokens);
+    final Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
     return seqSpans;
   }
-  
+
   /**
    * Lemmatize the current sentence.
-   * @param tokens the current sentence
+   * 
+   * @param tokens
+   *          the current sentence
    * @return the array of span sequences
    */
-  public String[] lemmatize(String[] tokens) {
-    Span[] origSpans = sequenceLabeler.tag(tokens);
-    Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    //TODO work with Spans only
-    String[] decodedLemmas = StringUtils.decodeLemmas(tokens, seqSpans);
+  public String[] lemmatize(final String[] tokens) {
+    final Span[] origSpans = this.sequenceLabeler.tag(tokens);
+    final Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    // TODO work with Spans only
+    final String[] decodedLemmas = StringUtils.decodeLemmas(tokens, seqSpans);
     return decodedLemmas;
   }
-  
+
   /**
    * Serialize this model into the overall Sequence model.
-   * @param out the output stream
-   * @throws IOException io exception
+   * 
+   * @param out
+   *          the output stream
+   * @throws IOException
+   *           io exception
    */
-  public void serialize(OutputStream out) throws IOException {
-    Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-    seqModel.serialize(out);
+  public void serialize(final OutputStream out) throws IOException {
+    final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    this.seqModel.serialize(out);
     writer.flush();
   }
 
+  @Override
   public Class<?> getArtifactSerializerClass() {
     return SequenceModelResourceSerializer.class;
   }
 
 }
-
-
-

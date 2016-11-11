@@ -18,51 +18,53 @@ package eus.ixa.ixa.pipe.ml.features;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
 
 public class PrefixFeatureGenerator extends CustomFeatureGenerator {
 
   private Map<String, String> attributes;
 
-  public String[] getPrefixes(String lex) {
-    Integer start = Integer.parseInt(attributes.get("begin"));
-    Integer end = Integer.parseInt(attributes.get("end"));
-    String[] prefs = new String[end];
+  public String[] getPrefixes(final String lex) {
+    final Integer start = Integer.parseInt(this.attributes.get("begin"));
+    final Integer end = Integer.parseInt(this.attributes.get("end"));
+    final String[] prefs = new String[end];
     for (int i = start, l = end; i < l; i++) {
       prefs[i] = lex.substring(0, Math.min(i + 1, lex.length()));
     }
     return prefs;
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    String[] prefs = getPrefixes(tokens[index]);
-    for (String pref : prefs) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+    final String[] prefs = getPrefixes(tokens[index]);
+    for (final String pref : prefs) {
       features.add("pre=" + pref);
       if (Flags.DEBUG) {
         System.err.println("-> " + tokens[index] + ": pre=" + pref);
       }
     }
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
+
   }
 
   @Override
   public void clearAdaptiveData() {
-    
+
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    attributes = properties;
+    this.attributes = properties;
   }
-  
+
 }

@@ -18,20 +18,21 @@ package eus.ixa.ixa.pipe.ml.pos;
 
 /**
  * Mappings from POS tagsets to NAF pos attribute.
+ * 
  * @author ragerri
  * @version 2016-04-22
  */
 public class TagSetMappingsToNAF {
-  
+
   /**
    * This class is not be instantiated.
    */
   private TagSetMappingsToNAF() {
   }
-  
+
   /**
    * Set the term type attribute based on the pos value.
-   * 
+   *
    * @param postag
    *          the postag
    * @return the type
@@ -44,17 +45,18 @@ public class TagSetMappingsToNAF {
       return "close";
     }
   }
-  
+
   /**
    * Obtain the appropriate tagset according to language and postag.
-   * 
+   *
    * @param postag
    *          the postag
-   * @param lang the language
+   * @param lang
+   *          the language
    * @return the mapped tag
    */
   public static String getNAFTagSet(final String postag, final String lang) {
-    
+
     String tag = null;
     if (lang.equalsIgnoreCase("de")) {
       tag = mapGermanCoNLL09TagSetToNAF(postag);
@@ -77,12 +79,13 @@ public class TagSetMappingsToNAF {
     }
     return tag;
   }
-  
+
   /**
-   * Mapping between CoNLL 2009 German tagset and NAF tagset.
-   * Based on the Stuttgart-Tuebingen tagset.
-   * 
-   * @param postag the postag
+   * Mapping between CoNLL 2009 German tagset and NAF tagset. Based on the
+   * Stuttgart-Tuebingen tagset.
+   *
+   * @param postag
+   *          the postag
    * @return NAF POS tag
    */
   private static String mapGermanCoNLL09TagSetToNAF(final String postag) {
@@ -100,7 +103,8 @@ public class TagSetMappingsToNAF {
       return "R"; // proper noun
     } else if (postag.startsWith("AP")) {
       return "P"; // preposition
-    } else if (postag.startsWith("PD") || postag.startsWith("PI") || postag.startsWith("PP") || postag.startsWith("PR")
+    } else if (postag.startsWith("PD") || postag.startsWith("PI")
+        || postag.startsWith("PP") || postag.startsWith("PR")
         || postag.startsWith("PW") || postag.startsWith("PA")) {
       return "Q"; // pronoun
     } else if (postag.startsWith("V")) {
@@ -109,9 +113,10 @@ public class TagSetMappingsToNAF {
       return "O"; // other
     }
   }
+
   /**
    * Mapping between Penn Treebank tagset and NAF tagset.
-   * 
+   *
    * @param postag
    *          treebank postag
    * @return NAF POS tag
@@ -125,7 +130,8 @@ public class TagSetMappingsToNAF {
       return "D"; // determiner and predeterminer
     } else if (postag.startsWith("J")) {
       return "G"; // adjective
-    } else if (postag.equalsIgnoreCase("NN") || postag.equalsIgnoreCase("NNS")) {
+    } else if (postag.equalsIgnoreCase("NN")
+        || postag.equalsIgnoreCase("NNS")) {
       return "N"; // common noun
     } else if (postag.startsWith("NNP")) {
       return "R"; // proper noun
@@ -142,7 +148,7 @@ public class TagSetMappingsToNAF {
 
   /**
    * Mapping between EAGLES PAROLE Ancora tagset and NAF.
-   * 
+   *
    * @param postag
    *          the postag
    * @return the mapping to NAF pos tagset
@@ -170,10 +176,10 @@ public class TagSetMappingsToNAF {
       return "O"; // other
     }
   }
-  
+
   /**
    * Mapping between Universal POS tags and NAF.
-   * 
+   *
    * @param postag
    *          the postag
    * @return the mapping to NAF pos tagset
@@ -181,7 +187,8 @@ public class TagSetMappingsToNAF {
   private static String mapUDTagSetToNAF(final String postag) {
     if (postag.equalsIgnoreCase("ADV")) {
       return "A"; // adverb
-    } else if (postag.equalsIgnoreCase("CONJ") || postag.equalsIgnoreCase("SCONJ")) {
+    } else if (postag.equalsIgnoreCase("CONJ")
+        || postag.equalsIgnoreCase("SCONJ")) {
       return "C"; // conjunction
     } else if (postag.equalsIgnoreCase("DET")) {
       return "D"; // det predeterminer
@@ -201,10 +208,10 @@ public class TagSetMappingsToNAF {
       return "O"; // other
     }
   }
-  
+
   /**
    * Mapping between CC tagset and NAF.
-   * 
+   *
    * @param postag
    *          the postag
    * @return the mapping to NAF pos tagset
@@ -236,7 +243,7 @@ public class TagSetMappingsToNAF {
 
   /**
    * Mapping between CTAG tagset and NAF.
-   * 
+   *
    * @param postag
    *          the postag
    * @return the mapping to NAF pos tagset
@@ -267,10 +274,10 @@ public class TagSetMappingsToNAF {
       return "O"; // other
     }
   }
-  
+
   /**
    * Mapping between Wotan (Alpino) tagset and NAF.
-   * 
+   *
    * @param postag
    *          the postag
    * @return the mapping to NAF pos tagset
@@ -278,7 +285,8 @@ public class TagSetMappingsToNAF {
   private static String mapWotanTagSetToNAF(final String postag) {
     if (postag.equalsIgnoreCase("ADV")) {
       return "A"; // adverb
-    } else if (postag.equalsIgnoreCase("CONJ") || postag.equalsIgnoreCase("SCONJ")) {
+    } else if (postag.equalsIgnoreCase("CONJ")
+        || postag.equalsIgnoreCase("SCONJ")) {
       return "C"; // conjunction
     } else if (postag.equalsIgnoreCase("Art")) {
       return "D"; // det predeterminer

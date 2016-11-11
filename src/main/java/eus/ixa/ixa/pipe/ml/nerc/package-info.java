@@ -1,5 +1,6 @@
 /**
  * Package containing Named Entity Recognition and Classification classes.
+ * 
  * @author ragerri
  *
  */

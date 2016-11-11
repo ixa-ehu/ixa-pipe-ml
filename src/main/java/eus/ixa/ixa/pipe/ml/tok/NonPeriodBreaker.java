@@ -32,7 +32,7 @@ import eus.ixa.ixa.pipe.ml.utils.StringUtils;
  * This class implements exceptions for periods as sentence breakers and tokens.
  * It decides when a period induces a new sentence or a new token and when it
  * does not.
- * 
+ *
  * @author ragerri
  * @version 2015-04-04
  */
@@ -57,8 +57,8 @@ public class NonPeriodBreaker {
   /**
    * General acronyms.
    */
-  public static Pattern acronym = Pattern.compile(
-      "(\\.)[\\p{Lu}\\-]+([\\.]+)$", Pattern.UNICODE_CHARACTER_CLASS);
+  public static Pattern acronym = Pattern.compile("(\\.)[\\p{Lu}\\-]+([\\.]+)$",
+      Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Do not segment numbers like 11.1.
    */
@@ -94,10 +94,10 @@ public class NonPeriodBreaker {
   private String NON_BREAKER = null;
 
   /**
-   * 
+   *
    * This constructor reads some non breaking prefixes files in resources to
    * create exceptions of segmentation and tokenization.
-   * 
+   *
    * @param properties
    *          the options
    */
@@ -107,7 +107,7 @@ public class NonPeriodBreaker {
 
   private void loadNonBreaker(final Properties properties) {
     final String lang = properties.getProperty("language");
-    if (NON_BREAKER == null) {
+    if (this.NON_BREAKER == null) {
       createNonBreaker(lang);
     }
   }
@@ -121,8 +121,8 @@ public class NonPeriodBreaker {
           + " in ixa-pipe-ml/src/main/resources/tokenizer/!!");
       System.exit(1);
     }
-    final BufferedReader breader = new BufferedReader(new InputStreamReader(
-        nonBreakerInputStream));
+    final BufferedReader breader = new BufferedReader(
+        new InputStreamReader(nonBreakerInputStream));
     String line;
     try {
       while ((line = breader.readLine()) != null) {
@@ -134,44 +134,44 @@ public class NonPeriodBreaker {
     } catch (final IOException e) {
       e.printStackTrace();
     }
-    NON_BREAKER = StringUtils.createDisjunctRegexFromList(nonBreakerList);
+    this.NON_BREAKER = StringUtils.createDisjunctRegexFromList(nonBreakerList);
   }
 
   private final InputStream getNonBreakerInputStream(final String lang) {
     InputStream nonBreakerInputStream = null;
     if (lang.equalsIgnoreCase("ca")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/ca-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/ca-exceptions.txt");
     } else if (lang.equalsIgnoreCase("de")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/de-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/de-exceptions.txt");
     } else if (lang.equalsIgnoreCase("en")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/en-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/en-exceptions.txt");
     } else if (lang.equalsIgnoreCase("es")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/es-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/es-exceptions.txt");
     } else if (lang.equalsIgnoreCase("eu")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/eu-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/eu-exceptions.txt");
     } else if (lang.equalsIgnoreCase("fr")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/fr-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/fr-exceptions.txt");
     } else if (lang.equalsIgnoreCase("gl")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/gl-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/gl-exceptions.txt");
     } else if (lang.equalsIgnoreCase("it")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/it-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/it-exceptions.txt");
     } else if (lang.equalsIgnoreCase("nl")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/nl-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/nl-exceptions.txt");
     } else if (lang.equalsIgnoreCase("pt")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/pt-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/pt-exceptions.txt");
     } else if (lang.equalsIgnoreCase("ru")) {
-      nonBreakerInputStream = getClass().getResourceAsStream(
-          "/tokenizer/ru-exceptions.txt");
+      nonBreakerInputStream = getClass()
+          .getResourceAsStream("/tokenizer/ru-exceptions.txt");
     }
     return nonBreakerInputStream;
   }
@@ -180,17 +180,17 @@ public class NonPeriodBreaker {
    * Segment the rest of the text taking into account some exceptions for
    * periods as sentence breakers. It decides when a period marks an end of
    * sentence.
-   * 
+   *
    * @param lines
    *          the segmented sentences so far
    * @return all the segmented sentences
    */
-  public String[] segmenterExceptions(String[] lines) {
-    List<String> sentences = new ArrayList<>();
-    for (String line : lines) {
-      String segmentedLine = segmenterNonBreaker(line);
-      String[] lineSentences = segmentedLine.split("\n");
-      for (String lineSentence : lineSentences) {
+  public String[] segmenterExceptions(final String[] lines) {
+    final List<String> sentences = new ArrayList<>();
+    for (final String line : lines) {
+      final String segmentedLine = segmenterNonBreaker(line);
+      final String[] lineSentences = segmentedLine.split("\n");
+      for (final String lineSentence : lineSentences) {
         sentences.add(lineSentence);
       }
     }
@@ -200,7 +200,7 @@ public class NonPeriodBreaker {
   /**
    * This function implements exceptions for periods as sentence breakers. It
    * decides when a period induces a new sentence or not.
-   * 
+   *
    * @param line
    *          the text to be processed
    * @return segmented text (with newlines included)
@@ -215,13 +215,14 @@ public class NonPeriodBreaker {
     int i;
     final String[] words = line.split(" ");
     // iterate over the words
-    for (i = 0; i < (words.length - 1); i++) {
-      Matcher nonSegmentedWordMatcher = nonSegmentedWords.matcher(words[i]);
+    for (i = 0; i < words.length - 1; i++) {
+      final Matcher nonSegmentedWordMatcher = nonSegmentedWords
+          .matcher(words[i]);
       // candidate word to be segmented found:
       if (nonSegmentedWordMatcher.find()) {
-        String curWord = nonSegmentedWordMatcher.replaceAll("$1");
-        String finalPunct = nonSegmentedWordMatcher.replaceAll("$2");
-        if (!curWord.isEmpty() && curWord.matches("(" + NON_BREAKER + ")")
+        final String curWord = nonSegmentedWordMatcher.replaceAll("$1");
+        final String finalPunct = nonSegmentedWordMatcher.replaceAll("$2");
+        if (!curWord.isEmpty() && curWord.matches("(" + this.NON_BREAKER + ")")
             && finalPunct.isEmpty()) {
           // if current word is not empty and is a no breaker and there is not
           // final punctuation
@@ -231,8 +232,8 @@ public class NonPeriodBreaker {
           // if next word contains initial punctuation and then uppercase or
           // digit do:
           if (!(!curWord.isEmpty() && curWord.matches(NON_BREAKER_DIGITS)
-              && (finalPunct.isEmpty()) && (startDigit.matcher(words[i + 1])
-              .find()))) {
+              && finalPunct.isEmpty()
+              && startDigit.matcher(words[i + 1]).find())) {
             // segment unless current word is a non breaker digit and next word
             // is not final punctuation or does not start with a number
             words[i] = words[i] + "\n";
@@ -249,7 +250,7 @@ public class NonPeriodBreaker {
 
   /**
    * It decides when periods do not need to be tokenized.
-   * 
+   *
    * @param line
    *          the sentence to be tokenized
    * @return line
@@ -271,10 +272,10 @@ public class NonPeriodBreaker {
       if (wordDotMatcher.find()) {
         final String curWord = wordDotMatcher.replaceAll("$1");
 
-        if ((curWord.contains(".") && alphabetic.matcher(curWord).find())
-            || curWord.matches("(" + NON_BREAKER + ")")
-            || (i < words.length - 1 && (startLower.matcher(words[i + 1])
-                .find() || startPunct.matcher(words[i + 1]).find()))) {
+        if (curWord.contains(".") && alphabetic.matcher(curWord).find()
+            || curWord.matches("(" + this.NON_BREAKER + ")")
+            || i < words.length - 1 && (startLower.matcher(words[i + 1]).find()
+                || startPunct.matcher(words[i + 1]).find())) {
           // do not tokenize if (word contains a period and is alphabetic) OR
           // word is a non breaker OR (word is a non breaker and next is
           // (lowercase or starts with punctuation that is end of sentence

@@ -29,19 +29,19 @@ import com.google.common.io.Files;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 /**
- * 
+ *
  * Class to load a directory containing dictionaries into a list of
  * Dictionaries. The files need to have the following structure: Barack
  * Obama\tperson\n
- * 
+ *
  * Every file located in the directory passed as a parameter will be loaded.
- * 
+ *
  * @author ragerri
  * @version 2014/06/25
- * 
+ *
  */
 public class Dictionaries {
-  
+
   private static final Pattern tabPattern = Pattern.compile("\t");
 
   public static boolean DEBUG = false;
@@ -60,7 +60,7 @@ public class Dictionaries {
 
   /**
    * Construct the dictionaries from the input directory path.
-   * 
+   *
    * @param inputDir
    *          the input directory
    */
@@ -69,7 +69,7 @@ public class Dictionaries {
         && dictionariesIgnoreCase == null) {
       try {
         loadDictionaries(inputDir);
-      } catch (IOException e) {
+      } catch (final IOException e) {
         e.getMessage();
       }
     }
@@ -78,7 +78,7 @@ public class Dictionaries {
 
   /**
    * Get the list of dictionaries as HashMaps.
-   * 
+   *
    * @return a list of the dictionaries as HashMaps
    */
   public final List<Map<String, String>> getDictionaries() {
@@ -87,7 +87,7 @@ public class Dictionaries {
 
   /**
    * Get the lower case dictionaries.
-   * 
+   *
    * @return a list of the dictionaries as HashMaps
    */
   public final List<Map<String, String>> getIgnoreCaseDictionaries() {
@@ -96,7 +96,7 @@ public class Dictionaries {
 
   /**
    * Get the dictionary names.
-   * 
+   *
    * @return the list of dictionary names
    */
   public final List<String> getDictNames() {
@@ -105,36 +105,37 @@ public class Dictionaries {
 
   /**
    * Load the dictionaries.
-   * 
+   *
    * @param inputDir
    *          the input directory
    * @throws IOException
    *           throws an exception if directory does not exist
    */
   private void loadDictionaries(final String inputDir) throws IOException {
-    List<File> fileList = StringUtils.getFilesInDir(new File(inputDir));
+    final List<File> fileList = StringUtils.getFilesInDir(new File(inputDir));
     dictNames = new ArrayList<String>(fileList.size());
     dictionaries = new ArrayList<Map<String, String>>(fileList.size());
-    dictionariesIgnoreCase = new ArrayList<Map<String, String>>(fileList.size());
+    dictionariesIgnoreCase = new ArrayList<Map<String, String>>(
+        fileList.size());
     System.err.println("\tloading dictionaries in " + inputDir + " directory");
     for (int i = 0; i < fileList.size(); ++i) {
       if (DEBUG) {
-        System.err.println("\tloading dictionary:...."
-            + fileList.get(i).getCanonicalPath());
+        System.err.println(
+            "\tloading dictionary:...." + fileList.get(i).getCanonicalPath());
       }
       dictNames.add(fileList.get(i).getCanonicalPath());
       dictionaries.add(new HashMap<String, String>());
       dictionariesIgnoreCase.add(new HashMap<String, String>());
 
-      List<String> fileLines = Files.readLines(fileList.get(i), Charsets.UTF_8);
-      for (String line : fileLines) {
-        String[] lineArray = tabPattern.split(line);
+      final List<String> fileLines = Files.readLines(fileList.get(i),
+          Charsets.UTF_8);
+      for (final String line : fileLines) {
+        final String[] lineArray = tabPattern.split(line);
         if (lineArray.length == 2) {
           dictionaries.get(i).put(lineArray[0], lineArray[1]);
-          if ((!line.equalsIgnoreCase("in")) && (!line.equalsIgnoreCase("on"))
-              && (!line.equalsIgnoreCase("us"))
-              && (!line.equalsIgnoreCase("or"))
-              && (!line.equalsIgnoreCase("am"))) {
+          if (!line.equalsIgnoreCase("in") && !line.equalsIgnoreCase("on")
+              && !line.equalsIgnoreCase("us") && !line.equalsIgnoreCase("or")
+              && !line.equalsIgnoreCase("am")) {
             dictionariesIgnoreCase.get(i).put(lineArray[0].toLowerCase(),
                 lineArray[1]);
           }

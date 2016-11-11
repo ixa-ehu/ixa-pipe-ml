@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.eval.EvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.SequenceLabelerTrainer;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSampleTypeFilter;
@@ -35,6 +33,8 @@ import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluator;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerME;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
+import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
  * Evaluation class mostly using {@link SequenceLabelerEvaluator}.
@@ -52,101 +52,121 @@ public class SequenceLabelerEvaluate {
   /**
    * The corpus format: conll02, conll03, lemmatizer, tabulated.
    */
-  private String corpusFormat;
+  private final String corpusFormat;
   private boolean unknownAccuracy = false;
   /**
    * An instance of the probabilistic {@link SequenceLabelerME}.
    */
-  private SequenceLabeler sequenceLabeler;
+  private final SequenceLabeler sequenceLabeler;
   /**
-   * The models to use for every language. The keys of the hash are the
-   * language codes, the values the models.
+   * The models to use for every language. The keys of the hash are the language
+   * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels =
-      new ConcurrentHashMap<String, SequenceLabelerModel>();
+  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels = new ConcurrentHashMap<String, SequenceLabelerModel>();
 
   /**
-   * Construct an evaluator. It takes from the properties a model,
-   * a testset and the format of the testset. Every other parameter
-   * set in the training, e.g., beamsize, decoding, etc., is serialized
-   * in the model.
-   * @param props the properties parameter
-   * @throws IOException the io exception
+   * Construct an evaluator. It takes from the properties a model, a testset and
+   * the format of the testset. Every other parameter set in the training, e.g.,
+   * beamsize, decoding, etc., is serialized in the model.
+   * 
+   * @param props
+   *          the properties parameter
+   * @throws IOException
+   *           the io exception
    */
   public SequenceLabelerEvaluate(final Properties props) throws IOException {
-    
-    String lang = props.getProperty("language");
-    String clearFeatures = props.getProperty("clearFeatures");
-    String model = props.getProperty("model");
-    String testSet = props.getProperty("testset");
-    corpusFormat = props.getProperty("corpusFormat");
-    String seqTypes = props.getProperty("types");
-    String trainSet = props.getProperty("unknownAccuracy");
-    testSamples = SequenceLabelerTrainer.getSequenceStream(testSet, clearFeatures, corpusFormat);
+
+    final String lang = props.getProperty("language");
+    final String clearFeatures = props.getProperty("clearFeatures");
+    final String model = props.getProperty("model");
+    final String testSet = props.getProperty("testset");
+    this.corpusFormat = props.getProperty("corpusFormat");
+    final String seqTypes = props.getProperty("types");
+    final String trainSet = props.getProperty("unknownAccuracy");
+    this.testSamples = SequenceLabelerTrainer.getSequenceStream(testSet,
+        clearFeatures, this.corpusFormat);
     if (!trainSet.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG)) {
-      unknownAccuracy = true;
-      trainSamples = SequenceLabelerTrainer.getSequenceStream(trainSet, clearFeatures, corpusFormat);
+      this.unknownAccuracy = true;
+      this.trainSamples = SequenceLabelerTrainer.getSequenceStream(trainSet,
+          clearFeatures, this.corpusFormat);
     }
     if (seqTypes != Flags.DEFAULT_SEQUENCE_TYPES) {
-      String[] neTypes = seqTypes.split(",");
-      testSamples = new SequenceLabelSampleTypeFilter(neTypes, testSamples);
+      final String[] neTypes = seqTypes.split(",");
+      this.testSamples = new SequenceLabelSampleTypeFilter(neTypes,
+          this.testSamples);
     }
-    seqModels.putIfAbsent(lang, new SequenceLabelerModel(new FileInputStream(model)));
-    sequenceLabeler = new SequenceLabelerME(seqModels.get(lang));
+    seqModels.putIfAbsent(lang,
+        new SequenceLabelerModel(new FileInputStream(model)));
+    this.sequenceLabeler = new SequenceLabelerME(seqModels.get(lang));
   }
 
   /**
    * Evaluate and print precision, recall and F measure.
-   * @throws IOException if test corpus not loaded
+   * 
+   * @throws IOException
+   *           if test corpus not loaded
    */
   public final void evaluate() throws IOException {
-    SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
-    evaluator.evaluate(testSamples);
+    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+        this.sequenceLabeler);
+    evaluator.evaluate(this.testSamples);
     System.out.println(evaluator.getFMeasure());
   }
-  
+
   public final void evaluateAccuracy() throws IOException {
-    if (unknownAccuracy) {
-      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(trainSamples, corpusFormat, sequenceLabeler);
-      evaluator.evaluate(testSamples);
+    if (this.unknownAccuracy) {
+      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+          this.trainSamples, this.corpusFormat, this.sequenceLabeler);
+      evaluator.evaluate(this.testSamples);
       System.out.println();
       System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
-      System.out.println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
-      System.out.println("Unknown Word Accuracy: " + evaluator.getUnknownWordAccuracy());
-      System.out.println("Known Word Accuracy: " + evaluator.getKnownAccuracy());
+      System.out
+          .println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
+      System.out.println(
+          "Unknown Word Accuracy: " + evaluator.getUnknownWordAccuracy());
+      System.out
+          .println("Known Word Accuracy: " + evaluator.getKnownAccuracy());
     } else {
-      SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler);
-      evaluator.evaluate(testSamples);
+      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+          this.sequenceLabeler);
+      evaluator.evaluate(this.testSamples);
       System.out.println();
       System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
-      System.out.println("Sentence accuracy: " + evaluator.getSentenceAccuracy());
+      System.out
+          .println("Sentence accuracy: " + evaluator.getSentenceAccuracy());
     }
   }
+
   /**
-   * Evaluate and print the precision, recall and F measure per
-   * sequence class.
+   * Evaluate and print the precision, recall and F measure per sequence class.
    *
-   * @throws IOException if test corpus not loaded
+   * @throws IOException
+   *           if test corpus not loaded
    */
   public final void detailEvaluate() throws IOException {
-    List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
-    SequenceLabelerDetailedFMeasureListener detailedFListener = new SequenceLabelerDetailedFMeasureListener();
+    final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
+    final SequenceLabelerDetailedFMeasureListener detailedFListener = new SequenceLabelerDetailedFMeasureListener();
     listeners.add(detailedFListener);
-    SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler,
-        listeners.toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
-    evaluator.evaluate(testSamples);
+    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+        this.sequenceLabeler, listeners
+            .toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
+    evaluator.evaluate(this.testSamples);
     System.out.println(detailedFListener.toString());
   }
+
   /**
    * Evaluate and print every error.
-   * @throws IOException if test corpus not loaded
+   * 
+   * @throws IOException
+   *           if test corpus not loaded
    */
   public final void evalError() throws IOException {
-    List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
+    final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
     listeners.add(new SequenceLabelerEvaluationErrorListener());
-    SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(sequenceLabeler,
-        listeners.toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
-    evaluator.evaluate(testSamples);
+    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+        this.sequenceLabeler, listeners
+            .toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
+    evaluator.evaluate(this.testSamples);
     System.out.println(evaluator.getFMeasure());
   }
 

@@ -33,6 +33,7 @@ import opennlp.tools.util.featuregen.GeneratorFactory;
 
 /**
  * Based on opennlp.tools.namefind.TokenNameFinderFactory.
+ * 
  * @author ragerri
  * @version 2016-11-11
  */
@@ -43,61 +44,66 @@ public class SequenceLabelerFactory extends BaseToolFactory {
   private SequenceLabelerCodec<String> seqCodec;
 
   /**
-   * Creates a {@link SequenceLabelerFactory} that provides the default implementation
-   * of the resources.
+   * Creates a {@link SequenceLabelerFactory} that provides the default
+   * implementation of the resources.
    */
   public SequenceLabelerFactory() {
     this.seqCodec = new BioCodec();
   }
 
-  public SequenceLabelerFactory(byte[] featureGeneratorBytes, final Map<String, Object> resources,
-      SequenceLabelerCodec<String> seqCodec) {
+  public SequenceLabelerFactory(final byte[] featureGeneratorBytes,
+      final Map<String, Object> resources,
+      final SequenceLabelerCodec<String> seqCodec) {
     init(featureGeneratorBytes, resources, seqCodec);
   }
 
-  void init(byte[] featureGeneratorBytes, final Map<String, Object> resources, SequenceLabelerCodec<String> seqCodec) {
+  void init(final byte[] featureGeneratorBytes,
+      final Map<String, Object> resources,
+      final SequenceLabelerCodec<String> seqCodec) {
     this.featureGeneratorBytes = featureGeneratorBytes;
     this.resources = resources;
     this.seqCodec = seqCodec;
   }
 
   private static byte[] loadDefaultFeatureGeneratorBytes() {
-    
-    ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+    final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     try (InputStream in = SequenceLabelerFactory.class.getResourceAsStream(
         "/sequenceLabeler/default-feature-descriptor.xml")) {
-      
+
       if (in == null) {
-        throw new IllegalStateException("Classpath must contain default-feature-descriptor.xml file!");
+        throw new IllegalStateException(
+            "Classpath must contain default-feature-descriptor.xml file!");
       }
-      
-      byte buf[] = new byte[1024];
+
+      final byte buf[] = new byte[1024];
       int len;
       while ((len = in.read(buf)) > 0) {
         bytes.write(buf, 0, len);
       }
+    } catch (final IOException e) {
+      throw new IllegalStateException(
+          "Failed reading from default-feature-descriptor.xml file on classpath!");
     }
-    catch (IOException e) {
-      throw new IllegalStateException("Failed reading from default-feature-descriptor.xml file on classpath!");
-    }
-    
+
     return bytes.toByteArray();
   }
-  
+
   protected SequenceLabelerCodec<String> getSequenceCodec() {
-    return seqCodec;
+    return this.seqCodec;
   }
 
   protected Map<String, Object> getResources() {
-    return resources;
+    return this.resources;
   }
 
   protected byte[] getFeatureGenerator() {
-    return featureGeneratorBytes;
+    return this.featureGeneratorBytes;
   }
 
-  public static SequenceLabelerFactory create(String subclassName, byte[] featureGeneratorBytes, final Map<String, Object> resources,
-      SequenceLabelerCodec<String> seqCodec)
+  public static SequenceLabelerFactory create(final String subclassName,
+      final byte[] featureGeneratorBytes, final Map<String, Object> resources,
+      final SequenceLabelerCodec<String> seqCodec)
       throws InvalidFormatException {
     SequenceLabelerFactory theFactory;
     if (subclassName == null) {
@@ -105,10 +111,10 @@ public class SequenceLabelerFactory extends BaseToolFactory {
       theFactory = new SequenceLabelerFactory();
     } else {
       try {
-        theFactory = ExtensionLoader.instantiateExtension(
-            SequenceLabelerFactory.class, subclassName);
-      } catch (Exception e) {
-        String msg = "Could not instantiate the " + subclassName
+        theFactory = ExtensionLoader
+            .instantiateExtension(SequenceLabelerFactory.class, subclassName);
+      } catch (final Exception e) {
+        final String msg = "Could not instantiate the " + subclassName
             + ". The initialization throw an exception.";
         System.err.println(msg);
         e.printStackTrace();
@@ -126,19 +132,19 @@ public class SequenceLabelerFactory extends BaseToolFactory {
 
   public SequenceLabelerCodec<String> createSequenceCodec() {
 
-    if (artifactProvider != null) {
-      String sequeceCodecImplName = artifactProvider.getManifestProperty(
-          SequenceLabelerModel.SEQUENCE_CODEC_CLASS_NAME_PARAMETER);
+    if (this.artifactProvider != null) {
+      final String sequeceCodecImplName = this.artifactProvider
+          .getManifestProperty(
+              SequenceLabelerModel.SEQUENCE_CODEC_CLASS_NAME_PARAMETER);
       return instantiateSequenceCodec(sequeceCodecImplName);
-    }
-    else {
-      return seqCodec;
+    } else {
+      return this.seqCodec;
     }
   }
 
   public SequenceLabelerContextGenerator createContextGenerator() {
 
-    AdaptiveFeatureGenerator featureGenerator = createFeatureGenerators();
+    final AdaptiveFeatureGenerator featureGenerator = createFeatureGenerators();
     if (featureGenerator == null) {
       throw new NullPointerException("featureGenerator must not be null");
     }
@@ -147,40 +153,44 @@ public class SequenceLabelerFactory extends BaseToolFactory {
   }
 
   /**
-   * Creates the {@link AdaptiveFeatureGenerator}. Usually this
-   * is a set of generators contained in the {@link AggregatedFeatureGenerator}.
+   * Creates the {@link AdaptiveFeatureGenerator}. Usually this is a set of
+   * generators contained in the {@link AggregatedFeatureGenerator}.
    *
-   * Note:
-   * The generators are created on every call to this method.
+   * Note: The generators are created on every call to this method.
    *
-   * @return the feature generator or null if there is no descriptor in the model
+   * @return the feature generator or null if there is no descriptor in the
+   *         model
    */
   public AdaptiveFeatureGenerator createFeatureGenerators() {
 
-    if (featureGeneratorBytes == null && artifactProvider != null) {
-      featureGeneratorBytes = (byte[]) artifactProvider.getArtifact(
-          SequenceLabelerModel.GENERATOR_DESCRIPTOR_ENTRY_NAME);
+    if (this.featureGeneratorBytes == null && this.artifactProvider != null) {
+      this.featureGeneratorBytes = (byte[]) this.artifactProvider
+          .getArtifact(SequenceLabelerModel.GENERATOR_DESCRIPTOR_ENTRY_NAME);
     }
-    if (featureGeneratorBytes == null) {
-      System.err.println("WARNING: loading the default feature generator descriptor!!");
-      featureGeneratorBytes = loadDefaultFeatureGeneratorBytes();
+    if (this.featureGeneratorBytes == null) {
+      System.err.println(
+          "WARNING: loading the default feature generator descriptor!!");
+      this.featureGeneratorBytes = loadDefaultFeatureGeneratorBytes();
     }
 
-    InputStream descriptorIn = new ByteArrayInputStream(featureGeneratorBytes);
+    final InputStream descriptorIn = new ByteArrayInputStream(
+        this.featureGeneratorBytes);
     AdaptiveFeatureGenerator generator = null;
     try {
-      generator = GeneratorFactory.create(descriptorIn, new FeatureGeneratorResourceProvider() {
+      generator = GeneratorFactory.create(descriptorIn,
+          new FeatureGeneratorResourceProvider() {
 
-        public Object getResource(String key) {
-          if (artifactProvider != null) {
-            return artifactProvider.getArtifact(key);
-          }
-          else {
-            return resources.get(key);
-          }
-        }
-      });
-    } catch (InvalidFormatException e) {
+            @Override
+            public Object getResource(final String key) {
+              if (SequenceLabelerFactory.this.artifactProvider != null) {
+                return SequenceLabelerFactory.this.artifactProvider
+                    .getArtifact(key);
+              } else {
+                return SequenceLabelerFactory.this.resources.get(key);
+              }
+            }
+          });
+    } catch (final InvalidFormatException e) {
       // It is assumed that the creation of the feature generation does not
       // fail after it succeeded once during model loading.
 
@@ -193,8 +203,9 @@ public class SequenceLabelerFactory extends BaseToolFactory {
       // throwing a Runtime Exception is reasonable
 
       throw new SequenceLabelerModel.FeatureGeneratorCreationError(e);
-    } catch (IOException e) {
-      throw new IllegalStateException("Reading from mem cannot result in an I/O error", e);
+    } catch (final IOException e) {
+      throw new IllegalStateException(
+          "Reading from mem cannot result in an I/O error", e);
     }
 
     return generator;
@@ -202,17 +213,14 @@ public class SequenceLabelerFactory extends BaseToolFactory {
 
   @SuppressWarnings("unchecked")
   public static SequenceLabelerCodec<String> instantiateSequenceCodec(
-      String sequenceCodecImplName) {
+      final String sequenceCodecImplName) {
 
     if (sequenceCodecImplName != null) {
-      return ExtensionLoader.instantiateExtension(
-          SequenceLabelerCodec.class, sequenceCodecImplName);
-    }
-    else {
+      return ExtensionLoader.instantiateExtension(SequenceLabelerCodec.class,
+          sequenceCodecImplName);
+    } else {
       // If nothing is specified return old default!
       return new BioCodec();
     }
   }
 }
-
-

@@ -25,6 +25,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
 
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import opennlp.tools.ml.BeamSearch;
 import opennlp.tools.ml.model.AbstractModel;
 import opennlp.tools.ml.model.MaxentModel;
@@ -32,11 +33,10 @@ import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.BaseModel;
 import opennlp.tools.util.model.UncloseableInputStream;
-import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 
 /**
  * ParserModel class. Based on opennlp.tools.parse.ParserModel.java.
- * 
+ *
  * @author ragerri
  * @version 2016-05-03
  */
@@ -49,48 +49,54 @@ public class ParserModel extends BaseModel {
   private static final String CHUNKER_TAGGER_MODEL_ENTRY_NAME = "parserchunker.chunker";
   private static final String HEAD_RULES_MODEL_ENTRY_NAME = "head-rules.headrules";
 
-  public ParserModel(String languageCode, MaxentModel buildModel,
-      MaxentModel checkModel, SequenceLabelerModel parserTagger,
-      SequenceLabelerModel chunkerTagger, int beamSize, HeadRules headRules,
-      Map<String, String> manifestInfoEntries) {
+  public ParserModel(final String languageCode, final MaxentModel buildModel,
+      final MaxentModel checkModel, final SequenceLabelerModel parserTagger,
+      final SequenceLabelerModel chunkerTagger, final int beamSize,
+      final HeadRules headRules,
+      final Map<String, String> manifestInfoEntries) {
 
     super(COMPONENT_NAME, languageCode, manifestInfoEntries);
 
     // adding beamsize to manifest
-    Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
+    final Properties manifest = (Properties) this.artifactMap
+        .get(MANIFEST_ENTRY);
     manifest.put(BeamSearch.BEAM_SIZE_PARAMETER, Integer.toString(beamSize));
 
-    artifactMap.put(BUILD_MODEL_ENTRY_NAME, buildModel);
-    artifactMap.put(CHECK_MODEL_ENTRY_NAME, checkModel);
-    artifactMap.put(PARSER_TAGGER_MODEL_ENTRY_NAME, parserTagger);
-    artifactMap.put(CHUNKER_TAGGER_MODEL_ENTRY_NAME, chunkerTagger);
-    artifactMap.put(HEAD_RULES_MODEL_ENTRY_NAME, headRules);
+    this.artifactMap.put(BUILD_MODEL_ENTRY_NAME, buildModel);
+    this.artifactMap.put(CHECK_MODEL_ENTRY_NAME, checkModel);
+    this.artifactMap.put(PARSER_TAGGER_MODEL_ENTRY_NAME, parserTagger);
+    this.artifactMap.put(CHUNKER_TAGGER_MODEL_ENTRY_NAME, chunkerTagger);
+    this.artifactMap.put(HEAD_RULES_MODEL_ENTRY_NAME, headRules);
     checkArtifactMap();
   }
 
-  public ParserModel(String languageCode, MaxentModel buildModel,
-      MaxentModel checkModel, SequenceLabelerModel parserTagger,
-      SequenceLabelerModel chunkerTagger, int beamSize, HeadRules headRules) {
+  public ParserModel(final String languageCode, final MaxentModel buildModel,
+      final MaxentModel checkModel, final SequenceLabelerModel parserTagger,
+      final SequenceLabelerModel chunkerTagger, final int beamSize,
+      final HeadRules headRules) {
     this(languageCode, buildModel, checkModel, parserTagger, chunkerTagger,
         beamSize, headRules, null);
   }
 
-  public ParserModel(InputStream in) throws IOException, InvalidFormatException {
+  public ParserModel(final InputStream in)
+      throws IOException, InvalidFormatException {
     super(COMPONENT_NAME, in);
   }
 
-  public ParserModel(File modelFile) throws IOException, InvalidFormatException {
+  public ParserModel(final File modelFile)
+      throws IOException, InvalidFormatException {
     super(COMPONENT_NAME, modelFile);
   }
 
-  public ParserModel(URL modelURL) throws IOException, InvalidFormatException {
+  public ParserModel(final URL modelURL)
+      throws IOException, InvalidFormatException {
     super(COMPONENT_NAME, modelURL);
   }
 
   @SuppressWarnings("rawtypes")
   @Override
   protected void createArtifactSerializers(
-      Map<String, ArtifactSerializer> serializers) {
+      final Map<String, ArtifactSerializer> serializers) {
     super.createArtifactSerializers(serializers);
 
     if (getLanguage().equalsIgnoreCase("es")) {
@@ -105,30 +111,31 @@ public class ParserModel extends BaseModel {
   }
 
   public MaxentModel getBuildModel() {
-    return (MaxentModel) artifactMap.get(BUILD_MODEL_ENTRY_NAME);
+    return (MaxentModel) this.artifactMap.get(BUILD_MODEL_ENTRY_NAME);
   }
 
   public MaxentModel getCheckModel() {
-    return (MaxentModel) artifactMap.get(CHECK_MODEL_ENTRY_NAME);
+    return (MaxentModel) this.artifactMap.get(CHECK_MODEL_ENTRY_NAME);
   }
 
   public SequenceLabelerModel getParserTaggerModel() {
-    return (SequenceLabelerModel) artifactMap
+    return (SequenceLabelerModel) this.artifactMap
         .get(PARSER_TAGGER_MODEL_ENTRY_NAME);
   }
 
   public SequenceLabelerModel getParserChunkerModel() {
-    return (SequenceLabelerModel) artifactMap
+    return (SequenceLabelerModel) this.artifactMap
         .get(CHUNKER_TAGGER_MODEL_ENTRY_NAME);
   }
 
   public HeadRules getHeadRules() {
-    return (HeadRules) artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME);
+    return (HeadRules) this.artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME);
   }
 
   public int getBeamSize() {
-    Properties manifest = (Properties) artifactMap.get(MANIFEST_ENTRY);
-    String beamSizeString = manifest
+    final Properties manifest = (Properties) this.artifactMap
+        .get(MANIFEST_ENTRY);
+    final String beamSizeString = manifest
         .getProperty(BeamSearch.BEAM_SIZE_PARAMETER);
 
     int beamSize = ShiftReduceParser.DEFAULT_BEAMSIZE;
@@ -140,24 +147,24 @@ public class ParserModel extends BaseModel {
 
   // TODO: Update model methods should make sure properties are copied correctly
   // ...
-  public ParserModel updateBuildModel(MaxentModel buildModel) {
+  public ParserModel updateBuildModel(final MaxentModel buildModel) {
     return new ParserModel(getLanguage(), buildModel, getCheckModel(),
         getParserTaggerModel(), getParserChunkerModel(), getBeamSize(),
         getHeadRules());
   }
 
-  public ParserModel updateCheckModel(MaxentModel checkModel) {
+  public ParserModel updateCheckModel(final MaxentModel checkModel) {
     return new ParserModel(getLanguage(), getBuildModel(), checkModel,
         getParserTaggerModel(), getParserChunkerModel(), getBeamSize(),
         getHeadRules());
   }
 
-  public ParserModel updateTaggerModel(SequenceLabelerModel taggerModel) {
+  public ParserModel updateTaggerModel(final SequenceLabelerModel taggerModel) {
     return new ParserModel(getLanguage(), getBuildModel(), getCheckModel(),
         taggerModel, getParserChunkerModel(), getBeamSize(), getHeadRules());
   }
 
-  public ParserModel updateChunkerModel(SequenceLabelerModel chunkModel) {
+  public ParserModel updateChunkerModel(final SequenceLabelerModel chunkModel) {
     return new ParserModel(getLanguage(), getBuildModel(), getCheckModel(),
         getParserTaggerModel(), chunkModel, getBeamSize(), getHeadRules());
   }
@@ -166,39 +173,46 @@ public class ParserModel extends BaseModel {
   protected void validateArtifactMap() throws InvalidFormatException {
     super.validateArtifactMap();
 
-    if (!(artifactMap.get(BUILD_MODEL_ENTRY_NAME) instanceof AbstractModel)) {
+    if (!(this.artifactMap
+        .get(BUILD_MODEL_ENTRY_NAME) instanceof AbstractModel)) {
       throw new InvalidFormatException("Missing the build model!");
     }
 
-    if (!(artifactMap.get(CHECK_MODEL_ENTRY_NAME) instanceof AbstractModel)) {
+    if (!(this.artifactMap
+        .get(CHECK_MODEL_ENTRY_NAME) instanceof AbstractModel)) {
       throw new InvalidFormatException("Missing the check model!");
     }
 
-    if (!(artifactMap.get(PARSER_TAGGER_MODEL_ENTRY_NAME) instanceof SequenceLabelerModel)) {
+    if (!(this.artifactMap
+        .get(PARSER_TAGGER_MODEL_ENTRY_NAME) instanceof SequenceLabelerModel)) {
       throw new InvalidFormatException("Missing the tagger model!");
     }
 
-    if (!(artifactMap.get(CHUNKER_TAGGER_MODEL_ENTRY_NAME) instanceof SequenceLabelerModel)) {
+    if (!(this.artifactMap.get(
+        CHUNKER_TAGGER_MODEL_ENTRY_NAME) instanceof SequenceLabelerModel)) {
       throw new InvalidFormatException("Missing the chunker model!");
     }
 
-    if (!(artifactMap.get(HEAD_RULES_MODEL_ENTRY_NAME) instanceof HeadRules)) {
+    if (!(this.artifactMap
+        .get(HEAD_RULES_MODEL_ENTRY_NAME) instanceof HeadRules)) {
       throw new InvalidFormatException("Missing the head rules!");
     }
   }
 
-  private static class SequenceLabelerModelSerializer implements
-      ArtifactSerializer<SequenceLabelerModel> {
+  private static class SequenceLabelerModelSerializer
+      implements ArtifactSerializer<SequenceLabelerModel> {
 
-    public SequenceLabelerModel create(InputStream in) throws IOException,
-        InvalidFormatException {
-      SequenceLabelerModel posModel = new SequenceLabelerModel(
+    @Override
+    public SequenceLabelerModel create(final InputStream in)
+        throws IOException, InvalidFormatException {
+      final SequenceLabelerModel posModel = new SequenceLabelerModel(
           new UncloseableInputStream(in));
       return posModel;
     }
 
-    public void serialize(SequenceLabelerModel artifact, OutputStream out)
-        throws IOException {
+    @Override
+    public void serialize(final SequenceLabelerModel artifact,
+        final OutputStream out) throws IOException {
       artifact.serialize(out);
     }
   }

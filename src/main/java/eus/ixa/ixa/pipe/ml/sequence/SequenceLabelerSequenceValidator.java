@@ -19,29 +19,32 @@ package eus.ixa.ixa.pipe.ml.sequence;
 
 import opennlp.tools.util.SequenceValidator;
 
-public class SequenceLabelerSequenceValidator implements
-    SequenceValidator<String> {
+public class SequenceLabelerSequenceValidator
+    implements SequenceValidator<String> {
 
-  public boolean validSequence(int i, String[] inputSequence,
-      String[] outcomesSequence, String outcome) {
+  @Override
+  public boolean validSequence(final int i, final String[] inputSequence,
+      final String[] outcomesSequence, final String outcome) {
 
     // outcome is formatted like "cont" or "sometype-cont", so we
     // can check if it ends with "cont".
     if (outcome.endsWith(BilouCodec.CONTINUE)) {
 
-      int li = outcomesSequence.length - 1;
+      final int li = outcomesSequence.length - 1;
 
       if (li == -1) {
         return false;
       } else if (outcomesSequence[li].endsWith(BilouCodec.OTHER)) {
         return false;
       } else if (outcomesSequence[li].endsWith(BilouCodec.CONTINUE)) {
-        // if it is continue, we have to check if previous match was of the same type
-        String previousSeqType = SequenceLabelerME.extractNameType(outcomesSequence[li]);
-        String seqType = SequenceLabelerME.extractNameType(outcome);
-        if( previousSeqType != null || seqType != null ) {
-          if( seqType != null ) {
-            if( seqType.equals(previousSeqType) ){
+        // if it is continue, we have to check if previous match was of the same
+        // type
+        final String previousSeqType = SequenceLabelerME
+            .extractNameType(outcomesSequence[li]);
+        final String seqType = SequenceLabelerME.extractNameType(outcome);
+        if (previousSeqType != null || seqType != null) {
+          if (seqType != null) {
+            if (seqType.equals(previousSeqType)) {
               return true;
             }
           }

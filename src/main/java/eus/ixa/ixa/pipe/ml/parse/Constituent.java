@@ -24,38 +24,38 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
 public class Constituent {
 
   private String label;
-  private Span span;
+  private final Span span;
 
-  public Constituent(String label, Span span) {
+  public Constituent(final String label, final Span span) {
     this.label = label;
     this.span = span;
   }
 
-
   /**
    * Returns the label of the constituent.
+   * 
    * @return the label of the constituent.
    */
   public String getLabel() {
-    return label;
+    return this.label;
   }
-
 
   /**
    * Assigns the label to the constituent.
-   * @param label The label to set.
+   * 
+   * @param label
+   *          The label to set.
    */
-  public void setLabel(String label) {
+  public void setLabel(final String label) {
     this.label = label;
   }
 
-
   /**
    * Returns the span of the constituent.
+   * 
    * @return the span of the constituent.
    */
   public Span getSpan() {
-    return span;
+    return this.span;
   }
 }
-

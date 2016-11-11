@@ -20,46 +20,46 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import opennlp.tools.util.FilterObjectStream;
-import opennlp.tools.util.ObjectStream;
 import eus.ixa.ixa.pipe.ml.parse.Parse;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.utils.Span;
+import opennlp.tools.util.FilterObjectStream;
+import opennlp.tools.util.ObjectStream;
 
 /**
- * Obtains the POS tags from a Penn Treebank formatted parse tree and
- * and encodes them in {@code TabulatedFormat} for training a
- * POS tagger.
+ * Obtains the POS tags from a Penn Treebank formatted parse tree and and
+ * encodes them in {@code TabulatedFormat} for training a POS tagger.
+ * 
  * @author ragerri
  * @version 2016-05-10
  */
-public class ParseToTabulatedFormat extends
-    FilterObjectStream<Parse, SequenceLabelSample> {
-  
-  public ParseToTabulatedFormat(ObjectStream<Parse> in) {
+public class ParseToTabulatedFormat
+    extends FilterObjectStream<Parse, SequenceLabelSample> {
+
+  public ParseToTabulatedFormat(final ObjectStream<Parse> in) {
     super(in);
   }
 
+  @Override
   public SequenceLabelSample read() throws IOException {
 
-    List<String> tokens = new ArrayList<>();
-    List<String> seqTypes = new ArrayList<>();
-    boolean isClearAdaptiveData = false;
-    Parse parse = samples.read();
+    final List<String> tokens = new ArrayList<>();
+    final List<String> seqTypes = new ArrayList<>();
+    final boolean isClearAdaptiveData = false;
+    final Parse parse = this.samples.read();
 
     if (parse != null) {
-      Parse[] nodes = parse.getTagNodes();
-      for (int i = 0; i < nodes.length; i++) {
-        Parse tok = nodes[i];
+      final Parse[] nodes = parse.getTagNodes();
+      for (final Parse tok : nodes) {
         tokens.add(tok.getCoveredText());
         seqTypes.add(tok.getType());
       }
     }
     // check if we need to clear features every sentence
-    //isClearAdaptiveData = true;
+    // isClearAdaptiveData = true;
     if (tokens.size() > 0) {
       // convert sequence tags into spans
-      List<Span> sequences = new ArrayList<Span>();
+      final List<Span> sequences = new ArrayList<Span>();
       int beginIndex = -1;
       int endIndex = -1;
       for (int i = 0; i < seqTypes.size(); i++) {
@@ -73,8 +73,9 @@ public class ParseToTabulatedFormat extends
         endIndex = i + 1;
       }
       // if one span remains, create it here
-      if (beginIndex != -1)
+      if (beginIndex != -1) {
         sequences.add(new Span(beginIndex, endIndex, seqTypes.get(beginIndex)));
+      }
 
       return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
           sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);

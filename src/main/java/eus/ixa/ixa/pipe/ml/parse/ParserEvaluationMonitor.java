@@ -16,6 +16,7 @@
 */
 
 package eus.ixa.ixa.pipe.ml.parse;
+
 import opennlp.tools.util.eval.EvaluationMonitor;
 
 public interface ParserEvaluationMonitor extends EvaluationMonitor<Parse> {

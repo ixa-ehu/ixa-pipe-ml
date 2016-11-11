@@ -24,14 +24,15 @@ import java.util.Properties;
  * <li>Language: ca, de, en, es, eu, fr, gl, it, nl, pt, ru.
  * <li>Model: the model name.
  * </ol>
+ * 
  * @author ragerri
  * @version 2016-04-22
  */
 public class AnnotateProperties {
 
   /**
-   * Choose corpus conventions for normalization of punctuation.
-   * See eus.ixa.ixa.pipe.ml.tok.Normalizer class.
+   * Choose corpus conventions for normalization of punctuation. See
+   * eus.ixa.ixa.pipe.ml.tok.Normalizer class.
    */
   public static final String DEFAULT_NORMALIZE = "default";
   /**
@@ -54,25 +55,31 @@ public class AnnotateProperties {
    * Output all POS and Lemma analysis before disambiguation.
    */
   public static final String DEFAULT_ALL_MORPHOLOGY = "false";
-  
-  
+
   /**
    * This class is not to be instantiated.
    */
   private AnnotateProperties() {
 
   }
-  
+
   /**
-   * Creates the Properties object required to construct a Sentence
-   * Segmenter and a Tokenizer.
-   * @param lang it is required to provide a language code
-   * @param normalize the normalization option
-   * @param untokenizable print untokenizable tokens
-   * @param hardParagraph do not segment paragraph marks
+   * Creates the Properties object required to construct a Sentence Segmenter
+   * and a Tokenizer.
+   * 
+   * @param lang
+   *          it is required to provide a language code
+   * @param normalize
+   *          the normalization option
+   * @param untokenizable
+   *          print untokenizable tokens
+   * @param hardParagraph
+   *          do not segment paragraph marks
    * @return the properties object
    */
-  public static Properties setTokenizeProperties(final String lang, final String normalize, final String untokenizable, final String hardParagraph) {
+  public static Properties setTokenizeProperties(final String lang,
+      final String normalize, final String untokenizable,
+      final String hardParagraph) {
     final Properties annotateProperties = new Properties();
     annotateProperties.setProperty("language", lang);
     annotateProperties.setProperty("normalize", normalize);
@@ -80,20 +87,29 @@ public class AnnotateProperties {
     annotateProperties.setProperty("hardParagraph", hardParagraph);
     return annotateProperties;
   }
-  
+
   /**
-   * Generate Properties object for POS tagging and Lemmatizing.
-   * Language, model and lemmatizerModel are compulsory.
-   * @param model the pos tagger model
-   * @param lemmatizerModel the lemmatizer model
-   * @param language the language
-   * @param multiwords whether multiwords are to be detected
-   * @param dictag whether tagging from a dictionary is activated
-   * @param allMorphology whether to disclose all pos tags and lemmas before disambiguation
+   * Generate Properties object for POS tagging and Lemmatizing. Language, model
+   * and lemmatizerModel are compulsory.
+   * 
+   * @param model
+   *          the pos tagger model
+   * @param lemmatizerModel
+   *          the lemmatizer model
+   * @param language
+   *          the language
+   * @param multiwords
+   *          whether multiwords are to be detected
+   * @param dictag
+   *          whether tagging from a dictionary is activated
+   * @param allMorphology
+   *          whether to disclose all pos tags and lemmas before disambiguation
    * @return a properties object
    */
-  public static Properties setPOSLemmaProperties(final String model, final String lemmatizerModel,
-      final String language, final String multiwords, final String dictag, final String allMorphology) {
+  public static Properties setPOSLemmaProperties(final String model,
+      final String lemmatizerModel, final String language,
+      final String multiwords, final String dictag,
+      final String allMorphology) {
     final Properties annotateProperties = new Properties();
     annotateProperties.setProperty("model", model);
     annotateProperties.setProperty("lemmatizerModel", lemmatizerModel);
@@ -103,17 +119,18 @@ public class AnnotateProperties {
     annotateProperties.setProperty("allMorphology", allMorphology);
     return annotateProperties;
   }
-  
+
   /**
-   * Generate Properties object for chunking. Both parameters are
-   * compulsory.
+   * Generate Properties object for chunking. Both parameters are compulsory.
+   * 
    * @param model
    *          the model to perform the annotation
    * @param language
    *          the language
    * @return a properties object
    */
-  public Properties setChunkingProperties(final String model, final String language) {
+  public Properties setChunkingProperties(final String model,
+      final String language) {
     final Properties annotateProperties = new Properties();
     annotateProperties.setProperty("model", model);
     annotateProperties.setProperty("language", language);

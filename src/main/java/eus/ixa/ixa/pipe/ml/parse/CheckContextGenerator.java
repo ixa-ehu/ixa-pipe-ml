@@ -16,70 +16,78 @@
  */
 
 package eus.ixa.ixa.pipe.ml.parse;
+
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Class for generating predictive context for deciding when a constituent is complete.
+ * Class for generating predictive context for deciding when a constituent is
+ * complete.
  */
 public class CheckContextGenerator extends AbstractContextGenerator {
-  
-  private Map<String, Object> resources;
 
   /**
-   * Creates a new context generator for generating predictive context for deciding when a constituent is complete.
+   * Creates a new context generator for generating predictive context for
+   * deciding when a constituent is complete.
    */
   public CheckContextGenerator() {
     super();
   }
-  
-  public CheckContextGenerator(Map<String, Object> resources) {
+
+  public CheckContextGenerator(final Map<String, Object> resources) {
     super();
-    this.resources = resources;
   }
 
-  public String[] getContext(Object o) {
-    Object[] params = (Object[]) o;
-    return getContext((Parse[]) params[0], (String) params[1], (Integer) params[2], (Integer) params[3]);
+  public String[] getContext(final Object o) {
+    final Object[] params = (Object[]) o;
+    return getContext((Parse[]) params[0], (String) params[1],
+        (Integer) params[2], (Integer) params[3]);
   }
 
   /**
-   * Returns predictive context for deciding whether the specified constituents between the specified start and end index
-   * can be combined to form a new constituent of the specified type.
-   * @param constituents The constituents which have yet to be combined into new constituents.
-   * @param type The type of the new constituent proposed.
-   * @param start The first constituent of the proposed constituent.
-   * @param end The last constituent of the proposed constituent.
-   * @return The predictive context for deciding whether a new constituent should be created.
+   * Returns predictive context for deciding whether the specified constituents
+   * between the specified start and end index can be combined to form a new
+   * constituent of the specified type.
+   * 
+   * @param constituents
+   *          The constituents which have yet to be combined into new
+   *          constituents.
+   * @param type
+   *          The type of the new constituent proposed.
+   * @param start
+   *          The first constituent of the proposed constituent.
+   * @param end
+   *          The last constituent of the proposed constituent.
+   * @return The predictive context for deciding whether a new constituent
+   *         should be created.
    */
-  public String[] getContext(Parse[] constituents, String type, int start, int end) {
-    int ps = constituents.length;
-    List<String> features = new ArrayList<String>(100);
+  public String[] getContext(final Parse[] constituents, final String type,
+      final int start, final int end) {
+    final int ps = constituents.length;
+    final List<String> features = new ArrayList<String>(100);
 
-    //default
+    // default
     features.add("default");
-    //first constituent label
-    features.add("fl="+constituents[0].getLabel());
-    Parse pstart = constituents[start];
-    Parse pend = constituents[end];
+    // first constituent label
+    features.add("fl=" + constituents[0].getLabel());
+    final Parse pstart = constituents[start];
+    final Parse pend = constituents[end];
     checkcons(pstart, "begin", type, features);
     checkcons(pend, "last", type, features);
-    StringBuilder production = new StringBuilder(20);
-    StringBuilder punctProduction = new StringBuilder(20);
+    final StringBuilder production = new StringBuilder(20);
+    final StringBuilder punctProduction = new StringBuilder(20);
     production.append("p=").append(type).append("->");
     punctProduction.append("pp=").append(type).append("->");
     for (int pi = start; pi < end; pi++) {
-      Parse p = constituents[pi];
+      final Parse p = constituents[pi];
       checkcons(p, pend, type, features);
       production.append(p.getType()).append(",");
       punctProduction.append(p.getType()).append(",");
-      Collection<Parse> nextPunct = p.getNextPunctuationSet();
+      final Collection<Parse> nextPunct = p.getNextPunctuationSet();
       if (nextPunct != null) {
-        for (Iterator<Parse> pit=nextPunct.iterator();pit.hasNext();) {
-          Parse punct = pit.next();
+        for (final Parse punct : nextPunct) {
           punctProduction.append(punct.getType()).append(",");
         }
       }
@@ -92,9 +100,10 @@ public class CheckContextGenerator extends AbstractContextGenerator {
     Parse p_1 = null;
     Parse p1 = null;
     Parse p2 = null;
-    Collection<Parse> p1s = constituents[end].getNextPunctuationSet();
+    final Collection<Parse> p1s = constituents[end].getNextPunctuationSet();
     Collection<Parse> p2s = null;
-    Collection<Parse> p_1s = constituents[start].getPreviousPunctuationSet();
+    final Collection<Parse> p_1s = constituents[start]
+        .getPreviousPunctuationSet();
     Collection<Parse> p_2s = null;
     if (start - 2 >= 0) {
       p_2 = constituents[start - 2];
@@ -118,4 +127,3 @@ public class CheckContextGenerator extends AbstractContextGenerator {
     return features.toArray(new String[features.size()]);
   }
 }
-

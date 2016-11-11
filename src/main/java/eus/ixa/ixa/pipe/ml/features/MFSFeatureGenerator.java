@@ -21,27 +21,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
-import opennlp.tools.util.featuregen.CustomFeatureGenerator;
-import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
-import opennlp.tools.util.model.ArtifactSerializer;
 import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
 import eus.ixa.ixa.pipe.ml.resources.MFSResource;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.Span;
+import opennlp.tools.util.InvalidFormatException;
+import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
+import opennlp.tools.util.featuregen.CustomFeatureGenerator;
+import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
+import opennlp.tools.util.model.ArtifactSerializer;
 
 /**
  * Generate pos tag, pos tag class, lemma and most frequent sense as feature of
  * the current token. This feature generator can also be placed in a sliding
  * window.
- * 
+ *
  * @author ragerri
  * @version 2015-03-27
  */
-public class MFSFeatureGenerator extends CustomFeatureGenerator implements
-    ArtifactToSerializerMapper {
+public class MFSFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
 
   private SequenceModelResource posModelResource;
   private DictionaryLemmatizer lemmaDictResource;
@@ -60,47 +60,52 @@ public class MFSFeatureGenerator extends CustomFeatureGenerator implements
   public MFSFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
 
     // cache annotation results for each sentence
-    if (currentSentence != tokens) {
-      currentSentence = tokens;
-      currentTags = posModelResource.seqToSpans(tokens);
-      currentLemmas = lemmaDictResource.lemmatize(tokens, currentTags);
-      if (isBio) {
-        currentMFSList = mfsDictResource.getFirstSenseBio(currentLemmas, currentTags);
+    if (this.currentSentence != tokens) {
+      this.currentSentence = tokens;
+      this.currentTags = this.posModelResource.seqToSpans(tokens);
+      this.currentLemmas = this.lemmaDictResource.lemmatize(tokens,
+          this.currentTags);
+      if (this.isBio) {
+        this.currentMFSList = this.mfsDictResource
+            .getFirstSenseBio(this.currentLemmas, this.currentTags);
       } else {
-        currentMFSList = mfsDictResource.getFirstSenseBilou(currentLemmas, currentTags);
+        this.currentMFSList = this.mfsDictResource
+            .getFirstSenseBilou(this.currentLemmas, this.currentTags);
       }
     }
-    String posTag = currentTags[index].getType();
+    final String posTag = this.currentTags[index].getType();
 
-    if (isPos) {
+    if (this.isPos) {
       features.add("posTag=" + posTag);
     }
-    if (isPosClass) {
-      String posTagClass = posTag.substring(0, 1);
+    if (this.isPosClass) {
+      final String posTagClass = posTag.substring(0, 1);
       features.add("posTagClass=" + posTagClass);
 
     }
-    if (isLemma) {
-      String lemma = currentLemmas.get(index);
+    if (this.isLemma) {
+      final String lemma = this.currentLemmas.get(index);
       features.add("lemma=" + lemma);
     }
-    if (isMFS) {
-      String mfs = currentMFSList.get(index);
+    if (this.isMFS) {
+      final String mfs = this.currentMFSList.get(index);
       features.add("mfs=" + mfs);
-      features.add("mfs,lemma=" + mfs + "," + currentLemmas.get(index));
+      features.add("mfs,lemma=" + mfs + "," + this.currentLemmas.get(index));
 
     }
-    if (isMonosemic) {
+    if (this.isMonosemic) {
 
     }
   }
 
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
 
   }
 
@@ -110,65 +115,68 @@ public class MFSFeatureGenerator extends CustomFeatureGenerator implements
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    Object posResource = resourceProvider.getResource(properties.get("model"));
+    final Object posResource = resourceProvider
+        .getResource(properties.get("model"));
     if (!(posResource instanceof SequenceModelResource)) {
-      throw new InvalidFormatException("Not a POSModelResource for key: "
-          + properties.get("model"));
+      throw new InvalidFormatException(
+          "Not a POSModelResource for key: " + properties.get("model"));
     }
     this.posModelResource = (SequenceModelResource) posResource;
-    Object lemmaResource = resourceProvider.getResource(properties.get("dict"));
+    final Object lemmaResource = resourceProvider
+        .getResource(properties.get("dict"));
     if (!(lemmaResource instanceof DictionaryLemmatizer)) {
-      throw new InvalidFormatException("Not a LemmaResource for key: "
-          + properties.get("dict"));
+      throw new InvalidFormatException(
+          "Not a LemmaResource for key: " + properties.get("dict"));
     }
     this.lemmaDictResource = (DictionaryLemmatizer) lemmaResource;
-    Object mfsResource = resourceProvider.getResource(properties.get("mfs"));
+    final Object mfsResource = resourceProvider
+        .getResource(properties.get("mfs"));
     if (!(mfsResource instanceof MFSResource)) {
-      throw new InvalidFormatException("Not a MFSResource for key: "
-          + properties.get("mfs"));
+      throw new InvalidFormatException(
+          "Not a MFSResource for key: " + properties.get("mfs"));
     }
     this.mfsDictResource = (MFSResource) mfsResource;
     processRangeOptions(properties);
     if (properties.get("seqCodec").equalsIgnoreCase("bilou")) {
-      isBio = false;
+      this.isBio = false;
     } else {
-      isBio = true;
+      this.isBio = true;
     }
   }
 
   /**
    * Process the options of which kind of features are to be generated.
-   * 
+   *
    * @param properties
    *          the properties map
    */
-  private void processRangeOptions(Map<String, String> properties) {
-    String featuresRange = properties.get("range");
-    String[] rangeArray = Flags.processMFSFeaturesRange(featuresRange);
+  private void processRangeOptions(final Map<String, String> properties) {
+    final String featuresRange = properties.get("range");
+    final String[] rangeArray = Flags.processMFSFeaturesRange(featuresRange);
     // options
     if (rangeArray[0].equalsIgnoreCase("pos")) {
-      isPos = true;
+      this.isPos = true;
     }
     if (rangeArray[1].equalsIgnoreCase("posclass")) {
-      isPosClass = true;
+      this.isPosClass = true;
     }
     if (rangeArray[2].equalsIgnoreCase("lemma")) {
-      isLemma = true;
+      this.isLemma = true;
     }
     if (rangeArray[3].equalsIgnoreCase("mfs")) {
-      isMFS = true;
+      this.isMFS = true;
     }
     if (rangeArray[4].equalsIgnoreCase("monosemic")) {
-      isMonosemic = true;
+      this.isMonosemic = true;
     }
   }
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
     mapping.put("posmodelserializer",
         new SequenceModelResource.SequenceModelResourceSerializer());
     mapping.put("lemmadictserializer",

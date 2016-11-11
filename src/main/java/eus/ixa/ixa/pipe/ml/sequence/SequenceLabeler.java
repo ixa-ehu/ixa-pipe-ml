@@ -18,25 +18,31 @@ package eus.ixa.ixa.pipe.ml.sequence;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 /**
- * The interface for sequence labelers which provide tags for a sequence of tokens.
+ * The interface for sequence labelers which provide tags for a sequence of
+ * tokens.
+ * 
  * @author ragerri
  * @version 2016-03-14
  */
 public interface SequenceLabeler {
 
-  /** Generates tags for the given sequence, typically a sentence, returning token spans for any identified sequences.
-   * @param tokens an array of the tokens or words of the sequence, typically a sentence.
+  /**
+   * Generates tags for the given sequence, typically a sentence, returning
+   * token spans for any identified sequences.
+   * 
+   * @param tokens
+   *          an array of the tokens or words of the sequence, typically a
+   *          sentence.
    * @return an array of spans for each of the sequences identified.
    */
   public Span[] tag(String tokens[]);
 
   /**
-   * Forgets all adaptive data which was collected during previous
-   * calls to one of the find methods.
+   * Forgets all adaptive data which was collected during previous calls to one
+   * of the find methods.
    *
    * This method is typical called at the end of a document.
    */
   public void clearAdaptiveData();
 
 }
-

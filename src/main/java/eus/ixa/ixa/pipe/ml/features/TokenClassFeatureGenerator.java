@@ -20,7 +20,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import eus.ixa.ixa.pipe.ml.utils.Flags;
-
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
@@ -57,29 +56,28 @@ public class TokenClassFeatureGenerator extends CustomFeatureGenerator {
   public TokenClassFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] preds) {
-    String wordClass = tokenShapeFeature(tokens[index]);
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
+    final String wordClass = tokenShapeFeature(tokens[index]);
     features.add("wc=" + wordClass);
 
-    if (isWordAndClassFeature) {
-      if (isLower) {
-        features.add("w&c=" + tokens[index].toLowerCase()
-            + "," + wordClass);
+    if (this.isWordAndClassFeature) {
+      if (this.isLower) {
+        features.add("w&c=" + tokens[index].toLowerCase() + "," + wordClass);
       } else {
-        features.add("w&c=" + tokens[index]
-            + "," + wordClass);
+        features.add("w&c=" + tokens[index] + "," + wordClass);
       }
     }
     if (Flags.DEBUG) {
-      System.err.println("-> " + tokens[index].toLowerCase() + ": w&c=" + tokens[index].toLowerCase()
-          + "," + wordClass);
+      System.err.println("-> " + tokens[index].toLowerCase() + ": w&c="
+          + tokens[index].toLowerCase() + "," + wordClass);
     }
   }
 
-  public static String tokenShapeFeature(String token) {
+  public static String tokenShapeFeature(final String token) {
 
-    StringPattern pattern = StringPattern.recognize(token);
+    final StringPattern pattern = StringPattern.recognize(token);
 
     String feat;
     if (pattern.isAllLowerCaseLetter()) {
@@ -88,8 +86,7 @@ public class TokenClassFeatureGenerator extends CustomFeatureGenerator {
       feat = "2d";
     } else if (pattern.digits() == 4) {
       feat = "4d";
-    }
-    else if (pattern.containsDigit()) {
+    } else if (pattern.containsDigit()) {
       if (pattern.containsLetters()) {
         feat = "an";
       } else if (pattern.containsHyphen()) {
@@ -114,36 +111,40 @@ public class TokenClassFeatureGenerator extends CustomFeatureGenerator {
     } else {
       feat = "other";
     }
-    return (feat);
+    return feat;
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
   }
 
   @Override
   public void clearAdaptiveData() {
   }
-  
+
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-   processRangeOptions(properties);
+    processRangeOptions(properties);
   }
-  
+
   /**
    * Process the options of which type of features are to be generated.
-   * @param properties the properties map
+   * 
+   * @param properties
+   *          the properties map
    */
-  private void processRangeOptions(Map<String, String> properties) {
-    String featuresRange = properties.get("range");
-    String[] rangeArray = Flags.processTokenClassFeaturesRange(featuresRange);
+  private void processRangeOptions(final Map<String, String> properties) {
+    final String featuresRange = properties.get("range");
+    final String[] rangeArray = Flags
+        .processTokenClassFeaturesRange(featuresRange);
     if (rangeArray[0].equalsIgnoreCase("lower")) {
-      isLower = true;
+      this.isLower = true;
     }
     if (rangeArray[1].equalsIgnoreCase("wac")) {
-      isWordAndClassFeature = true;
+      this.isWordAndClassFeature = true;
     }
   }
 

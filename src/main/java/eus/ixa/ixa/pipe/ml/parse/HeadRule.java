@@ -19,7 +19,6 @@ package eus.ixa.ixa.pipe.ml.parse;
 
 import java.util.Arrays;
 
-
 public class HeadRule {
 
   private boolean leftToRight;
@@ -56,13 +55,14 @@ public class HeadRule {
    * @return the tags
    */
   public String[] getTags() {
-    return tags;
+    return this.tags;
   }
 
   /**
-   * @param tags the tags to set
+   * @param tags
+   *          the tags to set
    */
-  public void setTags(String[] tags) {
+  public void setTags(final String[] tags) {
     this.tags = tags;
   }
 
@@ -70,13 +70,14 @@ public class HeadRule {
    * @return the leftToRight
    */
   public boolean isLeftToRight() {
-    return leftToRight;
+    return this.leftToRight;
   }
 
   /**
-   * @param leftToRight the leftToRight to set
+   * @param leftToRight
+   *          the leftToRight to set
    */
-  public void setLeftToRight(boolean leftToRight) {
+  public void setLeftToRight(final boolean leftToRight) {
     this.leftToRight = leftToRight;
   }
 }

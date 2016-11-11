@@ -24,25 +24,23 @@ import opennlp.tools.util.ObjectStream;
 
 public class ParseSampleStream extends FilterObjectStream<String, Parse> {
 
-  public ParseSampleStream(ObjectStream<String> in) {
+  public ParseSampleStream(final ObjectStream<String> in) {
     super(in);
   }
 
+  @Override
   public Parse read() throws IOException {
 
-    String parse = samples.read();
+    final String parse = this.samples.read();
 
     if (parse != null) {
       if (!parse.trim().isEmpty()) {
         return Parse.parseParse(parse);
-      }
-      else {
+      } else {
         return read();
       }
-    }
-    else {
+    } else {
       return null;
     }
   }
 }
-

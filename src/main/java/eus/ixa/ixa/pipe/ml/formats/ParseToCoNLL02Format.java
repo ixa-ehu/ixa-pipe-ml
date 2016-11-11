@@ -20,54 +20,54 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import opennlp.tools.util.FilterObjectStream;
-import opennlp.tools.util.ObjectStream;
 import eus.ixa.ixa.pipe.ml.parse.Parse;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
 import eus.ixa.ixa.pipe.ml.utils.Span;
+import opennlp.tools.util.FilterObjectStream;
+import opennlp.tools.util.ObjectStream;
 
 /**
- * Obtains chunks from a Penn Treebank formatted parse tree and
- * encodes them in CoNLL 2000 format.
+ * Obtains chunks from a Penn Treebank formatted parse tree and encodes them in
+ * CoNLL 2000 format.
+ * 
  * @author ragerri
  * @version 2016-05-10
  */
-public class ParseToCoNLL02Format extends FilterObjectStream<Parse, SequenceLabelSample> {
+public class ParseToCoNLL02Format
+    extends FilterObjectStream<Parse, SequenceLabelSample> {
 
-  public ParseToCoNLL02Format(ObjectStream<Parse> in) {
+  public ParseToCoNLL02Format(final ObjectStream<Parse> in) {
     super(in);
   }
 
+  @Override
   public SequenceLabelSample read() throws IOException {
 
-    List<String> tokens = new ArrayList<>();
-    List<String> seqTypes = new ArrayList<>();
-    Parse parse = samples.read();
+    final List<String> tokens = new ArrayList<>();
+    final List<String> seqTypes = new ArrayList<>();
+    final Parse parse = this.samples.read();
     boolean isClearAdaptiveData = false;
-    
+
     if (parse != null) {
       isClearAdaptiveData = true;
-      
-      List<Parse> chunks = getInitialChunks(parse);
-      
+
+      final List<Parse> chunks = getInitialChunks(parse);
+
       for (int ci = 0, cl = chunks.size(); ci < cl; ci++) {
-        Parse c = chunks.get(ci);
+        final Parse c = chunks.get(ci);
         if (c.isPosTag()) {
           tokens.add(c.getCoveredText());
           seqTypes.add("O");
-        }
-        else {
+        } else {
           boolean start = true;
-          String ctype = c.getType();
-          Parse[] children = c.getChildren();
-          for (int ti = 0, tl = children.length; ti < tl; ti++) {
-            Parse tok = children[ti];
+          final String ctype = c.getType();
+          final Parse[] children = c.getChildren();
+          for (final Parse tok : children) {
             tokens.add(tok.getCoveredText());
             if (start) {
               seqTypes.add("B-" + ctype);
               start = false;
-            }
-            else {
+            } else {
               seqTypes.add("I-" + ctype);
             }
           }
@@ -76,14 +76,15 @@ public class ParseToCoNLL02Format extends FilterObjectStream<Parse, SequenceLabe
     }
     if (tokens.size() > 0) {
       // convert sequence tags into spans
-      List<Span> sequences = new ArrayList<Span>();
+      final List<Span> sequences = new ArrayList<Span>();
       int beginIndex = -1;
       int endIndex = -1;
       for (int i = 0; i < seqTypes.size(); i++) {
-        String seqTag = seqTypes.get(i);
+        final String seqTag = seqTypes.get(i);
         if (seqTag.startsWith("B-")) {
           if (beginIndex != -1) {
-            sequences.add(CoNLL02Format.extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+            sequences.add(CoNLL02Format.extract(beginIndex, endIndex,
+                seqTypes.get(beginIndex)));
             beginIndex = -1;
             endIndex = -1;
           }
@@ -93,7 +94,8 @@ public class ParseToCoNLL02Format extends FilterObjectStream<Parse, SequenceLabe
           endIndex++;
         } else if (seqTag.equals("O")) {
           if (beginIndex != -1) {
-            sequences.add(CoNLL02Format.extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+            sequences.add(CoNLL02Format.extract(beginIndex, endIndex,
+                seqTypes.get(beginIndex)));
             beginIndex = -1;
             endIndex = -1;
           }
@@ -102,8 +104,10 @@ public class ParseToCoNLL02Format extends FilterObjectStream<Parse, SequenceLabe
         }
       }
       // if one span remains, create it here
-      if (beginIndex != -1)
-        sequences.add(CoNLL02Format.extract(beginIndex, endIndex, seqTypes.get(beginIndex)));
+      if (beginIndex != -1) {
+        sequences.add(CoNLL02Format.extract(beginIndex, endIndex,
+            seqTypes.get(beginIndex)));
+      }
 
       return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
           sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
@@ -112,19 +116,19 @@ public class ParseToCoNLL02Format extends FilterObjectStream<Parse, SequenceLabe
       return null;
     }
   }
-  
 
-  private static List<Parse> getInitialChunks(Parse p) {
-    List<Parse> chunks = new ArrayList<Parse>();
+  private static List<Parse> getInitialChunks(final Parse p) {
+    final List<Parse> chunks = new ArrayList<Parse>();
     getInitialChunks(p, chunks);
     return chunks;
   }
 
-  private static void getInitialChunks(Parse p, List<Parse> ichunks) {
+  private static void getInitialChunks(final Parse p,
+      final List<Parse> ichunks) {
     if (p.isPosTag()) {
       ichunks.add(p);
     } else {
-      Parse[] kids = p.getChildren();
+      final Parse[] kids = p.getChildren();
       boolean allKidsAreTags = true;
       for (int ci = 0, cl = kids.length; ci < cl; ci++) {
         if (!kids[ci].isPosTag()) {
@@ -135,11 +139,10 @@ public class ParseToCoNLL02Format extends FilterObjectStream<Parse, SequenceLabe
       if (allKidsAreTags) {
         ichunks.add(p);
       } else {
-        for (int ci = 0, cl = kids.length; ci < cl; ci++) {
-          getInitialChunks(kids[ci], ichunks);
+        for (final Parse kid : kids) {
+          getInitialChunks(kid, ichunks);
         }
       }
     }
   }
 }
-

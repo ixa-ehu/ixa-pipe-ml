@@ -20,12 +20,12 @@ import java.io.IOException;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
-import opennlp.tools.util.ObjectStream;
 import eus.ixa.ixa.pipe.ml.ShiftReduceParserTrainer;
 import eus.ixa.ixa.pipe.ml.parse.Parse;
 import eus.ixa.ixa.pipe.ml.parse.ParserEvaluator;
 import eus.ixa.ixa.pipe.ml.parse.ParserModel;
 import eus.ixa.ixa.pipe.ml.parse.ShiftReduceParser;
+import opennlp.tools.util.ObjectStream;
 
 /**
  * Evaluation class mostly using ParserEvaluator.
@@ -38,44 +38,46 @@ public class ParserEvaluate {
   /**
    * ObjectStream of the test data.
    */
-  private ObjectStream<Parse> testSamples;
+  private final ObjectStream<Parse> testSamples;
   ShiftReduceParser parser;
-  
+
   /**
-   * The models to use for every language. The keys of the hash are the
-   * language codes, the values the models.
+   * The models to use for every language. The keys of the hash are the language
+   * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, ParserModel> parseModels =
-      new ConcurrentHashMap<String, ParserModel>();
- 
+  private static ConcurrentHashMap<String, ParserModel> parseModels = new ConcurrentHashMap<String, ParserModel>();
+
   /**
-   * Construct an evaluator. It takes from the properties a model,
-   * a testset and the format of the testset. Every other parameter
-   * set in the training, e.g., beamsize, decoding, etc., is serialized
-   * in the model.
-   * @param props the properties parameter
-   * @throws IOException the io exception
+   * Construct an evaluator. It takes from the properties a model, a testset and
+   * the format of the testset. Every other parameter set in the training, e.g.,
+   * beamsize, decoding, etc., is serialized in the model.
+   * 
+   * @param props
+   *          the properties parameter
+   * @throws IOException
+   *           the io exception
    */
   public ParserEvaluate(final Properties props) throws IOException {
-    
-    String lang = props.getProperty("language");
-    String model = props.getProperty("model");
-    String testSet = props.getProperty("testset");
-    
-    testSamples = ShiftReduceParserTrainer.getParseStream(testSet);
+
+    final String lang = props.getProperty("language");
+    final String model = props.getProperty("model");
+    final String testSet = props.getProperty("testset");
+
+    this.testSamples = ShiftReduceParserTrainer.getParseStream(testSet);
     parseModels.putIfAbsent(lang, new ParserModel(new FileInputStream(model)));
-    parser = new ShiftReduceParser(parseModels.get(lang));
+    this.parser = new ShiftReduceParser(parseModels.get(lang));
   }
 
   /**
    * Evaluate and print precision, recall and F measure.
-   * @throws IOException if test corpus not loaded
+   * 
+   * @throws IOException
+   *           if test corpus not loaded
    */
   public final void evaluate() throws IOException {
-    ParserEvaluator evaluator = new ParserEvaluator(parser);
-    evaluator.evaluate(testSamples);
+    final ParserEvaluator evaluator = new ParserEvaluator(this.parser);
+    evaluator.evaluate(this.testSamples);
     System.out.println(evaluator.getFMeasure());
   }
 
 }
-

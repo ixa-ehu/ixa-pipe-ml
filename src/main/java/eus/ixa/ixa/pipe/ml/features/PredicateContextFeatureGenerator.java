@@ -20,66 +20,68 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.resources.PredicateContext;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.CustomFeatureGenerator;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
-import eus.ixa.ixa.pipe.ml.resources.PredicateContext;
 
-public class PredicateContextFeatureGenerator extends CustomFeatureGenerator implements ArtifactToSerializerMapper {
+public class PredicateContextFeatureGenerator extends CustomFeatureGenerator
+    implements ArtifactToSerializerMapper {
 
-  private PredicateContext predicateContext;
-  
   public PredicateContextFeatureGenerator() {
   }
-  
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] preds) {
-    
-    String[] predicateContexts = tokens[index].split(":KK:");
-    
-    //token
-    //System.err.println(predicateContexts[0]);
+
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] preds) {
+
+    final String[] predicateContexts = tokens[index].split(":KK:");
+
+    // token
+    // System.err.println(predicateContexts[0]);
     features.add(predicateContexts[0]);
-    //pred
-    //System.err.println(predicateContexts[1]);
+    // pred
+    // System.err.println(predicateContexts[1]);
     features.add(predicateContexts[1]);
-    //region
-    //System.err.println(predicateContexts[2]);
+    // region
+    // System.err.println(predicateContexts[2]);
     features.add(predicateContexts[2]);
-    //ctxt
-    //System.err.println(predicateContexts[3]);
+    // ctxt
+    // System.err.println(predicateContexts[3]);
     features.add(predicateContexts[3]);
   }
-  
+
   @Override
-  public void updateAdaptiveData(String[] tokens, String[] outcomes) {
-    
+  public void updateAdaptiveData(final String[] tokens,
+      final String[] outcomes) {
+
   }
 
   @Override
   public void clearAdaptiveData() {
-    
+
   }
 
   @Override
-  public void init(Map<String, String> properties,
-      FeatureGeneratorResourceProvider resourceProvider)
+  public void init(final Map<String, String> properties,
+      final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    Object dictResource = resourceProvider.getResource(properties.get("dict"));
+    final Object dictResource = resourceProvider
+        .getResource(properties.get("dict"));
     if (!(dictResource instanceof PredicateContext)) {
-      throw new InvalidFormatException("Not a PredicateContext resource for key: " + properties.get("dict"));
+      throw new InvalidFormatException(
+          "Not a PredicateContext resource for key: " + properties.get("dict"));
     }
-    this.predicateContext = (PredicateContext) dictResource;
   }
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
-    Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("predicatecontextserializer", new PredicateContext.PredicateContextSerializer());
+    final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
+    mapping.put("predicatecontextserializer",
+        new PredicateContext.PredicateContextSerializer());
     return Collections.unmodifiableMap(mapping);
   }
-  
-}
 
+}

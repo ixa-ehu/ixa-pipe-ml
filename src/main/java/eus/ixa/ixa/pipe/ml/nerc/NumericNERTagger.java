@@ -27,42 +27,48 @@ import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 public class NumericNERTagger {
-  
-  private NumericNameLexer numericLexer;
-  private SequenceLabelFactory nameFactory;
-  
-  public NumericNERTagger(BufferedReader breader, SequenceLabelFactory aNameFactory) {
+
+  private final NumericNameLexer numericLexer;
+  private final SequenceLabelFactory nameFactory;
+
+  public NumericNERTagger(final BufferedReader breader,
+      final SequenceLabelFactory aNameFactory) {
     this.nameFactory = aNameFactory;
-    numericLexer = new NumericNameLexer(breader, aNameFactory);
+    this.numericLexer = new NumericNameLexer(breader, aNameFactory);
   }
 
-  public List<SequenceLabel> getNames(String[] tokens) {
-    Span[] origSpans = nercToSpans(tokens);
-    Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
+  public List<SequenceLabel> getNames(final String[] tokens) {
+    final Span[] origSpans = nercToSpans(tokens);
+    final Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
+    final List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
     return names;
   }
 
   public Span[] nercToSpans(final String[] tokens) {
-    List<Span> neSpans = new ArrayList<Span>();
-    List<SequenceLabel> flexNameList = numericLexer.getNumericNames();
-    for (SequenceLabel name : flexNameList) {
-      //System.err.println("numeric name: " + name.value());
-      List<Integer> neIds = StringUtils.exactTokenFinderIgnoreCase(name.getString(), tokens);
+    final List<Span> neSpans = new ArrayList<Span>();
+    final List<SequenceLabel> flexNameList = this.numericLexer
+        .getNumericNames();
+    for (final SequenceLabel name : flexNameList) {
+      // System.err.println("numeric name: " + name.value());
+      final List<Integer> neIds = StringUtils
+          .exactTokenFinderIgnoreCase(name.getString(), tokens);
       for (int i = 0; i < neIds.size(); i += 2) {
-        Span neSpan = new Span(neIds.get(i), neIds.get(i+1), name.getType());
+        final Span neSpan = new Span(neIds.get(i), neIds.get(i + 1),
+            name.getType());
         neSpans.add(neSpan);
       }
     }
     return neSpans.toArray(new Span[neSpans.size()]);
   }
 
-  public List<SequenceLabel> getNamesFromSpans(Span[] neSpans, String[] tokens) {
-    List<SequenceLabel> names = new ArrayList<SequenceLabel>();
-    for (Span neSpan : neSpans) {
-      String nameString = neSpan.getCoveredText(tokens);
-      String neType = neSpan.getType();
-      SequenceLabel name = nameFactory.createSequence(nameString, neType, neSpan);
+  public List<SequenceLabel> getNamesFromSpans(final Span[] neSpans,
+      final String[] tokens) {
+    final List<SequenceLabel> names = new ArrayList<SequenceLabel>();
+    for (final Span neSpan : neSpans) {
+      final String nameString = neSpan.getCoveredText(tokens);
+      final String neType = neSpan.getType();
+      final SequenceLabel name = this.nameFactory.createSequence(nameString,
+          neType, neSpan);
       names.add(name);
     }
     return names;
@@ -70,7 +76,7 @@ public class NumericNERTagger {
 
   public void clearAdaptiveData() {
     // nothing to clear
-    
+
   }
 
 }

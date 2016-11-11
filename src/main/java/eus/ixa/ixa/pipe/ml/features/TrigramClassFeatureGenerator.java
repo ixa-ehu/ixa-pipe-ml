@@ -25,40 +25,50 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 /**
  * Adds trigram features based on tokens and token class using
  * {@code TokenClassFeatureGenerator}.
- * 
+ *
  * @author ragerri
- * 
+ *
  */
 public class TrigramClassFeatureGenerator extends CustomFeatureGenerator {
 
-  public void createFeatures(List<String> features, String[] tokens, int index,
-      String[] previousOutcomes) {
-    String wc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index]);
+  @Override
+  public void createFeatures(final List<String> features, final String[] tokens,
+      final int index, final String[] previousOutcomes) {
+    final String wc = TokenClassFeatureGenerator
+        .tokenShapeFeature(tokens[index]);
     // trigram features
     if (index > 1) {
-      features.add("ppw,pw,w=" + tokens[index - 2] + "," + tokens[index - 1] + "," + tokens[index]);
-      String pwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 1]);
-      String ppwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index - 2]);
+      features.add("ppw,pw,w=" + tokens[index - 2] + "," + tokens[index - 1]
+          + "," + tokens[index]);
+      final String pwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 1]);
+      final String ppwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index - 2]);
       features.add("ppwc,pwc,wc=" + ppwc + "," + pwc + "," + wc);
     }
     if (index + 2 < tokens.length) {
-      features.add("w,nw,nnw=" + tokens[index] + "," + tokens[index + 1] + "," + tokens[index + 2]);
-      String nwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 1]);
-      String nnwc = TokenClassFeatureGenerator.tokenShapeFeature(tokens[index + 2]);
+      features.add("w,nw,nnw=" + tokens[index] + "," + tokens[index + 1] + ","
+          + tokens[index + 2]);
+      final String nwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 1]);
+      final String nnwc = TokenClassFeatureGenerator
+          .tokenShapeFeature(tokens[index + 2]);
       features.add("wc,nwc,nnwc=" + wc + "," + nwc + "," + nnwc);
     }
   }
+
   @Override
   public void clearAdaptiveData() {
   }
 
   @Override
-  public void updateAdaptiveData(String[] arg0, String[] arg1) {
+  public void updateAdaptiveData(final String[] arg0, final String[] arg1) {
   }
 
   @Override
-  public void init(Map<String, String> arg0,
-      FeatureGeneratorResourceProvider arg1) throws InvalidFormatException {
-  } 
+  public void init(final Map<String, String> arg0,
+      final FeatureGeneratorResourceProvider arg1)
+      throws InvalidFormatException {
+  }
 
 }

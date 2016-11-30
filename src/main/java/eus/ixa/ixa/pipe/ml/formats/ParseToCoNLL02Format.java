@@ -108,9 +108,10 @@ public class ParseToCoNLL02Format
         sequences.add(CoNLL02Format.extract(beginIndex, endIndex,
             seqTypes.get(beginIndex)));
       }
-
-      return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
+      SequenceLabelSample sequenceSample = new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
           sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
+      //System.err.println(sequenceSample.toString());
+      return sequenceSample; 
     } else {
       // source stream is not returning anymore lines
       return null;

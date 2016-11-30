@@ -77,7 +77,7 @@ public class ShiftReduceParserTrainer {
    */
   private ParserFactory parserFactory;
   /**
-   * The sequence encoding of the named entity spans, e.g., BIO or BILOU.
+   * The sequence encoding of the sequence spans, e.g., BIO or BILOU.
    */
   private String sequenceCodec;
   /**
@@ -91,8 +91,7 @@ public class ShiftReduceParserTrainer {
 
   /**
    * Construct a trainer with training and test data, and with options for
-   * language, beamsize for decoding, sequence codec and corpus format (conll or
-   * opennlp).
+   * language, beamsize for decoding, sequence codec and corpus format.
    *
    * @param params
    *          the training parameters

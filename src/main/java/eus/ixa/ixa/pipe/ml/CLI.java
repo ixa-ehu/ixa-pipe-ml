@@ -322,10 +322,10 @@ public class CLI {
   private void loadParserTrainingParameters() {
     this.parserTrainerParser.addArgument("-p", "--params").required(true)
         .help("Load the parsing training parameters file.\n");
-    this.parserTrainerParser.addArgument("-t", "--taggerParams").required(false)
-        .help("Load the tagger training parameters file.\n");
+    this.parserTrainerParser.addArgument("-t", "--taggerParams").required(true)
+        .help("Load the tagger training parameters file or an already trained POS tagger model.\n");
     this.parserTrainerParser.addArgument("-c", "--chunkerParams")
-        .required(false).help("Load the chunker training parameters file.\n");
+        .required(true).help("Load the chunker training parameters file.\n");
   }
 
   /**

@@ -724,20 +724,18 @@ public class ShiftReduceParser {
 
     final Map<String, String> manifestInfoEntries = new HashMap<String, String>();
 
-    // TODO tag
     System.err.println("Training POS tagger...");
     final SequenceLabelerModel posModel = SequenceLabelerME.train(languageCode,
         new ParseToTabulatedFormat(parseSamples), taggerParams, taggerFactory);
     parseSamples.reset();
 
-    // TODO chunk
     System.err.println("Training chunker...");
     final SequenceLabelerModel chunkModel = SequenceLabelerME.train(
         languageCode, new ParseToCoNLL02Format(parseSamples), chunkerParams,
         chunkerFactory);
     parseSamples.reset();
 
-    // TODO build
+    // TODO build clusters
     System.err.println("Training builder...");
     final ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.BUILD, parserFactory);
@@ -748,7 +746,7 @@ public class ShiftReduceParser {
     mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
     parseSamples.reset();
 
-    // TODO check
+    // TODO check clusters
     System.err.println("Training checker...");
     final ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.CHECK);
@@ -787,24 +785,24 @@ public class ShiftReduceParser {
         chunkerFactory);
     parseSamples.reset();
 
-    // TODO build
+   // TODO build clusters
     System.err.println("Training builder...");
     final ObjectStream<Event> bes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.BUILD, parserFactory);
     final Map<String, String> buildReportMap = new HashMap<String, String>();
     final EventTrainer trainer = TrainerFactory
-        .getEventTrainer(trainParams.getSettings(), buildReportMap);
+        .getEventTrainer(trainParams.getSettings("build"), buildReportMap);
     final MaxentModel buildModel = trainer.train(bes);
     mergeReportIntoManifest(manifestInfoEntries, buildReportMap, "build");
     parseSamples.reset();
 
-    // TODO check
+    // TODO check clusters
     System.err.println("Training checker...");
     final ObjectStream<Event> kes = new ParserEventStream(parseSamples, rules,
         ParserEventTypeEnum.CHECK);
     final Map<String, String> checkReportMap = new HashMap<String, String>();
     final EventTrainer checkTrainer = TrainerFactory
-        .getEventTrainer(trainParams.getSettings(), checkReportMap);
+        .getEventTrainer(trainParams.getSettings("check"), checkReportMap);
     final MaxentModel checkModel = checkTrainer.train(kes);
     mergeReportIntoManifest(manifestInfoEntries, checkReportMap, "check");
 

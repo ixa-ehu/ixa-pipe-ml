@@ -27,7 +27,7 @@ import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
 
 /**
- * Obtains the POS tags from a Penn Treebank formatted parse tree and and
+ * Obtains the POS tags from a Penn Treebank formatted parse tree and
  * encodes them in {@code TabulatedFormat} for training a POS tagger.
  * 
  * @author ragerri
@@ -76,9 +76,10 @@ public class ParseToTabulatedFormat
       if (beginIndex != -1) {
         sequences.add(new Span(beginIndex, endIndex, seqTypes.get(beginIndex)));
       }
-
-      return new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
+      SequenceLabelSample sequenceSample = new SequenceLabelSample(tokens.toArray(new String[tokens.size()]),
           sequences.toArray(new Span[sequences.size()]), isClearAdaptiveData);
+      //System.err.println(sequenceSample.toString());
+      return sequenceSample;
     } else {
       // source stream is not returning anymore lines
       return null;

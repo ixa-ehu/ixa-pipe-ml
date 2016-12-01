@@ -42,7 +42,8 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator
 
     //final String posTag = this.posDictionary
     //    .getMostFrequentTag(tokens[index].toLowerCase());
-    final String ambiguityClass = this.posDictionary.getAmbiguityClass(tokens[index].toLowerCase());
+    final String ambiguityClass = this.posDictionary.getAmbiguityClass(tokens[index]);
+    System.err.println(ambiguityClass);
     features.add(this.attributes.get("dict") + "=" + ambiguityClass);
   }
 

@@ -28,11 +28,13 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
@@ -74,7 +76,7 @@ public class POSDictionary implements SerializableArtifact {
     }
   }
   
-  private final ListMultimap<String, String> dictMultiMap = ArrayListMultimap.create();
+  private final HashMultimap<String, String> dictMultiMap = HashMultimap.create();
   private final Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
   String[] splitted = new String[64];
 
@@ -97,11 +99,17 @@ public class POSDictionary implements SerializableArtifact {
   }
   
   public String getAmbiguityClass(final String word) {
-    List<String> tagList = dictMultiMap.get(word);
-    String fromStream = tagList.stream()
-        .map(String::toUpperCase)
-        .collect(Collectors.joining("-"));
-    return fromStream;
+    Set<String> tagList = dictMultiMap.get(word);
+    String ambiguityClass = null;
+    if (!tagList.isEmpty()) {
+      ambiguityClass = tagList.stream()
+          .map(String::toUpperCase)
+          .collect(Collectors.joining("-"));
+    } else {
+      ambiguityClass = "O";
+    }
+    
+    return ambiguityClass;
   }
   
   private static void populatePOSMap(final String[] lineArray,

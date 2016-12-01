@@ -26,10 +26,14 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
@@ -69,7 +73,8 @@ public class POSDictionary implements SerializableArtifact {
       artifact.serialize(out);
     }
   }
-
+  
+  private final ListMultimap<String, String> dictMultiMap = ArrayListMultimap.create();
   private final Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
   String[] splitted = new String[64];
 
@@ -80,10 +85,25 @@ public class POSDictionary implements SerializableArtifact {
     String line;
     while ((line = breader.readLine()) != null) {
       StringUtils.splitLine(line, tabDelimiter, this.splitted);
-      populatePOSMap(this.splitted, newEntries);
+      //populatePOSMap(this.splitted, newEntries);
+      populateMultiMap(this.splitted);
     }
   }
 
+  private void populateMultiMap(final String[] lineArray) {
+    if (lineArray.length == 2) {
+      dictMultiMap.put(lineArray[0], lineArray[1]);
+    }
+  }
+  
+  public String getAmbiguityClass(final String word) {
+    List<String> tagList = dictMultiMap.get(word);
+    String fromStream = tagList.stream()
+        .map(String::toUpperCase)
+        .collect(Collectors.joining("-"));
+    return fromStream;
+  }
+  
   private static void populatePOSMap(final String[] lineArray,
       final Map<String, Map<String, AtomicInteger>> newEntries) {
     if (lineArray.length == 2) {
@@ -145,13 +165,22 @@ public class POSDictionary implements SerializableArtifact {
    * @throws IOException
    *           if io problems
    */
-  public void serialize(final OutputStream out) throws IOException {
+  /*public void serialize(final OutputStream out) throws IOException {
 
     final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
     for (final Map.Entry<String, Map<String, AtomicInteger>> entry : this.newEntries
         .entrySet()) {
       writer.write(entry.getKey() + IOUtils.TAB_DELIMITER
           + entry.getValue().get(entry.getKey()) + "\n");
+    }
+    writer.flush();
+  }*/
+  
+  public void serialize(final OutputStream out) throws IOException {
+    final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
+    for (final Map.Entry<String, String> entry : this.dictMultiMap.entries()) {
+      writer.write(
+          entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue() + "\n");
     }
     writer.flush();
   }

@@ -26,21 +26,15 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
-import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.StringUtil;
 import opennlp.tools.util.featuregen.StringPattern;
@@ -58,7 +52,7 @@ import opennlp.tools.util.model.SerializableArtifact;
  */
 public class POSDictionary implements SerializableArtifact {
 
-  private final static char tabDelimiter = '\t';
+  private final static Pattern tabDelimiter = Pattern.compile("\t");
 
   public static class POSDictionarySerializer
       implements ArtifactSerializer<POSDictionary> {
@@ -75,45 +69,21 @@ public class POSDictionary implements SerializableArtifact {
       artifact.serialize(out);
     }
   }
-  
-  private final HashMultimap<String, String> dictMultiMap = HashMultimap.create();
+
   private final Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
-  String[] splitted = new String[64];
 
   public POSDictionary(final InputStream in) throws IOException {
-    final Map<String, Map<String, AtomicInteger>> newEntries = new HashMap<String, Map<String, AtomicInteger>>();
     final BufferedReader breader = new BufferedReader(
         new InputStreamReader(in, Charset.forName("UTF-8")));
     String line;
     while ((line = breader.readLine()) != null) {
-      StringUtils.splitLine(line, tabDelimiter, this.splitted);
-      //populatePOSMap(this.splitted, newEntries);
-      populateMultiMap(this.splitted);
+      String[] lineArray = tabDelimiter.split(line);
+      populatePOSMap(lineArray);
     }
   }
 
-  private void populateMultiMap(final String[] lineArray) {
-    if (lineArray.length == 2) {
-      dictMultiMap.put(lineArray[0], lineArray[1]);
-    }
-  }
-  
-  public String getAmbiguityClass(final String word) {
-    Set<String> tagList = dictMultiMap.get(word);
-    String ambiguityClass = null;
-    if (!tagList.isEmpty()) {
-      ambiguityClass = tagList.stream()
-          .map(String::toUpperCase)
-          .collect(Collectors.joining("-"));
-    } else {
-      ambiguityClass = "O";
-    }
-    
-    return ambiguityClass;
-  }
-  
-  private static void populatePOSMap(final String[] lineArray,
-      final Map<String, Map<String, AtomicInteger>> newEntries) {
+
+  private void populatePOSMap(final String[] lineArray) {
     if (lineArray.length == 2) {
       // only store words
       if (!StringPattern.recognize(lineArray[0]).containsDigit()) {
@@ -173,22 +143,15 @@ public class POSDictionary implements SerializableArtifact {
    * @throws IOException
    *           if io problems
    */
-  /*public void serialize(final OutputStream out) throws IOException {
+  public void serialize(final OutputStream out) throws IOException {
 
     final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
     for (final Map.Entry<String, Map<String, AtomicInteger>> entry : this.newEntries
         .entrySet()) {
+      System.err.println(entry.getKey() + IOUtils.TAB_DELIMITER
+          + entry.getValue());
       writer.write(entry.getKey() + IOUtils.TAB_DELIMITER
           + entry.getValue().get(entry.getKey()) + "\n");
-    }
-    writer.flush();
-  }*/
-  
-  public void serialize(final OutputStream out) throws IOException {
-    final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
-    for (final Map.Entry<String, String> entry : this.dictMultiMap.entries()) {
-      writer.write(
-          entry.getKey() + IOUtils.TAB_DELIMITER + entry.getValue() + "\n");
     }
     writer.flush();
   }

@@ -217,7 +217,7 @@ public class SequenceLabelerTrainer {
       System.out
           .println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
     } else {
-      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
           sequenceLabeler);
       try {
         evaluator.evaluate(this.testSamples);

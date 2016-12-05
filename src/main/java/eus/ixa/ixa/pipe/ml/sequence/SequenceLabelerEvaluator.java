@@ -52,9 +52,10 @@ public class SequenceLabelerEvaluator extends Evaluator<SequenceLabelSample> {
   private final SequenceLabeler sequenceLabeler;
   private String corpusFormat = Flags.DEFAULT_EVAL_FORMAT;
 
-  public SequenceLabelerEvaluator(final SequenceLabeler seqLabeler,
+  public SequenceLabelerEvaluator(final String aCorpusFormat, final SequenceLabeler seqLabeler,
       final SequenceLabelerEvaluationMonitor... listeners) {
     super(listeners);
+    this.corpusFormat = aCorpusFormat;
     this.sequenceLabeler = seqLabeler;
   }
 

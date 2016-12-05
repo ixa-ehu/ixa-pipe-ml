@@ -53,6 +53,8 @@ import opennlp.tools.util.model.SerializableArtifact;
 public class POSDictionary implements SerializableArtifact {
 
   private final static Pattern tabDelimiter = Pattern.compile("\t");
+  private final static Pattern valueDelimiter = Pattern.compile("=\\p{Digit}+,");
+  private final static Pattern splitValues = Pattern.compile(",\\s");
 
   public static class POSDictionarySerializer
       implements ArtifactSerializer<POSDictionary> {
@@ -85,6 +87,25 @@ public class POSDictionary implements SerializableArtifact {
 
   private void populatePOSMap(final String[] lineArray) {
     if (lineArray.length == 2) {
+      if (lineArray[1].startsWith("{") && lineArray[1].endsWith("}")) {
+        //reading the serialize resource from the model
+        String valuesString = lineArray[1].substring(1, lineArray[1].length() - 1);
+        if (valueDelimiter.matcher(valuesString) != null) {
+          String [] valuesArray = splitValues.split(valuesString);
+          Map<String, AtomicInteger> valuesMap = new HashMap<>();
+          for (String value : valuesArray) {
+            String[] valueArray = value.split("=");
+            valuesMap.put(valueArray[0], new AtomicInteger(Integer.parseInt(valueArray[1])));
+          }
+          newEntries.put(lineArray[0], valuesMap);
+        } else {
+          //only one value for this key
+          String[] valueStringArray = valuesString.split("=");
+          Map<String, AtomicInteger> valueMap = new HashMap<>();
+          valueMap.put(valueStringArray[0], new AtomicInteger(Integer.parseInt(valueStringArray[1])));
+          newEntries.put(lineArray[0], valueMap);
+        }
+      }
       // only store words
       if (!StringPattern.recognize(lineArray[0]).containsDigit()) {
 
@@ -114,7 +135,7 @@ public class POSDictionary implements SerializableArtifact {
     return mfTag;
   }
   
-  public String getAllTags(final String word) {
+  public String getAmbiguityClass(final String word) {
     final TreeMultimap<Integer, String> mfTagMap = getOrderedMap(word);
     String mfTag = null;
     if (!mfTagMap.isEmpty()) {
@@ -161,10 +182,8 @@ public class POSDictionary implements SerializableArtifact {
     final Writer writer = new BufferedWriter(new OutputStreamWriter(out));
     for (final Map.Entry<String, Map<String, AtomicInteger>> entry : this.newEntries
         .entrySet()) {
-      System.err.println(entry.getKey() + IOUtils.TAB_DELIMITER
-          + entry.getValue());
       writer.write(entry.getKey() + IOUtils.TAB_DELIMITER
-          + entry.getValue() + "\n");
+          + entry.getValue().toString() + "\n");
     }
     writer.flush();
   }

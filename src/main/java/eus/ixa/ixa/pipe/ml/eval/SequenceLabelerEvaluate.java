@@ -107,7 +107,7 @@ public class SequenceLabelerEvaluate {
    *           if test corpus not loaded
    */
   public final void evaluate() throws IOException {
-    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
         this.sequenceLabeler);
     evaluator.evaluate(this.testSamples);
     System.out.println(evaluator.getFMeasure());
@@ -127,7 +127,7 @@ public class SequenceLabelerEvaluate {
       System.out
           .println("Known Word Accuracy: " + evaluator.getKnownAccuracy());
     } else {
-      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
           this.sequenceLabeler);
       evaluator.evaluate(this.testSamples);
       System.out.println();
@@ -147,7 +147,7 @@ public class SequenceLabelerEvaluate {
     final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
     final SequenceLabelerDetailedFMeasureListener detailedFListener = new SequenceLabelerDetailedFMeasureListener();
     listeners.add(detailedFListener);
-    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
         this.sequenceLabeler, listeners
             .toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
     evaluator.evaluate(this.testSamples);
@@ -163,7 +163,7 @@ public class SequenceLabelerEvaluate {
   public final void evalError() throws IOException {
     final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
     listeners.add(new SequenceLabelerEvaluationErrorListener());
-    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
         this.sequenceLabeler, listeners
             .toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
     evaluator.evaluate(this.testSamples);

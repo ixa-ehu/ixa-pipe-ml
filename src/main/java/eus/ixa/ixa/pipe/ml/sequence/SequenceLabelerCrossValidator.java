@@ -25,6 +25,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.FilterObjectStream;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
@@ -227,9 +228,10 @@ public class SequenceLabelerCrossValidator {
         System.err.println("You need to implement a SequenceLabelerFactory!");
         System.exit(1);
       }
-
+      
+      String corpusFormat = Flags.getCorpusFormat(this.params);
       // do testing
-      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
+      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(corpusFormat,
           new SequenceLabelerME(model), this.listeners);
 
       evaluator.evaluate(new DocumentToNameSampleStream(

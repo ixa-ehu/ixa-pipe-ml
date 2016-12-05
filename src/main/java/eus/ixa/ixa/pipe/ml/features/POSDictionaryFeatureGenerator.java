@@ -31,7 +31,6 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator
     implements ArtifactToSerializerMapper {
 
   private POSDictionary posDictionary;
-  private Map<String, String> attributes;
 
   public POSDictionaryFeatureGenerator() {
   }
@@ -40,10 +39,12 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator
   public void createFeatures(final List<String> features, final String[] tokens,
       final int index, final String[] preds) {
 
-    final String posTag = this.posDictionary
-        .getMostFrequentTag(tokens[index].toLowerCase());
-    //System.err.println(posTag);
-    features.add(this.attributes.get("dict") + "=" + posTag);
+    final String ambiguityClass = this.posDictionary
+        .getAmbiguityClass(tokens[index].toLowerCase());
+    //features.add("ambiguityClass=" + ambiguityClass);
+    
+    final String mostFrequentPosTag = this.posDictionary.getMostFrequentTag(tokens[index].toLowerCase());
+    features.add("mfTag=" + mostFrequentPosTag);
   }
 
   @Override
@@ -68,7 +69,6 @@ public class POSDictionaryFeatureGenerator extends CustomFeatureGenerator
           "Not a POSDictionary resource for key: " + properties.get("dict"));
     }
     this.posDictionary = (POSDictionary) dictResource;
-    this.attributes = properties;
   }
 
   @Override

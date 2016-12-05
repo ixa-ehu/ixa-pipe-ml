@@ -28,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -110,6 +111,7 @@ public class POSDictionary implements SerializableArtifact {
       if (!StringPattern.recognize(lineArray[0]).containsDigit()) {
 
         final String word = StringUtil.toLowerCase(lineArray[0]);
+        //final String word = lineArray[0];
         if (!newEntries.containsKey(word)) {
           newEntries.put(word, new HashMap<String, AtomicInteger>());
         }
@@ -137,15 +139,18 @@ public class POSDictionary implements SerializableArtifact {
   
   public String getAmbiguityClass(final String word) {
     final TreeMultimap<Integer, String> mfTagMap = getOrderedMap(word);
-    String mfTag = null;
+    String ambiguityClass = null;
     if (!mfTagMap.isEmpty()) {
-      final SortedSet<String> mfTagSet = mfTagMap
-          .get(mfTagMap.keySet().first());
-      mfTag = mfTagSet.first();
+      StringJoiner sb = new StringJoiner("-");
+      for (Map.Entry<Integer, String> entry : mfTagMap.entries()) {
+        sb.add(entry.getValue());
+      }
+      ambiguityClass = sb.toString();
+      //System.err.println(ambiguityClass);
     } else {
-      mfTag = "O";
+      ambiguityClass = "O";
     }
-    return mfTag;
+    return ambiguityClass;
   }
 
   public TreeMultimap<Integer, String> getOrderedMap(final String word) {
@@ -170,7 +175,7 @@ public class POSDictionary implements SerializableArtifact {
   }
 
   /**
-   * Serialize the dictionary to original corpus format
+   * Serialize the dictionary.
    * 
    * @param out
    *          the output stream

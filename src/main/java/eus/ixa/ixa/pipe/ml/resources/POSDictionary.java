@@ -113,6 +113,19 @@ public class POSDictionary implements SerializableArtifact {
     }
     return mfTag;
   }
+  
+  public String getAllTags(final String word) {
+    final TreeMultimap<Integer, String> mfTagMap = getOrderedMap(word);
+    String mfTag = null;
+    if (!mfTagMap.isEmpty()) {
+      final SortedSet<String> mfTagSet = mfTagMap
+          .get(mfTagMap.keySet().first());
+      mfTag = mfTagSet.first();
+    } else {
+      mfTag = "O";
+    }
+    return mfTag;
+  }
 
   public TreeMultimap<Integer, String> getOrderedMap(final String word) {
     final Map<String, AtomicInteger> tagFreqsMap = this.newEntries.get(word);
@@ -151,7 +164,7 @@ public class POSDictionary implements SerializableArtifact {
       System.err.println(entry.getKey() + IOUtils.TAB_DELIMITER
           + entry.getValue());
       writer.write(entry.getKey() + IOUtils.TAB_DELIMITER
-          + entry.getValue().get(entry.getKey()) + "\n");
+          + entry.getValue() + "\n");
     }
     writer.flush();
   }

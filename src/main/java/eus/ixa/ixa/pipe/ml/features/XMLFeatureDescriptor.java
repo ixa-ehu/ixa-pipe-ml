@@ -378,11 +378,12 @@ public final class XMLFeatureDescriptor {
           POSDictionaryFeatureGenerator.class.getName());
       posDictFeatures.setAttribute("dict",
           IOUtils.normalizeLexiconName(new File(posDictPath).getName()));
-      final Element posDictWindow = new Element("window");
+      /*final Element posDictWindow = new Element("window");
       posDictWindow.setAttribute("prevLength", Integer.toString(leftWindow));
       posDictWindow.setAttribute("nextLength", Integer.toString(rightWindow));
       posDictWindow.addContent(posDictFeatures);
-      generators.addContent(posDictWindow);
+      generators.addContent(posDictWindow);*/
+      generators.addContent(posDictFeatures);
       System.err.println("-> POSDictionary Features added!");
     }
     if (Flags.isLemmaModelFeatures(params)) {

@@ -137,6 +137,7 @@ public class POSDictionary implements SerializableArtifact {
     return mfTag;
   }
   
+  //TODO serialization of this resource pending
   public String getAmbiguityClass(final String word) {
     final TreeMultimap<Integer, String> mfTagMap = getOrderedMap(word);
     String ambiguityClass = null;

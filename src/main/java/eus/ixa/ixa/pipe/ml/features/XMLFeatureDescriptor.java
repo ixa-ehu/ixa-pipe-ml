@@ -254,7 +254,7 @@ public final class XMLFeatureDescriptor {
       final Element prev2MapFeature = new Element("custom");
       prev2MapFeature.setAttribute("class",
           Prev2MapFeatureGenerator.class.getName());
-      // generators.addContent(prev2MapFeature);
+      generators.addContent(prev2MapFeature);
       // previous map and token feature (in window)
       final Element prevMapTokenFeature = new Element("custom");
       prevMapTokenFeature.setAttribute("class",
@@ -265,7 +265,7 @@ public final class XMLFeatureDescriptor {
       prevMapTokenWindow.setAttribute("nextLength",
           Integer.toString(rightWindow));
       prevMapTokenWindow.addContent(prevMapTokenFeature);
-      // generators.addContent(prevMapTokenWindow);
+      generators.addContent(prevMapTokenWindow);
       // brown clustering features
       final String brownClusterPath = Flags.getBrownFeatures(params);
       final List<File> brownClusterFiles = Flags

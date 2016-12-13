@@ -21,7 +21,7 @@ import java.util.Properties;
 /**
  * Properties for annotation. Language and model parameters are compulsory.
  * <ol>
- * <li>Language: ca, de, en, es, eu, fr, gl, it, nl, pt, ru.
+ * <li>Language: ca, de, en, es, eu, fr, gl, it, nl, pl, pt, ru.
  * <li>Model: the model name.
  * </ol>
  * 

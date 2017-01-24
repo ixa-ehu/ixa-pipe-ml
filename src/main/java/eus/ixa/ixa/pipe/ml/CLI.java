@@ -27,6 +27,7 @@ import com.google.common.io.Files;
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
+import eus.ixa.ixa.pipe.ml.eval.TokenizerEvaluate;
 import eus.ixa.ixa.pipe.ml.parse.ParserModel;
 import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
@@ -80,6 +81,10 @@ public class CLI {
    */
   private final Subparser parserTrainerParser;
   /**
+   * The subparser that manages the Tokenizer evaluation.
+   */
+  private final Subparser tokevalParser;
+  /**
    * The parser that manages the SequenceLabeler evaluation sub-command.
    */
   private final Subparser evalParser;
@@ -94,6 +99,7 @@ public class CLI {
 
   public static final String SEQ_TRAINER_NAME = "sequenceTrainer";
   public static final String PARSE_TRAINER_NAME = "parserTrainer";
+  public static final String TOKEVAL_PARSER_NAME = "tokeval";
   public static final String EVAL_PARSER_NAME = "eval";
   public static final String PARSEVAL_PARSER_NAME = "parseval";
   public static final String CROSS_PARSER_NAME = "cross";
@@ -110,6 +116,8 @@ public class CLI {
     this.parserTrainerParser = this.subParsers.addParser(PARSE_TRAINER_NAME)
         .help("Constituent Parser training CLI");
     loadParserTrainingParameters();
+    this.tokevalParser = this.subParsers.addParser(TOKEVAL_PARSER_NAME);
+    loadTokevalParameters();
     this.evalParser = this.subParsers.addParser(EVAL_PARSER_NAME)
         .help("Evaluation CLI");
     loadEvalParameters();
@@ -149,7 +157,10 @@ public class CLI {
       System.err.println("CLI options: " + this.parsedArguments);
       if (args[0].equals(EVAL_PARSER_NAME)) {
         eval();
-      } else if (args[0].equals(PARSEVAL_PARSER_NAME)) {
+      } else if (args[0].equals(TOKEVAL_PARSER_NAME)) {
+        tokeval();
+      }
+      else if (args[0].equals(PARSEVAL_PARSER_NAME)) {
         parseval();
       } else if (args[0].equals(SEQ_TRAINER_NAME)) {
         seqTrain();
@@ -162,7 +173,7 @@ public class CLI {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + this.version
           + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME
-          + "|eval|parseval|cross) -help for details");
+          + "|tokeval|eval|parseval|cross) -help for details");
       System.exit(1);
     }
   }
@@ -232,9 +243,25 @@ public class CLI {
     }
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
+  
+  /**
+   * Main evaluation entry point for sequence labelling.
+   *
+   * @throws IOException
+   *           throws exception if test set not available
+   */
+  public final void tokeval() throws IOException {
+
+    final String lang = this.parsedArguments.getString("language");
+    final String testset = this.parsedArguments.getString("testset");
+    final Properties props = setTokevalProperties(lang, testset);
+    final TokenizerEvaluate evaluator = new TokenizerEvaluate(
+        props);
+    //evaluator.evaluateAccuracy();
+  }
 
   /**
-   * Main evaluation entry point.
+   * Main evaluation entry point for sequence labelling.
    *
    * @throws IOException
    *           throws exception if test set not available
@@ -327,6 +354,18 @@ public class CLI {
     this.parserTrainerParser.addArgument("-c", "--chunkerParams")
         .required(true).help("Load the chunker training parameters file.\n");
   }
+  
+  /**
+   * Create the parameters available for evaluation.
+   */
+  private void loadTokevalParameters() {
+    this.tokevalParser.addArgument("-l", "--language").required(true)
+        .choices("ca", "de", "en", "es", "eu", "fr", "it")
+        .help("Choose language.\n");
+    this.tokevalParser.addArgument("-t", "--testset").required(true)
+        .help("The test or reference corpus.\n");
+  }
+
 
   /**
    * Create the parameters available for evaluation.
@@ -432,6 +471,13 @@ public class CLI {
     final Properties parsevalProperties = new Properties();
     parsevalProperties.setProperty("language", language);
     parsevalProperties.setProperty("model", model);
+    parsevalProperties.setProperty("testset", testset);
+    return parsevalProperties;
+  }
+  
+  private Properties setTokevalProperties(final String language, final String testset) {
+    final Properties parsevalProperties = new Properties();
+    parsevalProperties.setProperty("language", language);
     parsevalProperties.setProperty("testset", testset);
     return parsevalProperties;
   }

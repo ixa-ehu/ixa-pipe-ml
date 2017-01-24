@@ -49,7 +49,7 @@ public class StatisticalSequenceLabeler {
    * The models to use for every language. The keys of the hash are the language
    * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels = new ConcurrentHashMap<String, SequenceLabelerModel>();
+  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels = new ConcurrentHashMap<>();
   /**
    * The sequence labeler.
    */
@@ -142,9 +142,8 @@ public class StatisticalSequenceLabeler {
 
   public final String[] seqToStrings(final String[] tokens) {
     final String[] seqStrings = this.sequenceLabeler.tagToStrings(tokens);
-    final String[] decodedStringSequences = this.sequenceLabeler
+    return this.sequenceLabeler
         .decodeSequences(seqStrings);
-    return decodedStringSequences;
   }
 
   /**
@@ -162,17 +161,15 @@ public class StatisticalSequenceLabeler {
   public final List<SequenceLabel> getSequences(final String[] tokens) {
     final Span[] origSpans = this.sequenceLabeler.tag(tokens);
     final Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    final List<SequenceLabel> sequences = getSequencesFromSpans(tokens,
+    return getSequencesFromSpans(tokens,
         seqSpans);
-    return sequences;
   }
 
   public final List<SequenceLabel> getLemmaSequences(final String[] tokens) {
     final Span[] origSpans = this.sequenceLabeler.tag(tokens);
     final Span[] seqSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    final List<SequenceLabel> sequences = getLemmaSequencesFromSpans(tokens,
+    return getLemmaSequencesFromSpans(tokens,
         seqSpans);
-    return sequences;
   }
 
   /**
@@ -221,8 +218,7 @@ public class StatisticalSequenceLabeler {
    * @return the array containing for each row the tags
    */
   public final Span[][] getAllTags(final String[] tokens) {
-    final Span[][] allPosTags = this.sequenceLabeler.tag(13, tokens);
-    return allPosTags;
+    return this.sequenceLabeler.tag(13, tokens);
   }
 
   /**
@@ -275,7 +271,7 @@ public class StatisticalSequenceLabeler {
    *          the model to be loaded
    * @return the model as a {@link SequenceLabelerModel} object
    */
-  private final SequenceLabelerModel loadModel(final String lang,
+  private SequenceLabelerModel loadModel(final String lang,
       final String model) {
     final long lStartTime = new Date().getTime();
     try {

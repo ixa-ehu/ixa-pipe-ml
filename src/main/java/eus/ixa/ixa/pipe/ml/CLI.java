@@ -151,24 +151,30 @@ public class CLI {
    * @throws IOException
    *           exception if problems with the incoming data
    */
-  public final void parseCLI(final String[] args) throws IOException {
+  private void parseCLI(final String[] args) throws IOException {
     try {
       this.parsedArguments = this.argParser.parseArgs(args);
       System.err.println("CLI options: " + this.parsedArguments);
-      if (args[0].equals(EVAL_PARSER_NAME)) {
-        eval();
-      } else if (args[0].equals(TOKEVAL_PARSER_NAME)) {
-        tokeval();
-      }
-      else if (args[0].equals(PARSEVAL_PARSER_NAME)) {
-        parseval();
-      } else if (args[0].equals(SEQ_TRAINER_NAME)) {
-        seqTrain();
-      } else if (args[0].equals(PARSE_TRAINER_NAME)) {
-        parserTrain();
-      } else if (args[0].equals("CROSS_PARSER_NAME")) {
-        crossValidate();
-      }
+        switch (args[0]) {
+        case TOKEVAL_PARSER_NAME:
+          tokeval();
+          break;
+        case EVAL_PARSER_NAME:
+            eval();
+            break;
+        case PARSEVAL_PARSER_NAME:
+            parseval();
+            break;
+        case SEQ_TRAINER_NAME:
+            seqTrain();
+            break;
+        case PARSE_TRAINER_NAME:
+            parserTrain();
+            break;
+        case CROSS_PARSER_NAME:
+            crossValidate();
+            break;
+        }
     } catch (final ArgumentParserException e) {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + this.version
@@ -184,7 +190,7 @@ public class CLI {
    * @throws IOException
    *           input output exception if problems with corpora
    */
-  public final void seqTrain() throws IOException {
+  private void seqTrain() throws IOException {
 
     // load training parameters file
     final String paramFile = this.parsedArguments.getString("params");
@@ -209,7 +215,7 @@ public class CLI {
    * @throws IOException
    *           input output exception if problems with corpora
    */
-  public final void parserTrain() throws IOException {
+  private void parserTrain() throws IOException {
 
     // load training parameters file
     final String paramFile = this.parsedArguments.getString("params");
@@ -221,8 +227,8 @@ public class CLI {
     final TrainingParameters chunkerParams = IOUtils
         .loadTrainingParameters(chunkerParamsFile);
     ParserModel trainedModel;
-    String outModel = null;
-    if (params.getSettings().get("OutputModel") == null
+    String outModel;
+      if (params.getSettings().get("OutputModel") == null
         || params.getSettings().get("OutputModel").length() == 0) {
       outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
       params.put("OutputModel", outModel);
@@ -266,7 +272,7 @@ public class CLI {
    * @throws IOException
    *           throws exception if test set not available
    */
-  public final void eval() throws IOException {
+  private void eval() throws IOException {
 
     final String metric = this.parsedArguments.getString("metric");
     final String lang = this.parsedArguments.getString("language");
@@ -309,7 +315,7 @@ public class CLI {
    * @throws IOException
    *           throws exception if test set not available
    */
-  public final void parseval() throws IOException {
+  private void parseval() throws IOException {
 
     final String lang = this.parsedArguments.getString("language");
     final String model = this.parsedArguments.getString("model");
@@ -327,7 +333,7 @@ public class CLI {
    * @throws IOException
    *           input output exception if problems with corpora
    */
-  public final void crossValidate() throws IOException {
+  private void crossValidate() throws IOException {
 
     final String paramFile = this.parsedArguments.getString("params");
     final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
@@ -460,10 +466,6 @@ public class CLI {
    *          the model parameter
    * @param testset
    *          the reference set
-   * @param corpusFormat
-   *          the format of the testset
-   * @param netypes
-   *          the ne types to use in the evaluation
    * @return the properties object
    */
   private Properties setParsevalProperties(final String language,

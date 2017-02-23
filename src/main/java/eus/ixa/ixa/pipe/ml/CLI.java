@@ -97,12 +97,12 @@ public class CLI {
    */
   private final Subparser crossValidateParser;
 
-  public static final String SEQ_TRAINER_NAME = "sequenceTrainer";
-  public static final String PARSE_TRAINER_NAME = "parserTrainer";
-  public static final String TOKEVAL_PARSER_NAME = "tokeval";
-  public static final String EVAL_PARSER_NAME = "eval";
-  public static final String PARSEVAL_PARSER_NAME = "parseval";
-  public static final String CROSS_PARSER_NAME = "cross";
+  private static final String SEQ_TRAINER_NAME = "sequenceTrainer";
+  private static final String PARSE_TRAINER_NAME = "parserTrainer";
+  private static final String TOKEVAL_PARSER_NAME = "tokeval";
+  private static final String EVAL_PARSER_NAME = "eval";
+  private static final String PARSEVAL_PARSER_NAME = "parseval";
+  private static final String CROSS_PARSER_NAME = "cross";
 
   /**
    * Construct a CLI object with the sub-parsers to manage the command line

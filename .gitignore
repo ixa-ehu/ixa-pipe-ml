@@ -15,4 +15,4 @@ octave-core
 *.settings
 *.checkstyle
 *.iml
-*.idea
+.idea

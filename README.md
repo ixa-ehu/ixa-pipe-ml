@@ -1,6 +1,8 @@
 
 ixa-pipe-ml
 =============
+[![Build Status](https://travis-ci.org/ixa-ehu/ixa-pipe-ml.svg?branch=master)](https://travis-ci.org/ixa-ehu/ixa-pipe-ml)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/apache/opennlp/master/LICENSE)
 
 ixa-pipe-ml is the Machine Learning Component of IXA pipes. ixa-pipe-ml allows to
 train and evaluate the models for every IXA-pipe available.

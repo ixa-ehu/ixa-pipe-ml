@@ -16,7 +16,7 @@
  */
 
 
-package eus.ixa.ixa.pipe.ml.features;
+package eus.ixa.ixa.pipe.ml.document;
 
 import java.io.IOException;
 import java.io.InputStream;

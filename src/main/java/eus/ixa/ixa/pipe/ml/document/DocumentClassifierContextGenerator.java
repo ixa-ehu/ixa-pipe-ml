@@ -15,28 +15,24 @@
  * limitations under the License.
  */
 
-
-package eus.ixa.ixa.pipe.ml.features;
-
-import java.util.List;
+package eus.ixa.ixa.pipe.ml.document;
 
 /**
- * Interface for generating features for document classification.
+ * Context generator for the Document Classifier.
  */
-public interface DocumentFeatureGenerator {
+public interface DocumentClassifierContextGenerator {
 
   /**
-   * Extract features from given text fragments
+   * Adds a feature generator to this set of feature generators.
    *
-   * @param text the text fragments to extract features from
-   * @param extraInformation optional extra information to be used by the feature generator
+   * @param generator
+   *          The feature generator to add.
    */
-  void createFeatures(List<String> features, String[] text);
-  
-  /**
-   * Informs the feature generator that the context of the data in the context (typically a document)
-   * is no longer valid.
-   */
-   void clearFeatureData();
-}
+  public void addFeatureGenerator(DocumentFeatureGenerator generator);
 
+  /**
+   * Informs all the feature generators for a document classifier that the context of
+   * the feature data (typically a document) is no longer valid.
+   */
+  public void clearFeatureData();
+}

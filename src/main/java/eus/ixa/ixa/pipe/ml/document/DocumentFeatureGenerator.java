@@ -15,21 +15,28 @@
  * limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.features;
 
-import java.util.Map;
+package eus.ixa.ixa.pipe.ml.document;
 
-import opennlp.tools.util.InvalidFormatException;
-import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
+import java.util.List;
 
-public abstract class DocumentCustomFeatureGenerator implements DocumentFeatureGenerator {
+/**
+ * Interface for generating features for document classification.
+ */
+public interface DocumentFeatureGenerator {
 
   /**
-   * Initialized the Document Custom Feature Generator with defined properties and loaded resources.
+   * Extract features from given text fragments
    *
-   * @param properties
-   * @param resourceProvider
+   * @param text the text fragments to extract features from
+   * @param extraInformation optional extra information to be used by the feature generator
    */
-  public abstract void init(Map<String, String> properties, FeatureGeneratorResourceProvider resourceProvider)
-        throws InvalidFormatException;
+  void createFeatures(List<String> features, String[] text);
+  
+  /**
+   * Informs the feature generator that the context of the data in the context (typically a document)
+   * is no longer valid.
+   */
+   void clearFeatureData();
 }
+

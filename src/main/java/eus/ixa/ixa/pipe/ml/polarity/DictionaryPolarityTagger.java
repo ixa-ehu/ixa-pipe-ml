@@ -1,4 +1,4 @@
-package polarity;
+package eus.ixa.ixa.pipe.ml.polarity;
 
 import java.io.IOException;
 import java.io.InputStream;

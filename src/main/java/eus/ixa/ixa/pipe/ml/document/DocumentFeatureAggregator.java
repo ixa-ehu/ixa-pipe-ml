@@ -16,7 +16,7 @@
  */
 
 
-package eus.ixa.ixa.pipe.ml.features;
+package eus.ixa.ixa.pipe.ml.document;
 
 import java.util.ArrayList;
 import java.util.Collection;

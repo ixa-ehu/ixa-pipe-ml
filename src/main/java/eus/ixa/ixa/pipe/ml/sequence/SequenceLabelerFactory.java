@@ -65,6 +65,7 @@ public class SequenceLabelerFactory extends BaseToolFactory {
     this.seqCodec = seqCodec;
   }
 
+  //TODO call this method for default feature generation
   private static byte[] loadDefaultFeatureGeneratorBytes() {
 
     final ByteArrayOutputStream bytes = new ByteArrayOutputStream();

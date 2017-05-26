@@ -39,6 +39,7 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 import opennlp.tools.cmdline.CmdLineUtil;
+import opennlp.tools.doccat.DoccatModel;
 import opennlp.tools.util.TrainingParameters;
 
 /**
@@ -93,6 +94,10 @@ public class CLI {
    */
   private final Subparser parsevalParser;
   /**
+   * The parser that manages the DocumentClassification training sub-command.
+   */
+  private final Subparser docTrainerParser;
+  /**
    * The parser that manages the cross validation sub-command.
    */
   private final Subparser crossValidateParser;
@@ -102,6 +107,7 @@ public class CLI {
   private static final String TOKEVAL_PARSER_NAME = "tokeval";
   private static final String EVAL_PARSER_NAME = "eval";
   private static final String PARSEVAL_PARSER_NAME = "parseval";
+  public static final String DOC_TRAINER_NAME = "docTrainer";
   private static final String CROSS_PARSER_NAME = "cross";
 
   /**
@@ -124,6 +130,8 @@ public class CLI {
     this.parsevalParser = this.subParsers.addParser(PARSEVAL_PARSER_NAME)
         .help("Parseval CLI");
     loadParsevalParameters();
+    this.docTrainerParser = this.subParsers.addParser(DOC_TRAINER_NAME).help("Document Classification training CLI");
+    loadDocTrainingParameters();
     this.crossValidateParser = this.subParsers.addParser(CROSS_PARSER_NAME)
         .help("Cross validation CLI");
     loadCrossValidateParameters();
@@ -171,6 +179,8 @@ public class CLI {
         case PARSE_TRAINER_NAME:
             parserTrain();
             break;
+        case DOC_TRAINER_NAME:
+          docTrain();
         case CROSS_PARSER_NAME:
             crossValidate();
             break;
@@ -179,7 +189,7 @@ public class CLI {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + this.version
           + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME
-          + "|tokeval|eval|parseval|cross) -help for details");
+          + "|" + DOC_TRAINER_NAME + "|tokeval|eval|parseval|cross) -help for details");
       System.exit(1);
     }
   }
@@ -249,6 +259,30 @@ public class CLI {
     }
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
+  
+  /* Main access to the Sequence Labeler train functionalities.
+    *
+    * @throws IOException
+    *           input output exception if problems with corpora
+    */
+   private void docTrain() throws IOException {
+      // load training parameters file
+      final String paramFile = this.parsedArguments.getString("params");
+      final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
+      String outModel = null;
+      if (params.getSettings().get("OutputModel") == null
+          || params.getSettings().get("OutputModel").length() == 0) {
+        outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
+        params.put("OutputModel", outModel);
+      } else {
+        outModel = Flags.getModel(params);
+      }
+      final DocClassificationTrainer docTrainer = new DocClassificationTrainer(
+          params);
+      final DoccatModel trainedModel = docTrainer.train(params);
+      CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
+    }
+    
   
   /**
    * Main evaluation entry point for sequence labelling.
@@ -360,6 +394,14 @@ public class CLI {
     this.parserTrainerParser.addArgument("-c", "--chunkerParams")
         .required(true).help("Load the chunker training parameters file.\n");
   }
+  
+  /**
+     * Create the main parameters available for training document classification models.
+     */
+    private void loadDocTrainingParameters() {
+     this.docTrainerParser.addArgument("-p", "--params").required(true)
+          .help("Load the training parameters file\n");
+    }
   
   /**
    * Create the parameters available for evaluation.

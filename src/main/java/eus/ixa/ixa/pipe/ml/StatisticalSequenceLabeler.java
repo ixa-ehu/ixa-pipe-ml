@@ -49,7 +49,7 @@ public class StatisticalSequenceLabeler {
    * The models to use for every language. The keys of the hash are the language
    * codes, the values the models.
    */
-  private static ConcurrentHashMap<String, SequenceLabelerModel> seqModels = new ConcurrentHashMap<>();
+  private final static ConcurrentHashMap<String, SequenceLabelerModel> seqModels = new ConcurrentHashMap<>();
   /**
    * The sequence labeler.
    */
@@ -66,10 +66,7 @@ public class StatisticalSequenceLabeler {
    *          the properties to be loaded
    */
   public StatisticalSequenceLabeler(final Properties props) {
-    final String lang = props.getProperty("language");
-    final String model = props.getProperty("model");
-    final SequenceLabelerModel seqModel = loadModel(lang, model);
-    this.sequenceLabeler = new SequenceLabelerME(seqModel);
+    this(props, null);
   }
 
   /**
@@ -81,7 +78,7 @@ public class StatisticalSequenceLabeler {
    *          the language
    */
   public StatisticalSequenceLabeler(final String model, final String lang) {
-    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    final SequenceLabelerModel seqModel = loadModel(lang, model, true);
     this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
@@ -97,8 +94,9 @@ public class StatisticalSequenceLabeler {
       final SequenceLabelFactory aSeqFactory) {
     final String lang = props.getProperty("language");
     final String model = props.getProperty("model");
+    Boolean useModelCache = Boolean.valueOf(props.getProperty("useModelCache", "true"));
     this.sequenceFactory = aSeqFactory;
-    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    final SequenceLabelerModel seqModel = loadModel(lang, model, useModelCache);
     this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
@@ -116,7 +114,7 @@ public class StatisticalSequenceLabeler {
   public StatisticalSequenceLabeler(final String model, final String lang,
       final SequenceLabelFactory aSeqFactory) {
     this.sequenceFactory = aSeqFactory;
-    final SequenceLabelerModel seqModel = loadModel(lang, model);
+    final SequenceLabelerModel seqModel = loadModel(lang, model, true);
     this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
@@ -272,15 +270,21 @@ public class StatisticalSequenceLabeler {
    * @return the model as a {@link SequenceLabelerModel} object
    */
   private SequenceLabelerModel loadModel(final String lang,
-      final String model) {
+      final String modelName, final Boolean useModelCache) {
     final long lStartTime = new Date().getTime();
+    SequenceLabelerModel model = null;
     try {
-      synchronized (seqModels) {
-        if (!seqModels.containsKey(lang + model)) {
-          seqModels.put(lang + model,
-              new SequenceLabelerModel(new FileInputStream(model)));
+      if (useModelCache) {
+        synchronized (seqModels) {
+          if (!seqModels.containsKey(lang + modelName)) {
+            model = new SequenceLabelerModel(new FileInputStream(modelName));
+            seqModels.put(lang + modelName, model);
+          }
         }
+      } else {
+        model = new SequenceLabelerModel(new FileInputStream(modelName));
       }
+      
     } catch (final IOException e) {
       e.printStackTrace();
     }

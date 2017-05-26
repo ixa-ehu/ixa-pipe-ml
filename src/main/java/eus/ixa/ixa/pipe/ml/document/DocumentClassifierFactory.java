@@ -104,8 +104,8 @@ public class DocumentClassifierFactory extends BaseToolFactory {
   }
   
   /**
-   * Creates the {@link AdaptiveFeatureGenerator}. Usually this is a set of
-   * generators contained in the {@link AggregatedFeatureGenerator}.
+   * Creates the {@link DocumentFeatureGenerator}. Usually this is a set of
+   * generators contained in the {@link DocumentFeatureAggregator}.
    *
    * Note: The generators are created on every call to this method.
    *

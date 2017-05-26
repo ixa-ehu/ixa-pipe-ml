@@ -79,12 +79,12 @@ import opennlp.tools.util.model.ArtifactSerializer;
  * method.
  *
  * In the example above the generators element is mapped to the
- * {@link DocumentGeneratorFactory.AggregatedFeatureGeneratorFactory} which then
- * creates all the aggregated {@link AdaptiveFeatureGenerator}s to
+ * {@link DocumentGeneratorFactory.DocumentFeatureAggregatorFactory} which then
+ * creates all the aggregated {@link DocumentFeatureGenerator}s to
  * accomplish this it evaluates the mapping with the same mechanism
  * and gives the child element to the corresponding factories. All
  * created generators are added to a new instance of the
- * {@link AggregatedFeatureGenerator} which is then returned.
+ * {@link DocumentFeatureAggregator} which is then returned.
  */
 public class DocumentGeneratorFactory {
 

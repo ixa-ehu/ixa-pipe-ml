@@ -27,8 +27,9 @@ public abstract class DocumentCustomFeatureGenerator implements DocumentFeatureG
   /**
    * Initialized the Document Custom Feature Generator with defined properties and loaded resources.
    *
-   * @param properties
-   * @param resourceProvider
+   * @param properties the properties
+   * @param resourceProvider the external resources
+   * @throws InvalidFormatException throws an exception
    */
   public abstract void init(Map<String, String> properties, FeatureGeneratorResourceProvider resourceProvider)
         throws InvalidFormatException;

@@ -28,8 +28,8 @@ public interface DocumentFeatureGenerator {
   /**
    * Extract features from given text fragments
    *
+   *@param features the list of features
    * @param text the text fragments to extract features from
-   * @param extraInformation optional extra information to be used by the feature generator
    */
   void createFeatures(List<String> features, String[] text);
   

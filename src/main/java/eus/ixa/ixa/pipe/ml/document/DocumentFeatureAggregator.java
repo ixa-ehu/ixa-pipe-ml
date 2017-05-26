@@ -59,7 +59,7 @@ public class DocumentFeatureAggregator implements DocumentFeatureGenerator {
 
   /**
    * Calls the {@link DocumentFeatureGenerator#clearFeatureData()} method
-   * on all aggregated {@link AdaptiveFeatureGenerator}s.
+   * on all aggregated {@link DocumentFeatureGenerator}s.
    */
   public void clearFeatureData() {
 
@@ -70,7 +70,7 @@ public class DocumentFeatureAggregator implements DocumentFeatureGenerator {
 
   /**
    * Calls the {@link DocumentFeatureGenerator#createFeatures(List, String[])}
-   * method on all aggregated {@link AdaptiveFeatureGenerator}s.
+   * method on all aggregated {@link DocumentFeatureGenerator}s.
    */
   public void createFeatures(List<String> features, String[] tokens) {
 
@@ -81,7 +81,7 @@ public class DocumentFeatureAggregator implements DocumentFeatureGenerator {
 
   /**
    * Retrieves a {@link Collections} of all aggregated
-   * {@link AdaptiveFeatureGenerator}s.
+   * {@link DocumentFeatureGenerator}s.
    *
    * @return all aggregated generators
    */

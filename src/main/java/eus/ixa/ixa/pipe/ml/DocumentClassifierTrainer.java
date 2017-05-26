@@ -2,13 +2,14 @@ package eus.ixa.ixa.pipe.ml;
 
 import java.io.IOException;
 
+import eus.ixa.ixa.pipe.ml.document.DocSample;
+import eus.ixa.ixa.pipe.ml.document.DocSampleStream;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierFactory;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
-import opennlp.tools.doccat.DoccatFactory;
-import opennlp.tools.doccat.DoccatModel;
-import opennlp.tools.doccat.DocumentCategorizerME;
-import opennlp.tools.doccat.DocumentSample;
-import opennlp.tools.doccat.DocumentSampleStream;
+
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
 
@@ -17,11 +18,11 @@ import opennlp.tools.util.TrainingParameters;
  * feature set based on the features activated in the docClassicationTrainer.properties
  * file
  * 
- * @author vjramirez
- * @version 2017-04-17
+ * @author ragerri
+ * @version 2017-05-27
  */
 
-public class DocClassificationTrainer {
+public class DocumentClassifierTrainer {
 
   /**
    * The language.
@@ -34,11 +35,11 @@ public class DocClassificationTrainer {
   /**
    * ObjectStream of the training data.
    */
-  private ObjectStream<DocumentSample> trainSamples;
+  private ObjectStream<DocSample> trainSamples;
   /**
    * features needs to be implemented by any class extending this one.
    */
-  private DoccatFactory docClassFactory;
+  private DocumentClassifierFactory docClassFactory;
 
   /**
    * Construct a trainer with training and test data and language options.
@@ -48,7 +49,7 @@ public class DocClassificationTrainer {
    * @throws IOException
    *           io exception
    */
-  public DocClassificationTrainer(final TrainingParameters params)
+  public DocumentClassifierTrainer(final TrainingParameters params)
       throws IOException {
 
     this.lang = Flags.getLanguage(params);
@@ -67,17 +68,17 @@ public class DocClassificationTrainer {
    */
   public void createDocumentClassificationFactory(
       final TrainingParameters params) throws IOException {
-    docClassFactory = new DoccatFactory();
+    docClassFactory = new DocumentClassifierFactory();
   }
 
-  public final DoccatModel train(final TrainingParameters params) {
+  public final DocumentClassifierModel train(final TrainingParameters params) {
     if (getDocumentClassificationFactory() == null) {
       throw new IllegalStateException(
           "The DocumentClassificationFactory must be instantiated!!");
     }
-    DoccatModel trainedModel = null;
+    DocumentClassifierModel trainedModel = null;
     try {
-      trainedModel = DocumentCategorizerME.train(this.lang, trainSamples,
+      trainedModel = DocumentClassifierME.train(this.lang, trainSamples,
           params, docClassFactory);
     } catch (final IOException e) {
       System.err.println("IO error while loading traing and test sets!");
@@ -96,11 +97,11 @@ public class DocClassificationTrainer {
    * @throws IOException
    *           the io exception
    */
-  public static ObjectStream<DocumentSample> getDocumentStream(
+  public static ObjectStream<DocSample> getDocumentStream(
       final String inputData) throws IOException {
     final ObjectStream<String> docStream = IOUtils
         .readFileIntoMarkableStreamFactory(inputData);
-    ObjectStream<DocumentSample> sampleStream = new DocumentSampleStream(
+    ObjectStream<DocSample> sampleStream = new DocSampleStream(
         docStream);
     return sampleStream;
   }
@@ -111,7 +112,7 @@ public class DocClassificationTrainer {
    * 
    * @return the features
    */
-  public final DoccatFactory getDocumentClassificationFactory() {
+  public final DocumentClassifierFactory getDocumentClassificationFactory() {
     return this.docClassFactory;
   }
 

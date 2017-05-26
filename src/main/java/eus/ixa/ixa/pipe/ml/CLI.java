@@ -24,6 +24,7 @@ import java.util.Properties;
 
 import com.google.common.io.Files;
 
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
@@ -39,7 +40,6 @@ import net.sourceforge.argparse4j.inf.Namespace;
 import net.sourceforge.argparse4j.inf.Subparser;
 import net.sourceforge.argparse4j.inf.Subparsers;
 import opennlp.tools.cmdline.CmdLineUtil;
-import opennlp.tools.doccat.DoccatModel;
 import opennlp.tools.util.TrainingParameters;
 
 /**
@@ -277,9 +277,9 @@ public class CLI {
       } else {
         outModel = Flags.getModel(params);
       }
-      final DocClassificationTrainer docTrainer = new DocClassificationTrainer(
+      final DocumentClassifierTrainer docTrainer = new DocumentClassifierTrainer(
           params);
-      final DoccatModel trainedModel = docTrainer.train(params);
+      final DocumentClassifierModel trainedModel = docTrainer.train(params);
       CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
     }
     

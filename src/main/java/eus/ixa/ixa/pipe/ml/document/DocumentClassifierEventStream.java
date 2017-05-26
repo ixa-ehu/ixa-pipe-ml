@@ -33,9 +33,8 @@ public class DocumentClassifierEventStream extends AbstractEventStream<DocSample
   /**
    * Initializes the current instance via samples and feature generators.
    *
-   * @param data {@link ObjectStream} of {@link DocSample}s
-   *
-   * @param featureGenerators the feature generators
+   * @param dataStream {@link ObjectStream} of {@link DocSample}s
+   * @param contextGenerator the feature generators
    */
   public DocumentClassifierEventStream(ObjectStream<DocSample> dataStream,
       final DocumentClassifierContextGenerator contextGenerator) {

@@ -26,7 +26,7 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
 /**
  * Generates ngram features for a document.
- * n-gram {@link DocumenCustomFeatureGenerator}
+ * n-gram {@link DocumentCustomFeatureGenerator}
  */
 public class NGramFeatureGenerator extends DocumentCustomFeatureGenerator {
 

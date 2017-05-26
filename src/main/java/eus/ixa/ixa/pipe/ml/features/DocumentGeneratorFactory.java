@@ -69,24 +69,24 @@ import opennlp.tools.util.model.ArtifactSerializer;
  * &lt;/generators&gt;
  * </p>
  *
- * Each XML element is mapped to a {@link GeneratorFactory.XmlFeatureGeneratorFactory} which
+ * Each XML element is mapped to a {@link DocumentGeneratorFactory.XmlFeatureGeneratorFactory} which
  * is responsible to process the element and create the specified
  * {@link DocumentFeatureGenerator}. Elements can contain other
  * elements in this case it is the responsibility of the mapped factory to process
  * the child elements correctly. In some factories this leads to recursive
  * calls the
- * {@link GeneratorFactory.XmlFeatureGeneratorFactory#create(Element, FeatureGeneratorResourceProvider)}
+ * {@link DocumentGeneratorFactory.XmlFeatureGeneratorFactory#create(Element, FeatureGeneratorResourceProvider)}
  * method.
  *
  * In the example above the generators element is mapped to the
- * {@link GeneratorFactory.AggregatedFeatureGeneratorFactory} which then
+ * {@link DocumentGeneratorFactory.AggregatedFeatureGeneratorFactory} which then
  * creates all the aggregated {@link AdaptiveFeatureGenerator}s to
  * accomplish this it evaluates the mapping with the same mechanism
  * and gives the child element to the corresponding factories. All
  * created generators are added to a new instance of the
  * {@link AggregatedFeatureGenerator} which is then returned.
  */
-public class GeneratorFactory {
+public class DocumentGeneratorFactory {
 
   /**
    * The {@link XmlFeatureGeneratorFactory} is responsible to construct
@@ -126,7 +126,7 @@ public class GeneratorFactory {
         if (childNode instanceof Element) {
           Element aggregatedGeneratorElement = (Element) childNode;
           aggregatedGenerators.add(
-              GeneratorFactory.createGenerator(aggregatedGeneratorElement, resourceManager));
+              DocumentGeneratorFactory.createGenerator(aggregatedGeneratorElement, resourceManager));
         }
       }
 

@@ -46,7 +46,7 @@ public interface DocumentClassifier {
    * @param outcome a vector of outcome probabilities
    * @return the best label in a String
    */
-  String getBestCategory(double[] outcome);
+  String getBestLabel(double[] outcome);
 
   /**
    * Get the index of a certain label.

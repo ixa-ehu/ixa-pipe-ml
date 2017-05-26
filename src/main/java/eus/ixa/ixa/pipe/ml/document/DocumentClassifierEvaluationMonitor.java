@@ -17,25 +17,11 @@
 
 package eus.ixa.ixa.pipe.ml.document;
 
+import opennlp.tools.util.eval.EvaluationMonitor;
+
 /**
- * Context generator for the Document Classifier.
+ * {@link EvaluationMonitor} for the document classifier.
  */
-public interface DocumentClassifierContextGenerator {
-
-  /**
-   * Adds a feature generator to this set of feature generators.
-   *
-   * @param generator
-   *          The feature generator to add.
-   */
-  public void addFeatureGenerator(DocumentFeatureGenerator generator);
-
-  /**
-   * Informs all the feature generators for a document classifier that the context of
-   * the feature data (typically a document) is no longer valid.
-   */
-  public void clearFeatureData();
-  
-  public String[] getContext(String[] text);
-
+public interface DocumentClassifierEvaluationMonitor extends
+    EvaluationMonitor<DocSample> {
 }

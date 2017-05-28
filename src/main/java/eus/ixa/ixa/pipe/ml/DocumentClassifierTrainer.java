@@ -1,6 +1,8 @@
 package eus.ixa.ixa.pipe.ml;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.document.DocSample;
 import eus.ixa.ixa.pipe.ml.document.DocSampleStream;
@@ -9,6 +11,8 @@ import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluator;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierFactory;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
+import eus.ixa.ixa.pipe.ml.document.DocumentFeatureDescriptor;
+import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
@@ -80,7 +84,16 @@ public class DocumentClassifierTrainer {
    */
   public void createDocumentClassificationFactory(
       final TrainingParameters params) throws IOException {
-    docClassFactory = new DocumentClassifierFactory();
+    final String featureDescription = DocumentFeatureDescriptor
+        .createDocumentFeatureDescriptor(params);
+    System.err.println(featureDescription);
+    final byte[] featureGeneratorBytes = featureDescription
+        .getBytes(Charset.forName("UTF-8"));
+    final Map<String, Object> resources = LoadModelResources
+        .loadSequenceResources(params);
+    setDocumentClassifierFactory(
+        DocumentClassifierFactory.create(DocumentClassifierFactory.class.getName(),
+            featureGeneratorBytes, resources));
   }
 
   public final DocumentClassifierModel train(final TrainingParameters params) {
@@ -130,6 +143,12 @@ public class DocumentClassifierTrainer {
    * @return the features
    */
   public final DocumentClassifierFactory getDocumentClassificationFactory() {
+    return this.docClassFactory;
+  }
+  
+  public final DocumentClassifierFactory setDocumentClassifierFactory(
+      final DocumentClassifierFactory tokenNameFinderFactory) {
+    this.docClassFactory = tokenNameFinderFactory;
     return this.docClassFactory;
   }
 

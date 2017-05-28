@@ -40,6 +40,7 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
   public void createFeatures(List<String> features, String[] text) {
     Objects.requireNonNull(text, "text must not be null");
 
+    
     for (String word : text) {
       features.add("bow=" + word);
       /*if (this.attributes.get("range").equalsIgnoreCase("lettersOnly")) {

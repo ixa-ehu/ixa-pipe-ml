@@ -44,6 +44,7 @@ public class Flags {
   public static final String DEFAULT_POSTAG_RANGE = "pos,posclass";
   public static final String DEFAULT_MFS_RANGE = "pos,posclass,lemma,mfs,no";
   public static final String DEFAULT_SUPERSENSE_RANGE = "mfs,monosemic";
+  public static final String DEFAULT_BOW_RANGE = "original";
 
   /**
    * Default beam size for decoding.
@@ -777,6 +778,48 @@ public class Flags {
     }
     return headRulesFlag;
   }
+  
+  public static String getBagOfWordsFeatures(final TrainingParameters params) {
+    String tokenFlag = null;
+    if (params.getSettings().get("BagOfWordsFeatures") != null) {
+      tokenFlag = params.getSettings().get("BagOfWordsFeatures");
+    } else {
+      tokenFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return tokenFlag;
+  }
+  
+
+  public static String getBagOfWordsFeaturesRange(final TrainingParameters params) {
+    String tokenRangeFlag = null;
+    if (params.getSettings().get("BagOfWordsFeaturesRange") != null) {
+      tokenRangeFlag = params.getSettings().get("BagOfWordsFeaturesRange");
+    } else {
+      tokenRangeFlag = DEFAULT_BOW_RANGE;
+    }
+    return tokenRangeFlag;
+  }
+  
+  public static String getNgramFeatures(final TrainingParameters params) {
+    String charNgramFlag = null;
+    if (params.getSettings().get("NGramFeatures") != null) {
+      charNgramFlag = params.getSettings().get("NGramFeatures");
+    } else {
+      charNgramFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return charNgramFlag;
+  }
+
+  public static String getNgramFeaturesRange(
+      final TrainingParameters params) {
+    String charNgramRangeFlag = null;
+    if (params.getSettings().get("NGramFeaturesRange") != null) {
+      charNgramRangeFlag = params.getSettings().get("NGramFeaturesRange");
+    } else {
+      charNgramRangeFlag = Flags.CHAR_NGRAM_RANGE;
+    }
+    return charNgramRangeFlag;
+  }
 
   public static boolean isPredicateContextFeatures(
       final TrainingParameters params) {
@@ -942,6 +985,17 @@ public class Flags {
 
   public static boolean isTokenFeature(final TrainingParameters params) {
     final String tokenParam = getTokenFeatures(params);
+    return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isNgramFeature(
+      final TrainingParameters params) {
+    final String charngramParam = getNgramFeatures(params);
+    return !charngramParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isBagOfWordsFeature(final TrainingParameters params) {
+    final String tokenParam = getBagOfWordsFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 

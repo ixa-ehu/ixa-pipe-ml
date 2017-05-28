@@ -4,6 +4,8 @@ import java.io.IOException;
 
 import eus.ixa.ixa.pipe.ml.document.DocSample;
 import eus.ixa.ixa.pipe.ml.document.DocSampleStream;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifier;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluator;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierFactory;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
@@ -33,9 +35,17 @@ public class DocumentClassifierTrainer {
    */
   private final String trainData;
   /**
+   * String pointing to the test data.
+   */
+  private final String testData;
+  /**
    * ObjectStream of the training data.
    */
   private ObjectStream<DocSample> trainSamples;
+  /**
+   * ObjectStream of the test data.
+   */
+  private ObjectStream<DocSample> testSamples;
   /**
    * features needs to be implemented by any class extending this one.
    */
@@ -54,7 +64,9 @@ public class DocumentClassifierTrainer {
 
     this.lang = Flags.getLanguage(params);
     this.trainData = params.getSettings().get("TrainSet");
-    this.trainSamples = getDocumentStream(this.trainData);
+    this.testData = params.getSettings().get("TestSet");
+    this.trainSamples = getDocumentStream(trainData);
+    this.testSamples = getDocumentStream(testData);
     createDocumentClassificationFactory(params);
   }
 
@@ -77,14 +89,19 @@ public class DocumentClassifierTrainer {
           "The DocumentClassificationFactory must be instantiated!!");
     }
     DocumentClassifierModel trainedModel = null;
+    DocumentClassifierEvaluator docEvaluator = null;
     try {
       trainedModel = DocumentClassifierME.train(this.lang, trainSamples,
           params, docClassFactory);
+      final DocumentClassifier docClassifier = new DocumentClassifierME(trainedModel);
+      docEvaluator = new DocumentClassifierEvaluator(docClassifier);
+      docEvaluator.evaluate(testSamples);
     } catch (final IOException e) {
       System.err.println("IO error while loading traing and test sets!");
       e.printStackTrace();
       System.exit(1);
     }
+    System.out.println("Final Result: \n" + docEvaluator.getAccuracy());
     return trainedModel;
   }
 

@@ -95,6 +95,12 @@ public interface DocumentClassifier {
    * @return a map with the score as a key. The value is a Set of labels with their score.
    */
   SortedMap<Double, Set<String>> sortedScoreMap(String[] text);
+  
+  /**
+   * Informs the feature generator that the context of the data in the context (typically a document)
+   * is no longer valid.
+   */
+   void clearFeatureData();
 
 }
 

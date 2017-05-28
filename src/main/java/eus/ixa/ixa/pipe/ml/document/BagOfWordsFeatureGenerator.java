@@ -41,14 +41,15 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
     Objects.requireNonNull(text, "text must not be null");
 
     for (String word : text) {
-      if (this.attributes.get("range").equalsIgnoreCase("lettersOnly")) {
+      features.add("bow=" + word);
+      /*if (this.attributes.get("range").equalsIgnoreCase("lettersOnly")) {
         StringPattern pattern = StringPattern.recognize(word);
         if (pattern.isAllLetter())
           features.add("bow=" + word);
       }
       else {
         features.add("bow=" + word);
-      }
+      }*/
     }
   }
 

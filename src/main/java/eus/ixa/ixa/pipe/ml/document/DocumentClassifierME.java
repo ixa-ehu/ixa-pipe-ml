@@ -135,6 +135,17 @@ public class DocumentClassifierME implements DocumentClassifier {
   public String getAllLabels(double[] results) {
     return model.getAllOutcomes(results);
   }
+  
+  /**
+   * Forgets all adaptive data which was collected during previous calls to one
+   * of the find methods.
+   *
+   * This method is typical called at the end of a document.
+   */
+  @Override
+  public void clearFeatureData() {
+    this.contextGenerator.clearFeatureData();
+  }
 
   public static DocumentClassifierModel train(String languageCode, ObjectStream<DocSample> samples,
       TrainingParameters mlParams, DocumentClassifierFactory factory)

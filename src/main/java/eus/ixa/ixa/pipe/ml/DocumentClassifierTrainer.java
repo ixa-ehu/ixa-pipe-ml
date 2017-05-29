@@ -12,7 +12,7 @@ import eus.ixa.ixa.pipe.ml.document.DocumentClassifierFactory;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
 import eus.ixa.ixa.pipe.ml.document.DocumentFeatureDescriptor;
-import eus.ixa.ixa.pipe.ml.resources.LoadModelResources;
+import eus.ixa.ixa.pipe.ml.document.DocumentModelResources;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 
@@ -99,8 +99,8 @@ public class DocumentClassifierTrainer {
     System.err.println(featureDescription);
     final byte[] featureGeneratorBytes = featureDescription
         .getBytes(Charset.forName("UTF-8"));
-    final Map<String, Object> resources = LoadModelResources
-        .loadSequenceResources(params);
+    final Map<String, Object> resources = DocumentModelResources
+        .loadDocumentResources(params);
     setDocumentClassifierFactory(
         DocumentClassifierFactory.create(DocumentClassifierFactory.class.getName(),
             featureGeneratorBytes, resources));

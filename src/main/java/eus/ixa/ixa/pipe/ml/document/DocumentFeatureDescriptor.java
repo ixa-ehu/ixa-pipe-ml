@@ -27,10 +27,8 @@ import org.jdom2.output.XMLOutputter;
 import eus.ixa.ixa.pipe.ml.features.BrownBigramFeatureGenerator;
 import eus.ixa.ixa.pipe.ml.features.BrownTokenClassFeatureGenerator;
 import eus.ixa.ixa.pipe.ml.features.BrownTokenFeatureGenerator;
-import eus.ixa.ixa.pipe.ml.features.ClarkFeatureGenerator;
 import eus.ixa.ixa.pipe.ml.features.Prev2MapFeatureGenerator;
 import eus.ixa.ixa.pipe.ml.features.PreviousMapTokenFeatureGenerator;
-import eus.ixa.ixa.pipe.ml.features.Word2VecClusterFeatureGenerator;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import opennlp.tools.util.TrainingParameters;
@@ -135,7 +133,7 @@ public final class DocumentFeatureDescriptor {
       for (final File clarkCluster : clarkClusterFiles) {
         final Element clarkFeatures = new Element("custom");
         clarkFeatures.setAttribute("class",
-            ClarkFeatureGenerator.class.getName());
+            DocClarkFeatureGenerator.class.getName());
         clarkFeatures.setAttribute("dict",
             IOUtils.normalizeLexiconName(clarkCluster.getName()));
         generators.addContent(clarkFeatures);
@@ -151,7 +149,7 @@ public final class DocumentFeatureDescriptor {
       for (final File word2vecFile : word2vecClusterFiles) {
         final Element word2vecClusterFeatures = new Element("custom");
         word2vecClusterFeatures.setAttribute("class",
-            Word2VecClusterFeatureGenerator.class.getName());
+            DocWord2VecClusterFeatureGenerator.class.getName());
         word2vecClusterFeatures.setAttribute("dict",
             IOUtils.normalizeLexiconName(word2vecFile.getName()));
         generators.addContent(word2vecClusterFeatures);

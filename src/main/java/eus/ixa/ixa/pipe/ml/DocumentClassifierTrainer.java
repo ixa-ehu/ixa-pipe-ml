@@ -51,6 +51,14 @@ public class DocumentClassifierTrainer {
    */
   private ObjectStream<DocSample> testSamples;
   /**
+   * Reset the adaptive features every newline in the training data.
+   */
+  private final String clearTrainingFeatures;
+  /**
+   * Reset the adaptive features every newline in the testing data.
+   */
+  private final String clearEvaluationFeatures;
+  /**
    * features needs to be implemented by any class extending this one.
    */
   private DocumentClassifierFactory docClassFactory;
@@ -67,10 +75,12 @@ public class DocumentClassifierTrainer {
       throws IOException {
 
     this.lang = Flags.getLanguage(params);
+    this.clearTrainingFeatures = Flags.getClearTrainingFeatures(params);
+    this.clearEvaluationFeatures = Flags.getClearEvaluationFeatures(params);
     this.trainData = params.getSettings().get("TrainSet");
     this.testData = params.getSettings().get("TestSet");
-    this.trainSamples = getDocumentStream(trainData);
-    this.testSamples = getDocumentStream(testData);
+    this.trainSamples = getDocumentStream(trainData, clearTrainingFeatures);
+    this.testSamples = getDocumentStream(testData, clearEvaluationFeatures);
     createDocumentClassificationFactory(params);
   }
 
@@ -114,7 +124,7 @@ public class DocumentClassifierTrainer {
       e.printStackTrace();
       System.exit(1);
     }
-    //System.out.println("Final Result: \n" + docEvaluator.getAccuracy());
+    System.out.println("Final Result: \n" + docEvaluator.getAccuracy());
     return trainedModel;
   }
 
@@ -131,7 +141,7 @@ public class DocumentClassifierTrainer {
       final String inputData, String clearFeatures) throws IOException {
     final ObjectStream<String> docStream = IOUtils
         .readFileIntoMarkableStreamFactory(inputData);
-    ObjectStream<DocSample> sampleStream = new DocSampleStream(
+    ObjectStream<DocSample> sampleStream = new DocSampleStream(clearFeatures,
         docStream);
     return sampleStream;
   }

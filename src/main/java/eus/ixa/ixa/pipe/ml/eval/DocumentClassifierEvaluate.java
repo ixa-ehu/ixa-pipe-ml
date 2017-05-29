@@ -17,18 +17,16 @@ package eus.ixa.ixa.pipe.ml.eval;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 
 import eus.ixa.ixa.pipe.ml.DocumentClassifierTrainer;
 import eus.ixa.ixa.pipe.ml.document.DocSample;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifier;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluator;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
-import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
  * Evaluation class mostly using {@link DocumentClassifierEvaluator}.
@@ -42,7 +40,6 @@ public class DocumentClassifierEvaluate {
    * The reference corpus to evaluate against.
    */
   private ObjectStream<DocSample> testSamples;
-  private ObjectStream<DocSample> trainSamples;
   /**
    * An instance of the probabilistic {@link DocumentClassifierME}.
    */
@@ -69,89 +66,17 @@ public class DocumentClassifierEvaluate {
     final String model = props.getProperty("model");
     final String testSet = props.getProperty("testset");
     this.testSamples = DocumentClassifierTrainer.getDocumentStream(testSet, clearFeatures);
-    if (!trainSet.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG)) {
-      this.unknownAccuracy = true;
-      this.trainSamples = SequenceLabelerTrainer.getSequenceStream(trainSet,
-          clearFeatures, this.corpusFormat);
-    }
-    if (seqTypes != Flags.DEFAULT_SEQUENCE_TYPES) {
-      final String[] neTypes = seqTypes.split(",");
-      this.testSamples = new SequenceLabelSampleTypeFilter(neTypes,
-          this.testSamples);
-    }
-    seqModels.putIfAbsent(lang,
-        new SequenceLabelerModel(new FileInputStream(model)));
-    this.docClassifier = new SequenceLabelerME(seqModels.get(lang));
+    docModels.putIfAbsent(lang,
+        new DocumentClassifierModel(new FileInputStream(model)));
+    this.docClassifier = new DocumentClassifierME(docModels.get(lang));
   }
 
-  /**
-   * Evaluate and print precision, recall and F measure.
-   * 
-   * @throws IOException
-   *           if test corpus not loaded
-   */
   public final void evaluate() throws IOException {
-    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
-        this.docClassifier);
-    evaluator.evaluate(this.testSamples);
-    System.out.println(evaluator.getFMeasure());
-  }
-
-  public final void evaluateAccuracy() throws IOException {
-    if (this.unknownAccuracy) {
-      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(
-          this.trainSamples, this.corpusFormat, this.docClassifier);
+    
+      final DocumentClassifierEvaluator evaluator = new DocumentClassifierEvaluator(this.docClassifier);
       evaluator.evaluate(this.testSamples);
       System.out.println();
-      System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
-      System.out
-          .println("Sentence Accuracy: " + evaluator.getSentenceAccuracy());
-      System.out.println(
-          "Unknown Word Accuracy: " + evaluator.getUnknownWordAccuracy());
-      System.out
-          .println("Known Word Accuracy: " + evaluator.getKnownAccuracy());
-    } else {
-      final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
-          this.docClassifier);
-      evaluator.evaluate(this.testSamples);
-      System.out.println();
-      System.out.println("Word Accuracy: " + evaluator.getWordAccuracy());
-      System.out
-          .println("Sentence accuracy: " + evaluator.getSentenceAccuracy());
-    }
-  }
-
-  /**
-   * Evaluate and print the precision, recall and F measure per sequence class.
-   *
-   * @throws IOException
-   *           if test corpus not loaded
-   */
-  public final void detailEvaluate() throws IOException {
-    final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
-    final SequenceLabelerDetailedFMeasureListener detailedFListener = new SequenceLabelerDetailedFMeasureListener();
-    listeners.add(detailedFListener);
-    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
-        this.docClassifier, listeners
-            .toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
-    evaluator.evaluate(this.testSamples);
-    System.out.println(detailedFListener.toString());
-  }
-
-  /**
-   * Evaluate and print every error.
-   * 
-   * @throws IOException
-   *           if test corpus not loaded
-   */
-  public final void evalError() throws IOException {
-    final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
-    listeners.add(new SequenceLabelerEvaluationErrorListener());
-    final SequenceLabelerEvaluator evaluator = new SequenceLabelerEvaluator(this.corpusFormat,
-        this.docClassifier, listeners
-            .toArray(new SequenceLabelerEvaluationMonitor[listeners.size()]));
-    evaluator.evaluate(this.testSamples);
-    System.out.println(evaluator.getFMeasure());
+      System.out.println("Word Accuracy: " + evaluator.getAccuracy());
   }
 
 }

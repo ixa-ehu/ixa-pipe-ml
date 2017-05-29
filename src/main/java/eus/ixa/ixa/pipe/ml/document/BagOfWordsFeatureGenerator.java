@@ -31,18 +31,17 @@ import opennlp.tools.util.featuregen.StringPattern;
  */
 public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
 
-  private Map<String, String> attributes;
+  private boolean lettersOnly;
   
   public BagOfWordsFeatureGenerator() {
   }
 
   @Override
   public void createFeatures(List<String> features, String[] text) {
-    Objects.requireNonNull(text, "text must not be null");
-
     
+    Objects.requireNonNull(text, "text must not be null");
     for (String word : text) {
-      if (this.attributes.get("range").equalsIgnoreCase("lettersOnly")) {
+      if (lettersOnly) {
         StringPattern pattern = StringPattern.recognize(word);
         if (pattern.isAllLetter())
           features.add("bow=" + word);
@@ -61,6 +60,10 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
   public void init(Map<String, String> properties,
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    this.attributes = properties;
+      if (properties.get("range").equalsIgnoreCase("lettersOnly")) {
+        lettersOnly = true;
+      } else {
+        lettersOnly = false;
+      }
   }
 }

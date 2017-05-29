@@ -19,7 +19,6 @@ package eus.ixa.ixa.pipe.ml.document;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
@@ -36,17 +35,9 @@ public class NGramFeatureGenerator extends DocumentCustomFeatureGenerator {
   }
 
   public void createFeatures(List<String> features, String[] text) {
+    
     int minGram = Integer.parseInt(this.attributes.get("minLength"));
     int maxGram = Integer.parseInt(this.attributes.get("maxLength"));
-    
-    try {
-      checkMinMaxNGrams(minGram, maxGram);
-    } catch (InvalidFormatException e) {
-      e.printStackTrace();
-    }
-    
-    Objects.requireNonNull(text, "text must not be null");
-
     for (int i = 0; i <= text.length - minGram; i++) {
       String feature = "ng=";
       for (int y = 0; y < maxGram && i + y < text.length; y++) {
@@ -56,18 +47,6 @@ public class NGramFeatureGenerator extends DocumentCustomFeatureGenerator {
           features.add(feature);
         }
       }
-    }
-  }
-  
-  private void checkMinMaxNGrams(int minGram, int maxGram) throws InvalidFormatException {
-    if (minGram > 0 && maxGram > 0) {
-      if (minGram >= maxGram) {
-        throw new InvalidFormatException(
-            "Minimum range value (minGram) should be less than or equal to maximum range value (maxGram)!");
-      }
-    } else {
-      throw new InvalidFormatException("Both minimum range value (minGram) & maximum " +
-          "range value (maxGram) should be greater than or equal to 1!");
     }
   }
   

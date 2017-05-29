@@ -42,15 +42,14 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
 
     
     for (String word : text) {
-      features.add("bow=" + word);
-      /*if (this.attributes.get("range").equalsIgnoreCase("lettersOnly")) {
+      if (this.attributes.get("range").equalsIgnoreCase("lettersOnly")) {
         StringPattern pattern = StringPattern.recognize(word);
         if (pattern.isAllLetter())
           features.add("bow=" + word);
       }
       else {
         features.add("bow=" + word);
-      }*/
+      }
     }
   }
 

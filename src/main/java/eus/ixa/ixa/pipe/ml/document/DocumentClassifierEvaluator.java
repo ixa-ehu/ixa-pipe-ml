@@ -61,6 +61,7 @@ public class DocumentClassifierEvaluator extends Evaluator<DocSample> {
       this.docClassifier.clearFeatureData();
     }
     String[] document = sample.getTokens();
+    System.err.println("-> Document length: " + document.length);
     String cat = docClassifier.classify(document);
 
     if (sample.getLabel().equals(cat)) {

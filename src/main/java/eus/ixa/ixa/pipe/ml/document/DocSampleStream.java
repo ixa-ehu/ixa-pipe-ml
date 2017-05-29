@@ -18,10 +18,18 @@
 package eus.ixa.ixa.pipe.ml.document;
 
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 import opennlp.tools.tokenize.WhitespaceTokenizer;
 import opennlp.tools.util.FilterObjectStream;
+import opennlp.tools.util.InputStreamFactory;
 import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.PlainTextByLineStream;
+import opennlp.tools.util.StringUtil;
 
 /**
  * This class reads in string encoded training samples, parses them and
@@ -33,38 +41,68 @@ import opennlp.tools.util.ObjectStream;
  * separated document tokens.<br>
  * Sample line: category-string tab-char whitespace-separated-tokens line-break-char(s)<br>
  */
-public class DocSampleStream extends FilterObjectStream<String, DocSample> {
+public class DocSampleStream implements ObjectStream<DocSample> {
+  
+  /**
+   * The stream.
+   */
+  private final ObjectStream<String> docStream;
+  /**
+   * Whether the features are to be reset or not.
+   */
+  private final String clearFeatures;
 
-  public DocSampleStream(ObjectStream<String> samples) {
-    super(samples);
+
+  public DocSampleStream(String clearFeatures, ObjectStream<String> samples) {
+    this.clearFeatures = clearFeatures;
+    this.docStream = samples;
+  }
+  
+  public DocSampleStream(String clearFeatures, InputStreamFactory in) throws IOException {
+    this.clearFeatures = clearFeatures;
+    try {
+      this.docStream = new PlainTextByLineStream(in, "UTF-8");
+      System.setOut(new PrintStream(System.out, true, "UTF-8"));
+    } catch (final UnsupportedEncodingException e) {
+      // UTF-8 is available on all JVMs, will never happen
+      throw new IllegalStateException(e);
+    }
   }
 
   public DocSample read() throws IOException {
-    String sampleString = samples.read();
+    
+    List<String> tokens = new ArrayList<>();
+    String label = null;
     boolean isClearAdaptiveData = false;
-
-
-    if (sampleString != null) {
-      isClearAdaptiveData = true;
-      // Whitespace tokenize entire string
-      String[] tokens = WhitespaceTokenizer.INSTANCE.tokenize(sampleString);
-
-      DocSample sample;
-
-      if (tokens.length > 1) {
-        String category = tokens[0];
-        String[] docTokens = new String[tokens.length - 1];
-        System.arraycopy(tokens, 1, docTokens, 0, tokens.length - 1);
-
-        sample = new DocSample(category, docTokens, isClearAdaptiveData);
+    //empty line indicates new document
+    String doc;
+    while ((doc = this.docStream.read()) != null
+        && !StringUtil.isEmpty(doc)) {
+      // clear adaptive data if document mark appears following
+      if (this.clearFeatures.equalsIgnoreCase("docstart")
+          && doc.startsWith("-DOCSTART-")) {
+        isClearAdaptiveData = true;
+        final String emptyLine = this.docStream.read();
+        if (!StringUtil.isEmpty(emptyLine)) {
+          throw new IOException(
+              "Empty line after -DOCSTART- not empty: '" + emptyLine + "'!");
+        }
+        continue;
       }
-      else {
-        throw new IOException("Empty lines, or lines with only a category string are not allowed!");
+      final String[] fields = doc.split("\t");
+      if (fields.length == 2) {
+        tokens.add(e)
+        
+      } else {
+        throw new IOException(
+            "Expected two fields per doc in training data, got "
+                + tokens.length + " for doc '" + doc + "'!");
       }
-
-      return sample;
     }
-
-    return null;
+    // check if we need to clear features every sentence
+    if (this.clearFeatures.equalsIgnoreCase("yes")) {
+      isClearAdaptiveData = true;
+    }
+    if ()
   }
 }

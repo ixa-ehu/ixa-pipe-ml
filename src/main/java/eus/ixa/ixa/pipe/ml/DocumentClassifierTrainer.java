@@ -114,7 +114,7 @@ public class DocumentClassifierTrainer {
       e.printStackTrace();
       System.exit(1);
     }
-    System.out.println("Final Result: \n" + docEvaluator.getAccuracy());
+    //System.out.println("Final Result: \n" + docEvaluator.getAccuracy());
     return trainedModel;
   }
 
@@ -128,7 +128,7 @@ public class DocumentClassifierTrainer {
    *           the io exception
    */
   public static ObjectStream<DocSample> getDocumentStream(
-      final String inputData) throws IOException {
+      final String inputData, String clearFeatures) throws IOException {
     final ObjectStream<String> docStream = IOUtils
         .readFileIntoMarkableStreamFactory(inputData);
     ObjectStream<DocSample> sampleStream = new DocSampleStream(

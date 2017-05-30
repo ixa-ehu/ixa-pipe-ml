@@ -26,6 +26,7 @@ import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
 import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
+import eus.ixa.ixa.pipe.ml.eval.DocumentClassifierEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.TokenizerEvaluate;
@@ -78,17 +79,13 @@ public class CLI {
    */
   private final Subparser seqTrainerParser;
   /**
-   * The subparser that manages the Constituent Parser training sub-command.
-   */
-  private final Subparser parserTrainerParser;
-  /**
-   * The subparser that manages the Tokenizer evaluation.
-   */
-  private final Subparser tokevalParser;
-  /**
    * The parser that manages the SequenceLabeler evaluation sub-command.
    */
   private final Subparser evalParser;
+  /**
+   * The subparser that manages the Constituent Parser training sub-command.
+   */
+  private final Subparser parserTrainerParser;
   /**
    * The parser to manage the parsing evaluation.
    */
@@ -98,17 +95,26 @@ public class CLI {
    */
   private final Subparser docTrainerParser;
   /**
+   * The parser that manages the DocumentClassification evaluation.
+   */
+  private final Subparser docevalParser;
+  /**
    * The parser that manages the cross validation sub-command.
    */
   private final Subparser crossValidateParser;
+  /**
+   * The subparser that manages the Tokenizer evaluation.
+   */
+  private final Subparser tokevalParser;
 
   private static final String SEQ_TRAINER_NAME = "sequenceTrainer";
   private static final String PARSE_TRAINER_NAME = "parserTrainer";
-  private static final String TOKEVAL_PARSER_NAME = "tokeval";
   private static final String EVAL_PARSER_NAME = "eval";
   private static final String PARSEVAL_PARSER_NAME = "parseval";
   public static final String DOC_TRAINER_NAME = "docTrainer";
+  public static final String DOCEVAL_PARSER_NAME = "doceval";
   private static final String CROSS_PARSER_NAME = "cross";
+  private static final String TOKEVAL_PARSER_NAME = "tokeval";
 
   /**
    * Construct a CLI object with the sub-parsers to manage the command line
@@ -119,19 +125,23 @@ public class CLI {
     this.seqTrainerParser = this.subParsers.addParser(SEQ_TRAINER_NAME)
         .help("Sequence Labeler training CLI");
     loadSeqLabelerTrainingParameters();
+    this.evalParser = this.subParsers.addParser(EVAL_PARSER_NAME)
+        .help("Sequence Labeler Evaluation CLI");
+    loadEvalParameters();
     this.parserTrainerParser = this.subParsers.addParser(PARSE_TRAINER_NAME)
         .help("Constituent Parser training CLI");
     loadParserTrainingParameters();
-    this.tokevalParser = this.subParsers.addParser(TOKEVAL_PARSER_NAME);
-    loadTokevalParameters();
-    this.evalParser = this.subParsers.addParser(EVAL_PARSER_NAME)
-        .help("Evaluation CLI");
-    loadEvalParameters();
     this.parsevalParser = this.subParsers.addParser(PARSEVAL_PARSER_NAME)
         .help("Parseval CLI");
     loadParsevalParameters();
-    this.docTrainerParser = this.subParsers.addParser(DOC_TRAINER_NAME).help("Document Classification training CLI");
+    this.docTrainerParser = this.subParsers.addParser(DOC_TRAINER_NAME)
+        .help("Document Classification training CLI");
     loadDocTrainingParameters();
+    this.docevalParser = this.subParsers.addParser(DOCEVAL_PARSER_NAME)
+        .help("Document Classification Evaluation CLI");
+    loadDocevalParameters();
+    this.tokevalParser = this.subParsers.addParser(TOKEVAL_PARSER_NAME);
+    loadTokevalParameters();
     this.crossValidateParser = this.subParsers.addParser(CROSS_PARSER_NAME)
         .help("Cross validation CLI");
     loadCrossValidateParameters();
@@ -163,33 +173,38 @@ public class CLI {
     try {
       this.parsedArguments = this.argParser.parseArgs(args);
       System.err.println("CLI options: " + this.parsedArguments);
-        switch (args[0]) {
-        case TOKEVAL_PARSER_NAME:
-          tokeval();
-          break;
-        case EVAL_PARSER_NAME:
-            eval();
-            break;
-        case PARSEVAL_PARSER_NAME:
-            parseval();
-            break;
-        case SEQ_TRAINER_NAME:
-            seqTrain();
-            break;
-        case PARSE_TRAINER_NAME:
-            parserTrain();
-            break;
-        case DOC_TRAINER_NAME:
-          docTrain();
-        case CROSS_PARSER_NAME:
-            crossValidate();
-            break;
-        }
+      switch (args[0]) {
+      case SEQ_TRAINER_NAME:
+        seqTrain();
+        break;
+      case EVAL_PARSER_NAME:
+        eval();
+        break;
+      case PARSEVAL_PARSER_NAME:
+        parseval();
+        break;
+      case PARSE_TRAINER_NAME:
+        parserTrain();
+        break;
+      case DOC_TRAINER_NAME:
+        docTrain();
+        break;
+      case DOCEVAL_PARSER_NAME:
+        doceval();
+        break;
+      case CROSS_PARSER_NAME:
+        crossValidate();
+        break;
+      case TOKEVAL_PARSER_NAME:
+        tokeval();
+        break;
+      }
     } catch (final ArgumentParserException e) {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + this.version
-          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME
-          + "|" + DOC_TRAINER_NAME + "|tokeval|eval|parseval|cross) -help for details");
+          + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|"
+          + DOC_TRAINER_NAME
+          + "|eval|parseval|doceval|cross|tokeval) -help for details");
       System.exit(1);
     }
   }
@@ -238,7 +253,7 @@ public class CLI {
         .loadTrainingParameters(chunkerParamsFile);
     ParserModel trainedModel;
     String outModel;
-      if (params.getSettings().get("OutputModel") == null
+    if (params.getSettings().get("OutputModel") == null
         || params.getSettings().get("OutputModel").length() == 0) {
       outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
       params.put("OutputModel", outModel);
@@ -259,45 +274,28 @@ public class CLI {
     }
     CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
-  
-  /* Main access to the Sequence Labeler train functionalities.
-    *
-    * @throws IOException
-    *           input output exception if problems with corpora
-    */
-   private void docTrain() throws IOException {
-      // load training parameters file
-      final String paramFile = this.parsedArguments.getString("params");
-      final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
-      String outModel = null;
-      if (params.getSettings().get("OutputModel") == null
-          || params.getSettings().get("OutputModel").length() == 0) {
-        outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
-        params.put("OutputModel", outModel);
-      } else {
-        outModel = Flags.getModel(params);
-      }
-      final DocumentClassifierTrainer docTrainer = new DocumentClassifierTrainer(
-          params);
-      final DocumentClassifierModel trainedModel = docTrainer.train(params);
-      CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
-    }
-    
-  
-  /**
-   * Main evaluation entry point for sequence labelling.
-   *
-   * @throws IOException
-   *           throws exception if test set not available
-   */
-  public final void tokeval() throws IOException {
 
-    final String lang = this.parsedArguments.getString("language");
-    final String testset = this.parsedArguments.getString("testset");
-    final Properties props = setTokevalProperties(lang, testset);
-    final TokenizerEvaluate evaluator = new TokenizerEvaluate(
-        props);
-    //evaluator.evaluateAccuracy();
+  /*
+   * Main access to the Sequence Labeler train functionalities.
+   *
+   * @throws IOException input output exception if problems with corpora
+   */
+  private void docTrain() throws IOException {
+    // load training parameters file
+    final String paramFile = this.parsedArguments.getString("params");
+    final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
+    String outModel = null;
+    if (params.getSettings().get("OutputModel") == null
+        || params.getSettings().get("OutputModel").length() == 0) {
+      outModel = Files.getNameWithoutExtension(paramFile) + ".bin";
+      params.put("OutputModel", outModel);
+    } else {
+      outModel = Flags.getModel(params);
+    }
+    final DocumentClassifierTrainer docTrainer = new DocumentClassifierTrainer(
+        params);
+    final DocumentClassifierModel trainedModel = docTrainer.train(params);
+    CmdLineUtil.writeModel("ixa-pipe-ml", new File(outModel), trainedModel);
   }
 
   /**
@@ -358,7 +356,33 @@ public class CLI {
 
     final ParserEvaluate parserEvaluator = new ParserEvaluate(props);
     parserEvaluator.evaluate();
+  }
 
+  private void doceval() throws IOException {
+    final String model = this.parsedArguments.getString("model");
+    final String testset = this.parsedArguments.getString("testset");
+    final String clearFeatures = this.parsedArguments
+        .getString("clearFeatures");
+    final Properties props = setDocevalProperties(model, testset,
+        clearFeatures);
+    final DocumentClassifierEvaluate docEvaluator = new DocumentClassifierEvaluate(
+        props);
+    docEvaluator.evaluate();
+  }
+
+  /**
+   * Main evaluation entry point for sequence labelling.
+   *
+   * @throws IOException
+   *           throws exception if test set not available
+   */
+  private final void tokeval() throws IOException {
+
+    final String lang = this.parsedArguments.getString("language");
+    final String testset = this.parsedArguments.getString("testset");
+    final Properties props = setTokevalProperties(lang, testset);
+    final TokenizerEvaluate evaluator = new TokenizerEvaluate(props);
+    // evaluator.evaluateAccuracy();
   }
 
   /**
@@ -390,30 +414,20 @@ public class CLI {
     this.parserTrainerParser.addArgument("-p", "--params").required(true)
         .help("Load the parsing training parameters file.\n");
     this.parserTrainerParser.addArgument("-t", "--taggerParams").required(true)
-        .help("Load the tagger training parameters file or an already trained POS tagger model.\n");
-    this.parserTrainerParser.addArgument("-c", "--chunkerParams")
-        .required(true).help("Load the chunker training parameters file.\n");
-  }
-  
-  /**
-     * Create the main parameters available for training document classification models.
-     */
-    private void loadDocTrainingParameters() {
-     this.docTrainerParser.addArgument("-p", "--params").required(true)
-          .help("Load the training parameters file\n");
-    }
-  
-  /**
-   * Create the parameters available for evaluation.
-   */
-  private void loadTokevalParameters() {
-    this.tokevalParser.addArgument("-l", "--language").required(true)
-        .choices("ca", "de", "en", "es", "eu", "fr", "it")
-        .help("Choose language.\n");
-    this.tokevalParser.addArgument("-t", "--testset").required(true)
-        .help("The test or reference corpus.\n");
+        .help(
+            "Load the tagger training parameters file or an already trained POS tagger model.\n");
+    this.parserTrainerParser.addArgument("-c", "--chunkerParams").required(true)
+        .help("Load the chunker training parameters file.\n");
   }
 
+  /**
+   * Create the main parameters available for training document classification
+   * models.
+   */
+  private void loadDocTrainingParameters() {
+    this.docTrainerParser.addArgument("-p", "--params").required(true)
+        .help("Load the training parameters file\n");
+  }
 
   /**
    * Create the parameters available for evaluation.
@@ -463,6 +477,31 @@ public class CLI {
     this.parsevalParser.addArgument("--clearFeatures").required(false)
         .choices("yes", "no", "docstart").setDefault(Flags.DEFAULT_FEATURE_FLAG)
         .help("Reset the adaptive features; defaults to 'no'.\n");
+  }
+
+  /**
+   * Create the parameters available for evaluation.
+   */
+  private void loadDocevalParameters() {
+    this.docevalParser.addArgument("-m", "--model").required(false)
+        .setDefault(Flags.DEFAULT_EVALUATE_MODEL)
+        .help("Pass the model to evaluate as a parameter.\n");
+    this.docevalParser.addArgument("-t", "--testset").required(true)
+        .help("The test or reference corpus.\n");
+    this.docevalParser.addArgument("--clearFeatures").required(false)
+        .choices("yes", "no", "docstart").setDefault(Flags.DEFAULT_FEATURE_FLAG)
+        .help("Reset the adaptive features; defaults to 'no'.\n");
+  }
+
+  /**
+   * Create the parameters available for evaluation.
+   */
+  private void loadTokevalParameters() {
+    this.tokevalParser.addArgument("-l", "--language").required(true)
+        .choices("ca", "de", "en", "es", "eu", "fr", "it")
+        .help("Choose language.\n");
+    this.tokevalParser.addArgument("-t", "--testset").required(true)
+        .help("The test or reference corpus.\n");
   }
 
   /**
@@ -518,8 +557,27 @@ public class CLI {
     parsevalProperties.setProperty("testset", testset);
     return parsevalProperties;
   }
-  
-  private Properties setTokevalProperties(final String language, final String testset) {
+
+  /**
+   * Set a Properties object with the CLI parameters for evaluation.
+   * 
+   * @param model
+   *          the model parameter
+   * @param testset
+   *          the reference set
+   * @return the properties object
+   */
+  private Properties setDocevalProperties(final String model,
+      final String testset, String clearFeatures) {
+    final Properties parsevalProperties = new Properties();
+    parsevalProperties.setProperty("model", model);
+    parsevalProperties.setProperty("testset", testset);
+    parsevalProperties.setProperty("clearFeatures", clearFeatures);
+    return parsevalProperties;
+  }
+
+  private Properties setTokevalProperties(final String language,
+      final String testset) {
     final Properties parsevalProperties = new Properties();
     parsevalProperties.setProperty("language", language);
     parsevalProperties.setProperty("testset", testset);

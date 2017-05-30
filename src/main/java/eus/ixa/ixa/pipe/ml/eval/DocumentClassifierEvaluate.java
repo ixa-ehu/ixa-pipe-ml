@@ -18,7 +18,6 @@ package eus.ixa.ixa.pipe.ml.eval;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 import eus.ixa.ixa.pipe.ml.DocumentClassifierTrainer;
 import eus.ixa.ixa.pipe.ml.document.DocSample;
@@ -44,11 +43,6 @@ public class DocumentClassifierEvaluate {
    * An instance of the probabilistic {@link DocumentClassifierME}.
    */
   private final DocumentClassifier docClassifier;
-  /**
-   * The models to use for every language. The keys of the hash are the language
-   * codes, the values the models.
-   */
-  private static ConcurrentHashMap<String, DocumentClassifierModel> docModels = new ConcurrentHashMap<String, DocumentClassifierModel>();
 
   /**
    * Construct an evaluator. It takes from the properties a model, a testset.
@@ -61,22 +55,23 @@ public class DocumentClassifierEvaluate {
    */
   public DocumentClassifierEvaluate(final Properties props) throws IOException {
 
-    final String lang = props.getProperty("language");
     final String clearFeatures = props.getProperty("clearFeatures");
-    final String model = props.getProperty("model");
+    final String modelName = props.getProperty("model");
     final String testSet = props.getProperty("testset");
-    this.testSamples = DocumentClassifierTrainer.getDocumentStream(testSet, clearFeatures);
-    docModels.putIfAbsent(lang,
-        new DocumentClassifierModel(new FileInputStream(model)));
-    this.docClassifier = new DocumentClassifierME(docModels.get(lang));
+    this.testSamples = DocumentClassifierTrainer.getDocumentStream(testSet,
+        clearFeatures);
+    DocumentClassifierModel model = new DocumentClassifierModel(
+        new FileInputStream(modelName));
+    this.docClassifier = new DocumentClassifierME(model);
   }
 
   public final void evaluate() throws IOException {
-    
-      final DocumentClassifierEvaluator evaluator = new DocumentClassifierEvaluator(this.docClassifier);
-      evaluator.evaluate(this.testSamples);
-      System.out.println();
-      System.out.println("Word Accuracy: " + evaluator.getAccuracy());
+
+    final DocumentClassifierEvaluator evaluator = new DocumentClassifierEvaluator(
+        this.docClassifier);
+    evaluator.evaluate(this.testSamples);
+    System.out.println();
+    System.out.println("Word Accuracy: " + evaluator.getAccuracy());
   }
 
 }

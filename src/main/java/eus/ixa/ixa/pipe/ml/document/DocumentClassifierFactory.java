@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.document.features.DocumentFeatureAggregator;
+import eus.ixa.ixa.pipe.ml.document.features.DocumentFeatureGenerator;
+import eus.ixa.ixa.pipe.ml.document.features.DocumentGeneratorFactory;
 import opennlp.tools.util.BaseToolFactory;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.ext.ExtensionLoader;

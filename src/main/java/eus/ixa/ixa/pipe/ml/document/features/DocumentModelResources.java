@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
  */
-package eus.ixa.ixa.pipe.ml.document;
+package eus.ixa.ixa.pipe.ml.document.features;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
 import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
 import eus.ixa.ixa.pipe.ml.resources.Dictionary;
 import eus.ixa.ixa.pipe.ml.resources.POSDictionary;

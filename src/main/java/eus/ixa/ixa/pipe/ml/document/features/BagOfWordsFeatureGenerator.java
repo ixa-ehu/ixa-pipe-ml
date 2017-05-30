@@ -15,50 +15,55 @@
  * limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.document;
+
+package eus.ixa.ixa.pipe.ml.document.features;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
+import opennlp.tools.util.featuregen.StringPattern;
 
 /**
- * Generates ngram features for a document.
- * n-gram {@link DocumentCustomFeatureGenerator}
+ * Generates a feature for each word in a document.
  */
-public class NGramFeatureGenerator extends DocumentCustomFeatureGenerator {
+public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
 
-  private Map<String, String> attributes; 
-
-  public NGramFeatureGenerator() {
+  private boolean lettersOnly;
+  
+  public BagOfWordsFeatureGenerator() {
   }
 
+  @Override
   public void createFeatures(List<String> features, String[] text) {
     
-    int minGram = Integer.parseInt(this.attributes.get("minLength"));
-    int maxGram = Integer.parseInt(this.attributes.get("maxLength"));
-    for (int i = 0; i <= text.length - minGram; i++) {
-      String feature = "ng=";
-      for (int y = 0; y < maxGram && i + y < text.length; y++) {
-        feature = feature + ":" + text[i + y];
-        int gramCount = y + 1;
-        if (maxGram >= gramCount && gramCount >= minGram) {
-          features.add(feature);
-        }
+    Objects.requireNonNull(text, "text must not be null");
+    for (String word : text) {
+      if (lettersOnly) {
+        StringPattern pattern = StringPattern.recognize(word);
+        if (pattern.isAllLetter())
+          features.add("bow=" + word);
+      }
+      else {
+        features.add("bow=" + word);
       }
     }
   }
-  
+
   @Override
   public void clearFeatureData() {
   }
 
   @Override
-  public void init(final Map<String, String> properties,
-      final FeatureGeneratorResourceProvider resourceProvider)
+  public void init(Map<String, String> properties,
+      FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    this.attributes = properties;
-
+      if (properties.get("range").equalsIgnoreCase("lettersOnly")) {
+        lettersOnly = true;
+      } else {
+        lettersOnly = false;
+      }
   }
 }

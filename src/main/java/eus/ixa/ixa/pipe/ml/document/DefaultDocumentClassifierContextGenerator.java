@@ -19,6 +19,9 @@ package eus.ixa.ixa.pipe.ml.document;
 import java.util.ArrayList;
 import java.util.List;
 
+import eus.ixa.ixa.pipe.ml.document.features.BagOfWordsFeatureGenerator;
+import eus.ixa.ixa.pipe.ml.document.features.DocumentFeatureGenerator;
+
 /**
  * Class for determining contextual features for a tag/chunk style named-entity
  * recognizer.

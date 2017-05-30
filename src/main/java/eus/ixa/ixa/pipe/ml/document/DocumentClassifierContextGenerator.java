@@ -17,6 +17,8 @@
 
 package eus.ixa.ixa.pipe.ml.document;
 
+import eus.ixa.ixa.pipe.ml.document.features.DocumentFeatureGenerator;
+
 /**
  * Context generator for the Document Classifier.
  */

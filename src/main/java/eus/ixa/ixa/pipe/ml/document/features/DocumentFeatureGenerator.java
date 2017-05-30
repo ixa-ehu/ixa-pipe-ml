@@ -16,7 +16,7 @@
  */
 
 
-package eus.ixa.ixa.pipe.ml.document;
+package eus.ixa.ixa.pipe.ml.document.features;
 
 import java.util.List;
 

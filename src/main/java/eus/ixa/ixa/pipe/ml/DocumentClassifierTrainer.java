@@ -11,8 +11,8 @@ import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluator;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierFactory;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
-import eus.ixa.ixa.pipe.ml.document.DocumentFeatureDescriptor;
-import eus.ixa.ixa.pipe.ml.document.DocumentModelResources;
+import eus.ixa.ixa.pipe.ml.document.features.DocumentFeatureDescriptor;
+import eus.ixa.ixa.pipe.ml.document.features.DocumentModelResources;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 

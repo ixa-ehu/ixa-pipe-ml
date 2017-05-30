@@ -55,7 +55,7 @@ public class DocClassifierCrossValidator {
    * @param nFolds
    *          number of folds
    *
-   * @throws IOException
+   * @throws IOException if io error
    */
   public void evaluate(ObjectStream<DocSample> samples, int nFolds)
       throws IOException {

@@ -133,6 +133,7 @@ public class DocumentClassifierTrainer {
    * 
    * @param inputData
    *          the input data
+   * @param clearFeatures whether to reset the features for each document
    * @return the stream from the several corpus formats
    * @throws IOException
    *           the io exception

@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.featuregen.StringPattern;
@@ -31,7 +32,8 @@ import opennlp.tools.util.featuregen.StringPattern;
  */
 public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
 
-  private boolean lettersOnly;
+  private boolean isLettersOnly;
+  private boolean isLower;
   
   public BagOfWordsFeatureGenerator() {
   }
@@ -41,13 +43,22 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
     
     Objects.requireNonNull(text, "text must not be null");
     for (String word : text) {
-      if (lettersOnly) {
+      if (isLettersOnly) {
         StringPattern pattern = StringPattern.recognize(word);
-        if (pattern.isAllLetter())
-          features.add("bow=" + word);
+        if (pattern.isAllLetter()) {
+          if (isLower) {
+            features.add("bow=" + word.toLowerCase());
+          } else {
+            features.add("bow=" + word);
+          }
+        }
       }
       else {
-        features.add("bow=" + word);
+        if (isLower) {
+          features.add("bow=" + word.toLowerCase());
+        } else {
+          features.add("bow=" + word);
+        }
       }
     }
   }
@@ -60,10 +71,14 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
   public void init(Map<String, String> properties,
       FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-      if (properties.get("range").equalsIgnoreCase("lettersOnly")) {
-        lettersOnly = true;
-      } else {
-        lettersOnly = false;
-      }
+    String featuresRange = properties.get("range");
+    final String[] rangeArray = Flags
+        .processTokenClassFeaturesRange(featuresRange);
+    if (rangeArray[0].equalsIgnoreCase("lettersOnly")) {
+      this.isLettersOnly = true;
+    }
+    if (rangeArray[1].equalsIgnoreCase("lower")) {
+      this.isLower = true;
+    }
   }
 }

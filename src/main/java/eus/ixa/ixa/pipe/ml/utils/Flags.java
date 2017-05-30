@@ -44,7 +44,7 @@ public class Flags {
   public static final String DEFAULT_POSTAG_RANGE = "pos,posclass";
   public static final String DEFAULT_MFS_RANGE = "pos,posclass,lemma,mfs,no";
   public static final String DEFAULT_SUPERSENSE_RANGE = "mfs,monosemic";
-  public static final String DEFAULT_BOW_RANGE = "original";
+  public static final String DEFAULT_BOW_RANGE = "no,no";
 
   /**
    * Default beam size for decoding.

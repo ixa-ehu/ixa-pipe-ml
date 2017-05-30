@@ -24,13 +24,9 @@ import org.jdom2.Element;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
 
-import eus.ixa.ixa.pipe.ml.features.BrownBigramFeatureGenerator;
-import eus.ixa.ixa.pipe.ml.features.BrownTokenClassFeatureGenerator;
-import eus.ixa.ixa.pipe.ml.features.BrownTokenFeatureGenerator;
-import eus.ixa.ixa.pipe.ml.features.Prev2MapFeatureGenerator;
-import eus.ixa.ixa.pipe.ml.features.PreviousMapTokenFeatureGenerator;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
+import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 import opennlp.tools.util.TrainingParameters;
 
 /**
@@ -73,6 +69,56 @@ public final class DocumentFeatureDescriptor {
       generators.addContent(tokenFeature);
       System.err.println("-> BOW features added!");
     }
+    if (Flags.isTokenClassFeature(params)) {
+      final String tokenClassFeatureRange = Flags
+          .getTokenClassFeaturesRange(params);
+      final Element tokenClassFeature = new Element("custom");
+      tokenClassFeature.setAttribute("class",
+          DocTokenClassFeatureGenerator.class.getName());
+      tokenClassFeature.setAttribute("range", tokenClassFeatureRange);
+      generators.addContent(tokenClassFeature);
+      System.err.println("-> Token Class Features added!");
+    }
+    if (Flags.isOutcomePriorFeature(params)) {
+      final Element outcomePriorFeature = new Element("custom");
+      outcomePriorFeature.setAttribute("class",
+          DocOutcomePriorFeatureGenerator.class.getName());
+      generators.addContent(outcomePriorFeature);
+      System.err.println("-> Outcome Prior Features added!");
+    }
+    if (Flags.isSentenceFeature(params)) {
+      final String beginSentence = Flags.getSentenceFeaturesBegin(params);
+      final String endSentence = Flags.getSentenceFeaturesEnd(params);
+      final Element sentenceFeature = new Element("custom");
+      sentenceFeature.setAttribute("class",
+          DocSentenceFeatureGenerator.class.getName());
+      sentenceFeature.setAttribute("begin", beginSentence);
+      sentenceFeature.setAttribute("end", endSentence);
+      generators.addContent(sentenceFeature);
+      System.err.println("-> Sentence Features added!");
+    }
+    if (Flags.isPrefixFeature(params)) {
+      final String beginPrefix = Flags.getPrefixFeaturesBegin(params);
+      final String endPrefix = Flags.getPrefixFeaturesEnd(params);
+      final Element prefixFeature = new Element("custom");
+      prefixFeature.setAttribute("class",
+          DocPrefixFeatureGenerator.class.getName());
+      prefixFeature.setAttribute("begin", beginPrefix);
+      prefixFeature.setAttribute("end", endPrefix);
+      generators.addContent(prefixFeature);
+      System.err.println("-> Prefix Features added!");
+    }
+    if (Flags.isSuffixFeature(params)) {
+      final String beginSuffix = Flags.getSuffixFeaturesBegin(params);
+      final String endSuffix = Flags.getSuffixFeaturesEnd(params);
+      final Element suffixFeature = new Element("custom");
+      suffixFeature.setAttribute("class",
+          DocSuffixFeatureGenerator.class.getName());
+      suffixFeature.setAttribute("begin", beginSuffix);
+      suffixFeature.setAttribute("end", endSuffix);
+      generators.addContent(suffixFeature);
+      System.err.println("-> Suffix Features added!");
+    }
     if (Flags.isNgramFeature(params)) {
       final String charngramRange = Flags.getNgramFeaturesRange(params);
       final String[] rangeArray = Flags.processNgramRange(charngramRange);
@@ -84,19 +130,33 @@ public final class DocumentFeatureDescriptor {
       generators.addContent(charngramFeature);
       System.err.println("-> Ngram Features added!");
     }
+    if (Flags.isCharNgramClassFeature(params)) {
+      final String charngramRange = Flags.getCharNgramFeaturesRange(params);
+      final String[] rangeArray = Flags.processNgramRange(charngramRange);
+      final Element charngramFeature = new Element("custom");
+      charngramFeature.setAttribute("class",
+          DocCharacterNgramFeatureGenerator.class.getName());
+      charngramFeature.setAttribute("minLength", rangeArray[0]);
+      charngramFeature.setAttribute("maxLength", rangeArray[1]);
+      generators.addContent(charngramFeature);
+      System.err.println("-> CharNgram Class Features added!");
+    }
+    // Polarity Dictionary Features
+    if (Flags.isDictionaryFeatures(params)) {
+      final String dictPath = Flags.getDictionaryFeatures(params);
+      final List<File> fileList = StringUtils.getFilesInDir(new File(dictPath));
+      for (final File dictFile : fileList) {
+        final Element dictFeatures = new Element("custom");
+        dictFeatures.setAttribute("class",
+            DocPolarityDictionaryFeatureGenerator.class.getName());
+        dictFeatures.setAttribute("dict",
+            IOUtils.normalizeLexiconName(dictFile.getName()));
+        generators.addContent(dictFeatures);
+      }
+      System.err.println("-> Dictionary Polarity Features added!");
+    }
     // Brown clustering features
     if (Flags.isBrownFeatures(params)) {
-      // previous 2 maps features
-      final Element prev2MapFeature = new Element("custom");
-      prev2MapFeature.setAttribute("class",
-          Prev2MapFeatureGenerator.class.getName());
-      generators.addContent(prev2MapFeature);
-      // previous map and token feature (in window)
-      final Element prevMapTokenFeature = new Element("custom");
-      prevMapTokenFeature.setAttribute("class",
-          PreviousMapTokenFeatureGenerator.class.getName());
-      generators.addContent(prevMapTokenFeature);
-      // brown clustering features
       final String brownClusterPath = Flags.getBrownFeatures(params);
       final List<File> brownClusterFiles = Flags
           .getClusterLexiconFiles(brownClusterPath);
@@ -104,24 +164,24 @@ public final class DocumentFeatureDescriptor {
         // brown bigram class features
         final Element brownBigramFeatures = new Element("custom");
         brownBigramFeatures.setAttribute("class",
-            BrownBigramFeatureGenerator.class.getName());
+            DocBrownBigramFeatureGenerator.class.getName());
         brownBigramFeatures.setAttribute("dict",
             IOUtils.normalizeLexiconName(brownClusterFile.getName()));
-        generators.addContent(brownBigramFeatures);
+        //generators.addContent(brownBigramFeatures);
         // brown token feature
         final Element brownTokenFeature = new Element("custom");
         brownTokenFeature.setAttribute("class",
-            BrownTokenFeatureGenerator.class.getName());
+            DocBrownTokenFeatureGenerator.class.getName());
         brownTokenFeature.setAttribute("dict",
             IOUtils.normalizeLexiconName(brownClusterFile.getName()));
         generators.addContent(brownTokenFeature);
         // brown token class feature
         final Element brownTokenClassFeature = new Element("custom");
         brownTokenClassFeature.setAttribute("class",
-            BrownTokenClassFeatureGenerator.class.getName());
+            DocBrownTokenClassFeatureGenerator.class.getName());
         brownTokenClassFeature.setAttribute("dict",
             IOUtils.normalizeLexiconName(brownClusterFile.getName()));
-        generators.addContent(brownTokenClassFeature);
+        //generators.addContent(brownTokenClassFeature);
       }
       System.err.println("-> Brown Cluster Features added!");
     }
@@ -155,6 +215,43 @@ public final class DocumentFeatureDescriptor {
         generators.addContent(word2vecClusterFeatures);
       }
       System.err.println("-> Word2Vec Clusters Features added!");
+    }
+    // Morphological features
+    if (Flags.isPOSTagModelFeatures(params)) {
+      final String posModelPath = Flags.getPOSTagModelFeatures(params);
+      final String posModelRange = Flags.getPOSTagModelFeaturesRange(params);
+      final Element posTagClassFeatureElement = new Element("custom");
+      posTagClassFeatureElement.setAttribute("class",
+          DocPOSTagModelFeatureGenerator.class.getName());
+      posTagClassFeatureElement.setAttribute("model",
+          IOUtils.normalizeLexiconName(new File(posModelPath).getName()));
+      posTagClassFeatureElement.setAttribute("range", posModelRange);
+      generators.addContent(posTagClassFeatureElement);
+      System.err.println("-> POSTagModel Features added!");
+    }
+    if (Flags.isLemmaModelFeatures(params)) {
+      final String lemmaModelPath = Flags.getLemmaModelFeatures(params);
+      final Element lemmaClassFeatureElement = new Element("custom");
+      lemmaClassFeatureElement.setAttribute("class",
+          DocLemmaModelFeatureGenerator.class.getName());
+      lemmaClassFeatureElement.setAttribute("model",
+          IOUtils.normalizeLexiconName(new File(lemmaModelPath).getName()));
+      generators.addContent(lemmaClassFeatureElement);
+      System.err.println("-> LemmaModel Features added!");
+    }
+    if (Flags.isLemmaDictionaryFeatures(params)) {
+      final String lemmaDictPath = Flags.getLemmaDictionaryFeatures(params);
+      final String[] lemmaDictResources = Flags
+          .getLemmaDictionaryResources(lemmaDictPath);
+      final Element lemmaClassFeatureElement = new Element("custom");
+      lemmaClassFeatureElement.setAttribute("class",
+          DocLemmaDictionaryFeatureGenerator.class.getName());
+      lemmaClassFeatureElement.setAttribute("model", IOUtils
+          .normalizeLexiconName(new File(lemmaDictResources[0]).getName()));
+      lemmaClassFeatureElement.setAttribute("dict", IOUtils
+          .normalizeLexiconName(new File(lemmaDictResources[1]).getName()));
+      generators.addContent(lemmaClassFeatureElement);
+      System.err.println("-> LemmaDictionary Features added!");
     }
     final XMLOutputter xmlOutput = new XMLOutputter();
     final Format format = Format.getPrettyFormat();

@@ -20,6 +20,7 @@ package eus.ixa.ixa.pipe.ml.document.features;
 import java.util.List;
 import java.util.Map;
 
+import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 
@@ -34,16 +35,19 @@ public class NGramFeatureGenerator extends DocumentCustomFeatureGenerator {
   public NGramFeatureGenerator() {
   }
 
-  public void createFeatures(List<String> features, String[] text) {
+  public void createFeatures(List<String> features, String[] tokens) {
     
     int minGram = Integer.parseInt(this.attributes.get("minLength"));
     int maxGram = Integer.parseInt(this.attributes.get("maxLength"));
-    for (int i = 0; i <= text.length - minGram; i++) {
+    for (int i = 0; i <= tokens.length - minGram; i++) {
       String feature = "ng=";
-      for (int y = 0; y < maxGram && i + y < text.length; y++) {
-        feature = feature + ":" + text[i + y];
+      for (int y = 0; y < maxGram && i + y < tokens.length; y++) {
+        feature = feature + ":" + tokens[i + y];
         int gramCount = y + 1;
         if (maxGram >= gramCount && gramCount >= minGram) {
+          if (Flags.DEBUG) {
+            System.err.println(feature);
+          }
           features.add(feature);
         }
       }

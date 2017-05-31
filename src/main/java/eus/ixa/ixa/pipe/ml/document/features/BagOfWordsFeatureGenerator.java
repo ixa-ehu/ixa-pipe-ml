@@ -74,11 +74,11 @@ public class BagOfWordsFeatureGenerator extends DocumentCustomFeatureGenerator {
     String featuresRange = properties.get("range");
     final String[] rangeArray = Flags
         .processTokenClassFeaturesRange(featuresRange);
-    if (rangeArray[0].equalsIgnoreCase("lettersOnly")) {
-      this.isLettersOnly = true;
-    }
-    if (rangeArray[1].equalsIgnoreCase("lower")) {
+    if (rangeArray[0].equalsIgnoreCase("lower")) {
       this.isLower = true;
+    }
+    if (rangeArray[1].equalsIgnoreCase("lettersOnly")) {
+      this.isLettersOnly = true;
     }
   }
 }

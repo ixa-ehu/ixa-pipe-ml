@@ -101,6 +101,7 @@ public class DocumentClassifierTrainer {
         .getBytes(Charset.forName("UTF-8"));
     final Map<String, Object> resources = DocumentModelResources
         .loadDocumentResources(params);
+    //TODO add default feature generator
     setDocumentClassifierFactory(
         DocumentClassifierFactory.create(DocumentClassifierFactory.class.getName(),
             featureGeneratorBytes, resources));

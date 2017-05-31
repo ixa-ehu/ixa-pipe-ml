@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <generators>
-      <custom class="eus.ixa.ixa.pipe.ml.document.BagOfWordsFeatureGenerator" />
+<custom class="eus.ixa.ixa.pipe.ml.document.features.BagOfWordsFeatureGenerator" range="no,no" />
 </generators>

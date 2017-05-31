@@ -20,12 +20,12 @@ public class StatisticalDocumentClassifier {
       String language = props.getProperty("language");
       String inputModel = props.getProperty("model");
       Boolean useModelCache = Boolean.valueOf(props.getProperty("useModelCache", "true"));
-      final DocumentClassifierModel docClassModel = loadModel(inputModel, language, useModelCache);
+      final DocumentClassifierModel docClassModel = loadModel(language, inputModel, useModelCache);
       this.docClassifier = new DocumentClassifierME(docClassModel);
     }
     
     public StatisticalDocumentClassifier(final String inputModel, String language) throws IOException {
-        final DocumentClassifierModel docClassModel = loadModel(inputModel, language, true);
+        final DocumentClassifierModel docClassModel = loadModel(language, inputModel, true);
         this.docClassifier = new DocumentClassifierME(docClassModel);
     }
     

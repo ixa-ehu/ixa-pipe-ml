@@ -4,16 +4,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Properties;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
-import eus.ixa.ixa.pipe.ml.utils.StringUtils;
 
 public class StatisticalDocumentClassifier {
     
-    private static final char tabDelimiter = '\t';
-    private static final char newLineDelimiter = '\n';
     private static final ConcurrentHashMap<String, DocumentClassifierModel> docClassifierModels = new ConcurrentHashMap<>();
     private final DocumentClassifierME docClassifier;
     
@@ -30,10 +29,44 @@ public class StatisticalDocumentClassifier {
         this.docClassifier = new DocumentClassifierME(docClassModel);
     }
     
+    /**
+     * Classifies the given text, provided in separate tokens.
+     * @param text the tokens of text to classify
+     * @return the best label found
+     */
     public String classify(final String[] document) {
         double[] outcomes = docClassifier.classifyProb(document);
         String category = docClassifier.getBestLabel(outcomes);
-        return StringUtils.getStringFromTokens(document) + tabDelimiter + category + newLineDelimiter;
+        return category;
+    }
+    
+    /**
+     * Classifies the given text, provided in separate tokens.
+     * @param text the tokens of text to classify
+     * @return probabilities per label
+     */
+    public double[] classifyProb(final String[] document) {
+      return docClassifier.classifyProb(document);
+    }
+    
+    /**
+     * Get a map of the scores sorted in ascending order together with their associated labels.
+     * Many labels can have the same score, hence the Set as value.
+     *
+     * @param text the input text to classify
+     * @return a map with the score as a key. The value is a Set of labels with their score.
+     */
+    public SortedMap<Double, Set<String>> classifySortedScoreMap(final String[] document) {
+      return docClassifier.sortedScoreMap(document);
+    }
+    
+    /**
+     * Forgets all adaptive data which was collected during previous calls to one
+     * of the find methods. This method is typically called at the end of a
+     * document.
+     */
+    public final void clearFeatureData() {
+      this.docClassifier.clearFeatureData();
     }
 
     private DocumentClassifierModel loadModel(final String lang,

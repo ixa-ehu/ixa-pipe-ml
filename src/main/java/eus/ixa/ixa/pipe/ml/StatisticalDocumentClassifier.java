@@ -31,7 +31,7 @@ public class StatisticalDocumentClassifier {
     
     /**
      * Classifies the given text, provided in separate tokens.
-     * @param text the tokens of text to classify
+     * @param document the tokens of text to classify
      * @return the best label found
      */
     public String classify(final String[] document) {
@@ -42,7 +42,7 @@ public class StatisticalDocumentClassifier {
     
     /**
      * Classifies the given text, provided in separate tokens.
-     * @param text the tokens of text to classify
+     * @param document the tokens of text to classify
      * @return probabilities per label
      */
     public double[] classifyProb(final String[] document) {
@@ -53,7 +53,7 @@ public class StatisticalDocumentClassifier {
      * Get a map of the scores sorted in ascending order together with their associated labels.
      * Many labels can have the same score, hence the Set as value.
      *
-     * @param text the input text to classify
+     * @param document the input text to classify
      * @return a map with the score as a key. The value is a Set of labels with their score.
      */
     public SortedMap<Double, Set<String>> classifySortedScoreMap(final String[] document) {

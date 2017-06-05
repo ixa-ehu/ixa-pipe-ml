@@ -155,6 +155,20 @@ public final class DocumentFeatureDescriptor {
       }
       System.err.println("-> Dictionary Polarity Features added!");
     }
+    // Frequent Word Features
+    if (Flags.isFrequentWordFeatures(params)) {
+      final String dictPath = Flags.getFrequentWordFeatures(params);
+      final List<File> fileList = StringUtils.getFilesInDir(new File(dictPath));
+      for (final File dictFile : fileList) {
+        final Element dictFeatures = new Element("custom");
+        dictFeatures.setAttribute("class",
+            FrequentWordFeatureGenerator.class.getName());
+        dictFeatures.setAttribute("dict",
+            IOUtils.normalizeLexiconName(dictFile.getName()));
+        generators.addContent(dictFeatures);
+      }
+      System.err.println("-> Frequent Word Features added!");
+    }
     // Brown clustering features
     if (Flags.isBrownFeatures(params)) {
       final String brownClusterPath = Flags.getBrownFeatures(params);

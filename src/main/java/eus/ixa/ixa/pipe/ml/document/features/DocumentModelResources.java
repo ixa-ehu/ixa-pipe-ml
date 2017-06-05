@@ -109,6 +109,18 @@ public class DocumentModelResources {
             resources);
       }
     }
+    if (Flags.isFrequentWordFeatures(params)) {
+      final String dictDir = Flags.getFrequentWordFeatures(params);
+      final String serializerId = "dictionaryserializer";
+      final List<File> fileList = StringUtils.getFilesInDir(new File(dictDir));
+      for (final File dictFile : fileList) {
+        final String dictionaryPath = dictFile.getCanonicalPath();
+        artifactSerializers.put(serializerId,
+            new Dictionary.DictionarySerializer());
+        loadResource(serializerId, artifactSerializers, dictionaryPath,
+            resources);
+      }
+    }
     if (Flags.isPOSTagModelFeatures(params)) {
       final String morphoResourcesPath = Flags.getPOSTagModelFeatures(params);
       final String posSerializerId = "seqmodelserializer";

@@ -821,6 +821,16 @@ public class Flags {
     return charNgramRangeFlag;
   }
 
+  public static String getFrequentWordFeatures(final TrainingParameters params) {
+    String dictionaryFlag = null;
+    if (params.getSettings().get("FrequentWordFeatures") != null) {
+      dictionaryFlag = params.getSettings().get("FrequentWordFeatures");
+    } else {
+      dictionaryFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return dictionaryFlag;
+  }
+
   public static boolean isPredicateContextFeatures(
       final TrainingParameters params) {
     final String posFeatures = getPredicateContextFeatures(params);
@@ -997,6 +1007,10 @@ public class Flags {
   public static boolean isBagOfWordsFeature(final TrainingParameters params) {
     final String tokenParam = getBagOfWordsFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  public static boolean isFrequentWordFeatures(final TrainingParameters params) {
+    final String dictFeatures = getFrequentWordFeatures(params);
+    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
   public static void componentException() {

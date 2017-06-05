@@ -46,6 +46,7 @@ public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeature
   public void createFeatures(final List<String> features, final String[] tokens) {
     
     for (String token : tokens) {
+      //TODO consider adding gazEntry + polarity class
       String gazEntry = this.dictionary.lookup(token);
       if (gazEntry == null) {
         gazEntry = "O";

@@ -45,6 +45,7 @@ public class Flags {
   public static final String DEFAULT_MFS_RANGE = "pos,posclass,lemma,mfs,no";
   public static final String DEFAULT_SUPERSENSE_RANGE = "mfs,monosemic";
   public static final String DEFAULT_BOW_RANGE = "no,no";
+  public static final String DEFAULT_TARGET_RANGE = "no";
 
   /**
    * Default beam size for decoding.
@@ -840,6 +841,34 @@ public class Flags {
     }
     return mfsFlag;
   }
+  
+  public static String getTargetFeatures(final TrainingParameters params) {
+    String morphoFlag = null;
+    if (params.getSettings().get("TargetFeatures") != null) {
+      morphoFlag = params.getSettings().get("TargetFeatures");
+    } else {
+      morphoFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return morphoFlag;
+  }
+
+  /**
+   * Get the morphological features configuration.
+   *
+   * @param params
+   *          the training parameters
+   * @return a list containing the options
+   */
+  public static String getTargetFeaturesRange(
+      final TrainingParameters params) {
+    String lemmaRangeFlag = null;
+    if (params.getSettings().get("TargetFeaturesRange") != null) {
+      lemmaRangeFlag = params.getSettings().get("TargetFeaturesRange");
+    } else {
+      lemmaRangeFlag = Flags.DEFAULT_TARGET_RANGE;
+    }
+    return lemmaRangeFlag;
+  }
 
   public static boolean isPredicateContextFeatures(
       final TrainingParameters params) {
@@ -1006,6 +1035,10 @@ public class Flags {
   public static boolean isTokenFeature(final TrainingParameters params) {
     final String tokenParam = getTokenFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  public static boolean isTargetFeatures(final TrainingParameters params) {
+    final String morphoFeatures = getTargetFeatures(params);
+    return !morphoFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
   public static boolean isDictionaryPolarityFeatures(final TrainingParameters params) {

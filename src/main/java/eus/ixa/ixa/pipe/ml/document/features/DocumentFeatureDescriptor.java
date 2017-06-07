@@ -169,6 +169,19 @@ public final class DocumentFeatureDescriptor {
       }
       System.err.println("-> Frequent Word Features added!");
     }
+    //Opinion Target Extraction Features
+    if (Flags.isTargetFeatures(params)) {
+      final String targetModelPath = Flags.getTargetFeatures(params);
+      final String targetModelRange = Flags.getTargetFeaturesRange(params);
+      final Element targetClassFeatureElement = new Element("custom");
+      targetClassFeatureElement.setAttribute("class",
+          DocTargetFeatureGenerator.class.getName());
+      targetClassFeatureElement.setAttribute("model",
+          IOUtils.normalizeLexiconName(new File(targetModelPath).getName()));
+      targetClassFeatureElement.setAttribute("range", targetModelRange);
+      generators.addContent(targetClassFeatureElement);
+      System.err.println("-> Target Model Features added!");
+    }
     // Brown clustering features
     if (Flags.isBrownFeatures(params)) {
       final String brownClusterPath = Flags.getBrownFeatures(params);

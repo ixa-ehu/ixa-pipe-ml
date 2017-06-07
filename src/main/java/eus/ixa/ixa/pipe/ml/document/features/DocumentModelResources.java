@@ -121,6 +121,14 @@ public class DocumentModelResources {
             resources);
       }
     }
+    if (Flags.isTargetFeatures(params)) {
+      final String morphoResourcesPath = Flags.getTargetFeatures(params);
+      final String posSerializerId = "otemodelserializer";
+      artifactSerializers.put(posSerializerId,
+          new SequenceModelResource.SequenceModelResourceSerializer());
+      loadResource(posSerializerId, artifactSerializers, morphoResourcesPath,
+          resources);
+    }
     if (Flags.isPOSTagModelFeatures(params)) {
       final String morphoResourcesPath = Flags.getPOSTagModelFeatures(params);
       final String posSerializerId = "seqmodelserializer";

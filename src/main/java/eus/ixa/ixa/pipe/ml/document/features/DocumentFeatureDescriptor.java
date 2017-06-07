@@ -142,17 +142,19 @@ public final class DocumentFeatureDescriptor {
       System.err.println("-> CharNgram Class Features added!");
     }
     // Polarity Dictionary Features
-    if (Flags.isDictionaryFeatures(params)) {
-      final String dictPath = Flags.getDictionaryFeatures(params);
-      final List<File> fileList = StringUtils.getFilesInDir(new File(dictPath));
-      for (final File dictFile : fileList) {
+    if (Flags.isDictionaryPolarityFeatures(params)) {
+      final String dictPath = Flags.getDictionaryPolarityFeatures(params);
+      final String[] dictResources = Flags.getDictionaryPolarityResources(dictPath);
         final Element dictFeatures = new Element("custom");
         dictFeatures.setAttribute("class",
             DocPolarityDictionaryFeatureGenerator.class.getName());
-        dictFeatures.setAttribute("dict",
-            IOUtils.normalizeLexiconName(dictFile.getName()));
+        dictFeatures.setAttribute("model",
+            IOUtils.normalizeLexiconName(new File(dictResources[0]).getName()));
+        dictFeatures.setAttribute("lemma",
+            IOUtils.normalizeLexiconName(new File(dictResources[1]).getName()));
+        dictFeatures.setAttribute("pol",
+            IOUtils.normalizeLexiconName(new File(dictResources[2]).getName()));
         generators.addContent(dictFeatures);
-      }
       System.err.println("-> Dictionary Polarity Features added!");
     }
     // Frequent Word Features

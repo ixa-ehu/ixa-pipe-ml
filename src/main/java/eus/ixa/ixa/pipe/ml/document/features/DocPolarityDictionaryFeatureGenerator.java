@@ -27,10 +27,9 @@ import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
 import opennlp.tools.util.model.ArtifactSerializer;
 
 /**
- * Checks if a named entity is in a gazetteer.
- * 
+ * Checks if an expression is in a polarity lexicon.
  * @author ragerri
- * @version 2015-03-30
+ * @version 2017-06-07
  *
  */
 public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeatureGenerator
@@ -38,20 +37,19 @@ public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeature
 
   private Dictionary dictionary;
   private Map<String, String> attributes;
-
+  
   public DocPolarityDictionaryFeatureGenerator() {
   }
 
   @Override
   public void createFeatures(final List<String> features, final String[] tokens) {
     
-    for (String token : tokens) {
+    for (int i = 0; i < tokens.length; i++) {
       //TODO consider adding gazEntry + polarity class
-      String gazEntry = this.dictionary.lookup(token);
-      if (gazEntry == null) {
-        gazEntry = "O";
+      String gazEntry = this.dictionary.lookup(tokens[i]);
+      if (gazEntry != null) {
+        features.add(this.attributes.get("dict") + "=" + gazEntry);
       }
-      features.add(this.attributes.get("dict") + "=" + gazEntry);
     }
   }
 
@@ -64,7 +62,7 @@ public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeature
       final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     final Object dictResource = resourceProvider
-        .getResource(properties.get("dict"));
+        .getResource(properties.get("pol"));
     if (!(dictResource instanceof Dictionary)) {
       throw new InvalidFormatException(
           "Not a Dictionary resource for key: " + properties.get("dict"));

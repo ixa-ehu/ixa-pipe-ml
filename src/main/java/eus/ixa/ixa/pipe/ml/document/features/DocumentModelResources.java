@@ -25,6 +25,7 @@ import java.util.Map;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
 import eus.ixa.ixa.pipe.ml.lemma.DictionaryLemmatizer;
 import eus.ixa.ixa.pipe.ml.resources.Dictionary;
+import eus.ixa.ixa.pipe.ml.resources.MFSResource;
 import eus.ixa.ixa.pipe.ml.resources.POSDictionary;
 import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
 import eus.ixa.ixa.pipe.ml.resources.WordCluster;
@@ -97,17 +98,25 @@ public class DocumentModelResources {
             resources);
       }
     }
-    if (Flags.isDictionaryFeatures(params)) {
-      final String dictDir = Flags.getDictionaryFeatures(params);
-      final String serializerId = "dictionaryserializer";
-      final List<File> fileList = StringUtils.getFilesInDir(new File(dictDir));
-      for (final File dictFile : fileList) {
-        final String dictionaryPath = dictFile.getCanonicalPath();
-        artifactSerializers.put(serializerId,
-            new Dictionary.DictionarySerializer());
-        loadResource(serializerId, artifactSerializers, dictionaryPath,
-            resources);
-      }
+    if (Flags.isDictionaryPolarityFeatures(params)) {
+      final String mfsResourcesPath = Flags.getDictionaryPolarityFeatures(params);
+      final String[] mfsResources = Flags
+          .getDictionaryPolarityResources(mfsResourcesPath);
+      final String posSerializerId = "seqmodelserializer";
+      final String lemmaSerializerId = "lemmadictserializer";
+      final String mfsSerializerId = "dictionaryserializer";
+      artifactSerializers.put(posSerializerId,
+          new SequenceModelResource.SequenceModelResourceSerializer());
+      loadResource(posSerializerId, artifactSerializers, mfsResources[0],
+          resources);
+      artifactSerializers.put(lemmaSerializerId,
+          new DictionaryLemmatizer.DictionaryLemmatizerSerializer());
+      loadResource(lemmaSerializerId, artifactSerializers, mfsResources[1],
+          resources);
+      artifactSerializers.put(mfsSerializerId,
+          new Dictionary.DictionarySerializer());
+      loadResource(mfsSerializerId, artifactSerializers, mfsResources[2],
+          resources);
     }
     if (Flags.isFrequentWordFeatures(params)) {
       final String dictDir = Flags.getFrequentWordFeatures(params);

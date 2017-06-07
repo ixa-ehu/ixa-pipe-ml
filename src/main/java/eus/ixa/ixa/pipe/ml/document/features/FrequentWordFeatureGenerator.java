@@ -46,7 +46,6 @@ public class FrequentWordFeatureGenerator extends DocumentCustomFeatureGenerator
   public void createFeatures(final List<String> features, final String[] tokens) {
     
     for (String token : tokens) {
-      //TODO try adding O when not token is in dictionary
       String gazEntry = this.dictionary.lookup(token);
       if (gazEntry != null) {
         features.add(this.attributes.get("dict") + "=" + token);

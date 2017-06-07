@@ -830,6 +830,26 @@ public class Flags {
     }
     return dictionaryFlag;
   }
+  
+  public static String getDictionaryPolarityFeatures(final TrainingParameters params) {
+    String mfsFlag = null;
+    if (params.getSettings().get("DictionaryPolarityFeatures") != null) {
+      mfsFlag = params.getSettings().get("DictionaryPolarityFeatures");
+    } else {
+      mfsFlag = Flags.DEFAULT_FEATURE_FLAG;
+    }
+    return mfsFlag;
+  }
+
+  public static String[] getDictionaryPolarityResources(final String mfsFlag) {
+    final String[] mfsFlagArray = mfsFlag.split(",");
+    if (mfsFlagArray.length != 3) {
+      System.err.println(
+          "Dictionary Polarity resources requires three fields but got " + mfsFlagArray.length);
+      System.exit(1);
+    }
+    return mfsFlagArray;
+  }
 
   public static boolean isPredicateContextFeatures(
       final TrainingParameters params) {
@@ -998,6 +1018,16 @@ public class Flags {
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
   
+  public static boolean isDictionaryPolarityFeatures(final TrainingParameters params) {
+    final String dictFeatures = getDictionaryPolarityFeatures(params);
+    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
+  public static boolean isFrequentWordFeatures(final TrainingParameters params) {
+    final String dictFeatures = getFrequentWordFeatures(params);
+    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
+  }
+  
   public static boolean isNgramFeature(
       final TrainingParameters params) {
     final String charngramParam = getNgramFeatures(params);
@@ -1007,10 +1037,6 @@ public class Flags {
   public static boolean isBagOfWordsFeature(final TrainingParameters params) {
     final String tokenParam = getBagOfWordsFeatures(params);
     return !tokenParam.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
-  }
-  public static boolean isFrequentWordFeatures(final TrainingParameters params) {
-    final String dictFeatures = getFrequentWordFeatures(params);
-    return !dictFeatures.equalsIgnoreCase(Flags.DEFAULT_FEATURE_FLAG);
   }
 
   public static void componentException() {

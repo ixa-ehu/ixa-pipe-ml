@@ -31,7 +31,7 @@ import opennlp.tools.util.TrainingParameters;
 
 /**
  * Class to automatically generate the feature descriptor from a
- * trainParams.properties file.
+ * docTrainer.properties file.
  * 
  * @author ragerri
  * @version 2017-05-28
@@ -45,7 +45,7 @@ public final class DocumentFeatureDescriptor {
   }
 
   /**
-   * Generate the XML feature descriptor from the TrainingParameters prop file.
+   * Generate the XML feature descriptor from the docTrainer.properties file.
    * 
    * @param params
    *          the properties file
@@ -144,18 +144,16 @@ public final class DocumentFeatureDescriptor {
     // Polarity Dictionary Features
     if (Flags.isDictionaryPolarityFeatures(params)) {
       final String dictPath = Flags.getDictionaryPolarityFeatures(params);
-      final String[] dictResources = Flags.getDictionaryPolarityResources(dictPath);
+      final List<File> fileList = StringUtils.getFilesInDir(new File(dictPath));
+      for (final File dictFile : fileList) {
         final Element dictFeatures = new Element("custom");
         dictFeatures.setAttribute("class",
             DocPolarityDictionaryFeatureGenerator.class.getName());
-        dictFeatures.setAttribute("model",
-            IOUtils.normalizeLexiconName(new File(dictResources[0]).getName()));
-        dictFeatures.setAttribute("lemma",
-            IOUtils.normalizeLexiconName(new File(dictResources[1]).getName()));
-        dictFeatures.setAttribute("pol",
-            IOUtils.normalizeLexiconName(new File(dictResources[2]).getName()));
+        dictFeatures.setAttribute("dict",
+            IOUtils.normalizeLexiconName(dictFile.getName()));
         generators.addContent(dictFeatures);
-      System.err.println("-> Dictionary Polarity Features added!");
+      }
+      System.err.println("-> Dictionary Features added!");
     }
     // Frequent Word Features
     if (Flags.isFrequentWordFeatures(params)) {

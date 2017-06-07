@@ -841,16 +841,6 @@ public class Flags {
     return mfsFlag;
   }
 
-  public static String[] getDictionaryPolarityResources(final String mfsFlag) {
-    final String[] mfsFlagArray = mfsFlag.split(",");
-    if (mfsFlagArray.length != 3) {
-      System.err.println(
-          "Dictionary Polarity resources requires three fields but got " + mfsFlagArray.length);
-      System.exit(1);
-    }
-    return mfsFlagArray;
-  }
-
   public static boolean isPredicateContextFeatures(
       final TrainingParameters params) {
     final String posFeatures = getPredicateContextFeatures(params);

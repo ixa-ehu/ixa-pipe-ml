@@ -44,11 +44,11 @@ public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeature
   @Override
   public void createFeatures(final List<String> features, final String[] tokens) {
     
-    for (int i = 0; i < tokens.length; i++) {
+    for (String token : tokens) {
       //TODO consider adding gazEntry + polarity class
-      String gazEntry = this.dictionary.lookup(tokens[i]);
-      if (gazEntry != null) {
-        features.add(this.attributes.get("dict") + "=" + gazEntry);
+      String polarityClass = this.dictionary.lookup(token);
+      if (polarityClass != null) {
+        features.add(this.attributes.get("dict") + "=" + token + "," + polarityClass);
       }
     }
   }
@@ -62,7 +62,7 @@ public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeature
       final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
     final Object dictResource = resourceProvider
-        .getResource(properties.get("pol"));
+        .getResource(properties.get("dict"));
     if (!(dictResource instanceof Dictionary)) {
       throw new InvalidFormatException(
           "Not a Dictionary resource for key: " + properties.get("dict"));
@@ -74,7 +74,7 @@ public class DocPolarityDictionaryFeatureGenerator extends DocumentCustomFeature
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("dictionaryserializer", new Dictionary.DictionarySerializer());
+    mapping.put("polaritydictionaryserializer", new Dictionary.DictionarySerializer());
     return Collections.unmodifiableMap(mapping);
   }
 }

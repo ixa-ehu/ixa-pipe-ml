@@ -272,19 +272,22 @@ public class StatisticalSequenceLabeler {
   private SequenceLabelerModel loadModel(final String lang,
       final String modelName, final Boolean useModelCache) {
     final long lStartTime = new Date().getTime();
-    SequenceLabelerModel model = null;
     try {
       if (useModelCache) {
         synchronized (seqModels) {
           if (!seqModels.containsKey(lang + modelName)) {
-            model = new SequenceLabelerModel(new FileInputStream(modelName));
+            SequenceLabelerModel model = new SequenceLabelerModel(new FileInputStream(modelName));
             seqModels.put(lang + modelName, model);
           }
         }
       } else {
-        model = new SequenceLabelerModel(new FileInputStream(modelName));
+        synchronized (seqModels) {
+          if (!seqModels.containsKey(lang + modelName)) {
+            SequenceLabelerModel model = new SequenceLabelerModel(new FileInputStream(modelName));
+            seqModels.put(lang + modelName, model);
+          }
+        }
       }
-      
     } catch (final IOException e) {
       e.printStackTrace();
     }
@@ -292,6 +295,6 @@ public class StatisticalSequenceLabeler {
     final long difference = lEndTime - lStartTime;
     System.err.println("IXA pipes Sequence model loaded in: " + difference
         + " miliseconds ... [DONE]");
-    return seqModels.get(lang + model);
+    return seqModels.get(lang + modelName);
   }
 }

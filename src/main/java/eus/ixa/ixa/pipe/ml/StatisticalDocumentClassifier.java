@@ -72,17 +72,21 @@ public class StatisticalDocumentClassifier {
     private DocumentClassifierModel loadModel(final String lang,
         final String modelName, final Boolean useModelCache) {
       final long lStartTime = new Date().getTime();
-      DocumentClassifierModel model = null;
       try {
         if (useModelCache) {
           synchronized (docClassifierModels) {
             if (!docClassifierModels.containsKey(lang + modelName)) {
-              model = new DocumentClassifierModel(new FileInputStream(modelName));
+              DocumentClassifierModel model = new DocumentClassifierModel(new FileInputStream(modelName));
               docClassifierModels.put(lang + modelName, model);
             }
           }
         } else {
-          model = new DocumentClassifierModel(new FileInputStream(modelName));
+          synchronized (docClassifierModels) {
+            if (!docClassifierModels.containsKey(lang + modelName)) {
+              DocumentClassifierModel model = new DocumentClassifierModel(new FileInputStream(modelName));
+              docClassifierModels.put(lang + modelName, model);
+            }
+          }
         }
       } catch (final IOException e) {
         e.printStackTrace();
@@ -91,6 +95,6 @@ public class StatisticalDocumentClassifier {
       final long difference = lEndTime - lStartTime;
       System.err.println("IXA pipes Document Classifier model loaded in: " + difference
           + " miliseconds ... [DONE]");
-      return model;
+      return docClassifierModels.get(lang + modelName);
     }
 }

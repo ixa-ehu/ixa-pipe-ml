@@ -60,13 +60,18 @@ public class StatisticalSequenceLabeler {
   private SequenceLabelFactory sequenceFactory;
 
   /**
-   * Construct a probabilistic sequence labeler.
-   * 
+   * Construct a StatisticalSequenceLabeler specifying the factory to be used.
+   *
    * @param props
-   *          the properties to be loaded
+   *          the properties
    */
   public StatisticalSequenceLabeler(final Properties props) {
-    this(props, null);
+    final String lang = props.getProperty("language");
+    final String model = props.getProperty("model");
+    Boolean useModelCache = Boolean.valueOf(props.getProperty("useModelCache", "true"));
+    this.sequenceFactory = new SequenceLabelFactory();
+    final SequenceLabelerModel seqModel = loadModel(lang, model, useModelCache);
+    this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 
   /**
@@ -79,42 +84,7 @@ public class StatisticalSequenceLabeler {
    */
   public StatisticalSequenceLabeler(final String model, final String lang) {
     final SequenceLabelerModel seqModel = loadModel(lang, model, true);
-    this.sequenceLabeler = new SequenceLabelerME(seqModel);
-  }
-
-  /**
-   * Construct a StatisticalSequenceLabeler specifying the factory to be used.
-   *
-   * @param props
-   *          the properties
-   * @param aSeqFactory
-   *          the name factory to construct Name objects
-   */
-  public StatisticalSequenceLabeler(final Properties props,
-      final SequenceLabelFactory aSeqFactory) {
-    final String lang = props.getProperty("language");
-    final String model = props.getProperty("model");
-    Boolean useModelCache = Boolean.valueOf(props.getProperty("useModelCache", "true"));
-    this.sequenceFactory = aSeqFactory;
-    final SequenceLabelerModel seqModel = loadModel(lang, model, useModelCache);
-    this.sequenceLabeler = new SequenceLabelerME(seqModel);
-  }
-
-  /**
-   * Construct a StatisticalSequenceLabeler specifying the model and the factory
-   * to be used.
-   * 
-   * @param model
-   *          the specific model to be used.
-   * @param lang
-   *          the language
-   * @param aSeqFactory
-   *          the factory
-   */
-  public StatisticalSequenceLabeler(final String model, final String lang,
-      final SequenceLabelFactory aSeqFactory) {
-    this.sequenceFactory = aSeqFactory;
-    final SequenceLabelerModel seqModel = loadModel(lang, model, true);
+    this.sequenceFactory = new SequenceLabelFactory();
     this.sequenceLabeler = new SequenceLabelerME(seqModel);
   }
 

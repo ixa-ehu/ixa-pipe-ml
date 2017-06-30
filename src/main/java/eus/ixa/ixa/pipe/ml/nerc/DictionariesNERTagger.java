@@ -63,29 +63,15 @@ public class DictionariesNERTagger {
   private final boolean debug = false;
 
   /**
-   * Construct a DictionaryNameFinder using one dictionary and one named entity
-   * class.
+   * Construct a DictionariesNameFinder with a dictionary, a type and a name
+   * factory.
    *
    * @param aDictionaries
    *          the dictionaries
    */
   public DictionariesNERTagger(final Dictionaries aDictionaries) {
     this.dictionaries = aDictionaries;
-  }
-
-  /**
-   * Construct a DictionariesNameFinder with a dictionary, a type and a name
-   * factory.
-   *
-   * @param aDictionaries
-   *          the dictionaries
-   * @param aNameFactory
-   *          the factory
-   */
-  public DictionariesNERTagger(final Dictionaries aDictionaries,
-      final SequenceLabelFactory aNameFactory) {
-    this.dictionaries = aDictionaries;
-    this.nameFactory = aNameFactory;
+    this.nameFactory = new SequenceLabelFactory();
   }
 
   /**

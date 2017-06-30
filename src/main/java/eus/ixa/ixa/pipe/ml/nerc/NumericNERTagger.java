@@ -31,10 +31,9 @@ public class NumericNERTagger {
   private final NumericNameLexer numericLexer;
   private final SequenceLabelFactory nameFactory;
 
-  public NumericNERTagger(final BufferedReader breader,
-      final SequenceLabelFactory aNameFactory) {
-    this.nameFactory = aNameFactory;
-    this.numericLexer = new NumericNameLexer(breader, aNameFactory);
+  public NumericNERTagger(final BufferedReader breader) {
+    this.nameFactory = new SequenceLabelFactory();
+    this.numericLexer = new NumericNameLexer(breader, nameFactory);
   }
 
   public List<SequenceLabel> getNames(final String[] tokens) {

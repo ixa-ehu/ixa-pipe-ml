@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Rodrigo Agerri
+ * Copyright 2017 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -21,8 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import eus.ixa.ixa.pipe.ml.resources.SequenceModelResource;
-import eus.ixa.ixa.pipe.ml.utils.Span;
+import eus.ixa.ixa.pipe.ml.resources.Dictionary;
 import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.featuregen.ArtifactToSerializerMapper;
 import opennlp.tools.util.featuregen.FeatureGeneratorResourceProvider;
@@ -34,16 +33,16 @@ import opennlp.tools.util.model.ArtifactSerializer;
  * @author ragerri
  * @version 2015-03-12
  */
-public class DocTargetFeatureGenerator extends DocumentCustomFeatureGenerator
+public class DocDictionaryFeatureGenerator extends DocumentCustomFeatureGenerator
     implements ArtifactToSerializerMapper {
 
-  private SequenceModelResource oteModelResource;
   private String[] currentSentence;
-  private Span[] currentTargets;
-  private boolean isCoarse = false;
-  private boolean isFineGrained = false;
+  private List<String> currentClasses;
+  private Dictionary dictionary;
+  private Map<String, String> attributes;
+  private boolean isBilou = true;
 
-  public DocTargetFeatureGenerator() {
+  public DocDictionaryFeatureGenerator() {
   }
 
   @Override
@@ -52,22 +51,17 @@ public class DocTargetFeatureGenerator extends DocumentCustomFeatureGenerator
     // cache annotations for each sentence
     if (this.currentSentence != tokens) {
       this.currentSentence = tokens;
-      this.currentTargets = this.oteModelResource.seqToSpans(tokens);
-    }
-    for (int index = 0; index < tokens.length; index++) {
-      for (Span target : currentTargets) {
-        if (target.contains(index)) {
-          if (this.isCoarse) {
-            final String aspect = target.getType();
-            features.add("aspect=" + tokens[index] + "," + aspect.split("#")[0]);
-          } else if (this.isFineGrained) {
-            final String aspect = target.getType();
-            features.add("aspect=" + tokens[index] + "," + aspect);
-          } else {
-            features.add("target=" + tokens[index]);
-          }
-        }
+      if (isBilou) {
+        this.currentClasses = dictionary.getBilouDictionaryMatch(tokens);
+      } else {
+        this.currentClasses = dictionary.getBioDictionaryMatch(tokens);
       }
+    }
+    
+    for (int index = 0; index < tokens.length; index++) {
+      String aspect = currentClasses.get(index);
+      features.add(this.attributes.get("dict") + "=" + aspect);
+      features.add(this.attributes.get("dict") + "=" + tokens[index] + ",");
     }
   }
 
@@ -79,37 +73,25 @@ public class DocTargetFeatureGenerator extends DocumentCustomFeatureGenerator
   public void init(final Map<String, String> properties,
       final FeatureGeneratorResourceProvider resourceProvider)
       throws InvalidFormatException {
-    final Object targetResource = resourceProvider
-        .getResource(properties.get("model"));
-    if (!(targetResource instanceof SequenceModelResource)) {
+    final Object aspectResource = resourceProvider
+        .getResource(properties.get("dict"));
+    if (!(aspectResource instanceof Dictionary)) {
       throw new InvalidFormatException(
-          "Not a SequenceModelResource for key: " + properties.get("model"));
+          "Not Dictionary resource for key: " + properties.get("dict"));
     }
-    this.oteModelResource = (SequenceModelResource) targetResource;
-    processRangeOptions(properties);
-  }
-
-  /**
-   * Process the options of which kind of features are to be generated.
-   * 
-   * @param properties
-   *          the properties map
-   */
-  private void processRangeOptions(final Map<String, String> properties) {
-    final String featuresRange = properties.get("range");
-    if (featuresRange.equalsIgnoreCase("coarse")) {
-      this.isCoarse = true;
-    }
-    if (featuresRange.equalsIgnoreCase("fine")) {
-      this.isFineGrained = true;
+    this.dictionary = (Dictionary) aspectResource;
+    this.attributes = properties;
+    if (properties.get("seqCodec").equalsIgnoreCase("bio")) {
+      this.isBilou = false;
+    } else {
+      this.isBilou = true;
     }
   }
 
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("otemodelserializer",
-        new SequenceModelResource.SequenceModelResourceSerializer());
+    mapping.put("dictionaryserializer", new Dictionary.DictionarySerializer());
     return Collections.unmodifiableMap(mapping);
   }
 }

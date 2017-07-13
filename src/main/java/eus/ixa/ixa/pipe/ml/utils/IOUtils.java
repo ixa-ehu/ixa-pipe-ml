@@ -18,6 +18,7 @@ package eus.ixa.ixa.pipe.ml.utils;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,6 +26,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -32,6 +34,7 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -393,5 +396,23 @@ public final class IOUtils {
     final ObjectInputStream ois = new ObjectInputStream(zis);
     final Object readObject = ois.readObject();
     return (T) readObject;
+  }
+  
+  public static Map<String,String> readDictIntoMap(InputStream dictionary) {
+    Map<String,String> dictMap = new HashMap<>();
+    final BufferedReader breader = new BufferedReader(
+        new InputStreamReader(dictionary));
+    String line;
+    try {
+      while ((line = breader.readLine()) != null) {
+        if (!line.isEmpty() && !line.startsWith("#")) {
+          final String[] elems = line.split("\t");
+          dictMap.put(elems[0], elems[2]);
+        }
+      }
+    } catch (final IOException e) {
+      e.printStackTrace();
+    }
+    return dictMap;
   }
 }

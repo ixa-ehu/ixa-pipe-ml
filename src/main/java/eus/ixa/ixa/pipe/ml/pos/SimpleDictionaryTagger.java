@@ -46,7 +46,7 @@ public class SimpleDictionaryTagger implements DictionaryTagger {
    *          the input dictionary via inputstream
    */
   public SimpleDictionaryTagger(final InputStream dictionary) {
-    this.dictMap = new HashMap<String, String>();
+    this.dictMap = new HashMap<>();
     final BufferedReader breader = new BufferedReader(
         new InputStreamReader(dictionary));
     String line;

@@ -61,7 +61,8 @@ public class DocDictionaryFeatureGenerator extends DocumentCustomFeatureGenerato
     for (int index = 0; index < tokens.length; index++) {
       String aspect = currentClasses.get(index);
       features.add(this.attributes.get("dict") + "=" + aspect);
-      features.add(this.attributes.get("dict") + "=" + tokens[index] + ",");
+      features.add(this.attributes.get("dict") + "=" + aspect + ",w=" + tokens[index]);
+      //System.err.println("-> Dictionary feature: " + aspect);
     }
   }
 

@@ -74,7 +74,7 @@ public class FrequentWordFeatureGenerator extends DocumentCustomFeatureGenerator
   @Override
   public Map<String, ArtifactSerializer<?>> getArtifactSerializerMapping() {
     final Map<String, ArtifactSerializer<?>> mapping = new HashMap<>();
-    mapping.put("dictionaryserializer", new Dictionary.DictionarySerializer());
+    mapping.put("frequentdictionaryserializer", new Dictionary.DictionarySerializer());
     return Collections.unmodifiableMap(mapping);
   }
 }

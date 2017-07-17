@@ -182,6 +182,22 @@ public final class DocumentFeatureDescriptor {
       generators.addContent(targetClassFeatureElement);
       System.err.println("-> Target Model Features added!");
     }
+    // Dictionary Features
+    if (Flags.isDictionaryFeatures(params)) {
+      final String dictPath = Flags.getDictionaryFeatures(params);
+      final String seqCodec = Flags.getSequenceCodec(params);
+      final List<File> fileList = StringUtils.getFilesInDir(new File(dictPath));
+      for (final File dictFile : fileList) {
+        final Element dictFeatures = new Element("custom");
+        dictFeatures.setAttribute("class",
+            DocDictionaryFeatureGenerator.class.getName());
+        dictFeatures.setAttribute("dict",
+            IOUtils.normalizeLexiconName(dictFile.getName()));
+        dictFeatures.setAttribute("seqCodec", seqCodec);
+        generators.addContent(dictFeatures);
+      }
+      System.err.println("-> Dictionary Features added!");
+    }
     // Brown clustering features
     if (Flags.isBrownFeatures(params)) {
       final String brownClusterPath = Flags.getBrownFeatures(params);

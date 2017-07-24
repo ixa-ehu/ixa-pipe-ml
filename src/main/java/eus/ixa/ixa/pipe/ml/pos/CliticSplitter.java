@@ -54,7 +54,7 @@ public class CliticSplitter {
    * @param lemmatizer
    *          the lemmatizer
    * @return the new pos and lemma after clitic splitting
-   * @throws IOException
+   * @throws IOException if io problems
    */
   public List<String> tagClitics(String word, String posTag, String lemma,
       MorfologikLemmatizer lemmatizer) throws IOException {

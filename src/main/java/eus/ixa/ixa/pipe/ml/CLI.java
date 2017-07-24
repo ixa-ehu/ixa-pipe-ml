@@ -1,5 +1,5 @@
 /*
- *  Copyright 2016 Rodrigo Agerri
+ *  Copyright 2017 Rodrigo Agerri
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -437,7 +437,7 @@ public class CLI {
         .choices("accuracy", "fmeasure").setDefault("fmeasure").help(
             "Choose evaluation metric for Sequence Labeler; it defaults to fmeasure.\n");
     this.evalParser.addArgument("-l", "--language").required(true)
-        .choices("de", "en", "es", "eu", "it", "nl").help("Choose language.\n");
+        .choices("de", "en", "es", "eu", "gl", "it", "nl").help("Choose language.\n");
     this.evalParser.addArgument("-m", "--model").required(false)
         .setDefault(Flags.DEFAULT_EVALUATE_MODEL)
         .help("Pass the model to evaluate as a parameter.\n");

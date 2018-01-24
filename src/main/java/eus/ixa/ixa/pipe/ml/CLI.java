@@ -25,8 +25,9 @@ import java.util.Properties;
 import com.google.common.io.Files;
 
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
-import eus.ixa.ixa.pipe.ml.eval.CrossValidator;
+import eus.ixa.ixa.pipe.ml.eval.SequenceCrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.DocumentClassifierEvaluate;
+import eus.ixa.ixa.pipe.ml.eval.DocumentCrossValidator;
 import eus.ixa.ixa.pipe.ml.eval.ParserEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.SequenceLabelerEvaluate;
 import eus.ixa.ixa.pipe.ml.eval.TokenizerEvaluate;
@@ -79,42 +80,48 @@ public class CLI {
    */
   private final Subparser seqTrainerParser;
   /**
-   * The parser that manages the SequenceLabeler evaluation sub-command.
-   */
-  private final Subparser evalParser;
-  /**
    * The subparser that manages the Constituent Parser training sub-command.
    */
   private final Subparser parserTrainerParser;
-  /**
-   * The parser to manage the parsing evaluation.
-   */
-  private final Subparser parsevalParser;
   /**
    * The parser that manages the DocumentClassification training sub-command.
    */
   private final Subparser docTrainerParser;
   /**
+   * The parser that manages the SequenceLabeler evaluation sub-command.
+   */
+  private final Subparser seqevalParser;
+  /**
+   * The parser to manage the parsing evaluation.
+   */
+  private final Subparser parsevalParser;
+  /**
    * The parser that manages the DocumentClassification evaluation.
    */
   private final Subparser docevalParser;
   /**
-   * The parser that manages the cross validation sub-command.
-   */
-  private final Subparser crossValidateParser;
-  /**
    * The subparser that manages the Tokenizer evaluation.
    */
   private final Subparser tokevalParser;
+  /**
+   * The parser that manages the SequenceLabeler cross validation sub-command.
+   */
+  private final Subparser crosseqParser;
+  /**
+   * The parser that manages the document classifier cross validation.
+   */
+  private final Subparser crossdocParser;
 
   private static final String SEQ_TRAINER_NAME = "sequenceTrainer";
   private static final String PARSE_TRAINER_NAME = "parserTrainer";
-  private static final String EVAL_PARSER_NAME = "eval";
-  private static final String PARSEVAL_PARSER_NAME = "parseval";
   public static final String DOC_TRAINER_NAME = "docTrainer";
+  private static final String SEQEVAL_PARSER_NAME = "sequenceval";
+  private static final String PARSEVAL_PARSER_NAME = "parseval";
   public static final String DOCEVAL_PARSER_NAME = "doceval";
-  private static final String CROSS_PARSER_NAME = "cross";
   private static final String TOKEVAL_PARSER_NAME = "tokeval";
+  private static final String CROSSSEQ_PARSER_NAME = "crosseq";
+  private static final String CROSSDOC_PARSER_NAME = "crossdoc";
+  
 
   /**
    * Construct a CLI object with the sub-parsers to manage the command line
@@ -125,26 +132,28 @@ public class CLI {
     this.seqTrainerParser = this.subParsers.addParser(SEQ_TRAINER_NAME)
         .help("Sequence Labeler training CLI");
     loadSeqLabelerTrainingParameters();
-    this.evalParser = this.subParsers.addParser(EVAL_PARSER_NAME)
-        .help("Sequence Labeler Evaluation CLI");
-    loadEvalParameters();
     this.parserTrainerParser = this.subParsers.addParser(PARSE_TRAINER_NAME)
         .help("Constituent Parser training CLI");
     loadParserTrainingParameters();
-    this.parsevalParser = this.subParsers.addParser(PARSEVAL_PARSER_NAME)
-        .help("Parseval CLI");
-    loadParsevalParameters();
     this.docTrainerParser = this.subParsers.addParser(DOC_TRAINER_NAME)
         .help("Document Classification training CLI");
     loadDocTrainingParameters();
+    this.seqevalParser = this.subParsers.addParser(SEQEVAL_PARSER_NAME)
+        .help("Sequence Labeler Evaluation CLI");
+    loadSeqEvalParameters();
+    this.parsevalParser = this.subParsers.addParser(PARSEVAL_PARSER_NAME)
+        .help("Parseval CLI");
+    loadParsevalParameters();
     this.docevalParser = this.subParsers.addParser(DOCEVAL_PARSER_NAME)
         .help("Document Classification Evaluation CLI");
     loadDocevalParameters();
     this.tokevalParser = this.subParsers.addParser(TOKEVAL_PARSER_NAME);
     loadTokevalParameters();
-    this.crossValidateParser = this.subParsers.addParser(CROSS_PARSER_NAME)
-        .help("Cross validation CLI");
-    loadCrossValidateParameters();
+    this.crosseqParser = this.subParsers.addParser(CROSSSEQ_PARSER_NAME)
+        .help("Cross validation CLI for the Sequence Labeler");
+    loadSequenceCrossValidateParameters();
+    this.crossdocParser = this.subParsers.addParser(CROSSDOC_PARSER_NAME).help("Cross Validation CLI for the Document Classifier");
+    loadDocumentCrossValidateParameters();
   }
 
   /**
@@ -177,34 +186,36 @@ public class CLI {
       case SEQ_TRAINER_NAME:
         seqTrain();
         break;
-      case EVAL_PARSER_NAME:
-        eval();
-        break;
-      case PARSEVAL_PARSER_NAME:
-        parseval();
-        break;
       case PARSE_TRAINER_NAME:
         parserTrain();
         break;
       case DOC_TRAINER_NAME:
         docTrain();
         break;
+      case SEQEVAL_PARSER_NAME:
+        seqeval();
+        break;
+      case PARSEVAL_PARSER_NAME:
+        parseval();
+        break;
       case DOCEVAL_PARSER_NAME:
         doceval();
-        break;
-      case CROSS_PARSER_NAME:
-        crossValidate();
         break;
       case TOKEVAL_PARSER_NAME:
         tokeval();
         break;
+      case CROSSSEQ_PARSER_NAME:
+        sequenceCrossValidate();
+        break;
+      case CROSSDOC_PARSER_NAME:
+        docCrossValidate();
       }
     } catch (final ArgumentParserException e) {
       this.argParser.handleError(e);
       System.out.println("Run java -jar target/ixa-pipe-ml-" + this.version
           + "-exec.jar (" + SEQ_TRAINER_NAME + "|" + PARSE_TRAINER_NAME + "|"
           + DOC_TRAINER_NAME
-          + "|eval|parseval|doceval|cross|tokeval) -help for details");
+          + "|seqeval|parseval|doceval|tokeval|crosseq|crossdoc) -help for details");
       System.exit(1);
     }
   }
@@ -276,7 +287,7 @@ public class CLI {
   }
 
   /*
-   * Main access to the Sequence Labeler train functionalities.
+   * Main access to the Document Classifer train functionalities.
    *
    * @throws IOException input output exception if problems with corpora
    */
@@ -299,12 +310,12 @@ public class CLI {
   }
 
   /**
-   * Main evaluation entry point for sequence labelling.
+   * Main evaluation entry point for sequence labeling.
    *
    * @throws IOException
    *           throws exception if test set not available
    */
-  private void eval() throws IOException {
+  private void seqeval() throws IOException {
 
     final String metric = this.parsedArguments.getString("metric");
     final String lang = this.parsedArguments.getString("language");
@@ -342,7 +353,7 @@ public class CLI {
   }
 
   /**
-   * Main evaluation entry point.
+   * Main parsing evaluation entry point.
    *
    * @throws IOException
    *           throws exception if test set not available
@@ -371,7 +382,7 @@ public class CLI {
   }
 
   /**
-   * Main evaluation entry point for sequence labelling.
+   * Main evaluation entry point for the tokenizer.
    *
    * @throws IOException
    *           throws exception if test set not available
@@ -386,17 +397,24 @@ public class CLI {
   }
 
   /**
-   * Main access to the cross validation.
+   * Main access to the sequence labeler cross validation.
    *
    * @throws IOException
    *           input output exception if problems with corpora
    */
-  private void crossValidate() throws IOException {
+  private void sequenceCrossValidate() throws IOException {
 
     final String paramFile = this.parsedArguments.getString("params");
     final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
-    final CrossValidator crossValidator = new CrossValidator(params);
+    final SequenceCrossValidator crossValidator = new SequenceCrossValidator(params);
     crossValidator.crossValidate(params);
+  }
+  
+  private void docCrossValidate() throws IOException {
+    final String paramFile = this.parsedArguments.getString("params");
+    final TrainingParameters params = IOUtils.loadTrainingParameters(paramFile);
+    final DocumentCrossValidator docCrossValidator = new DocumentCrossValidator(params);
+    docCrossValidator.crossValidate(params);
   }
 
   /**
@@ -432,32 +450,32 @@ public class CLI {
   /**
    * Create the parameters available for evaluation.
    */
-  private void loadEvalParameters() {
-    this.evalParser.addArgument("--metric").required(false)
+  private void loadSeqEvalParameters() {
+    this.seqevalParser.addArgument("--metric").required(false)
         .choices("accuracy", "fmeasure").setDefault("fmeasure").help(
             "Choose evaluation metric for Sequence Labeler; it defaults to fmeasure.\n");
-    this.evalParser.addArgument("-l", "--language").required(true)
+    this.seqevalParser.addArgument("-l", "--language").required(true)
         .choices("de", "en", "es", "eu", "gl", "it", "nl").help("Choose language.\n");
-    this.evalParser.addArgument("-m", "--model").required(false)
+    this.seqevalParser.addArgument("-m", "--model").required(false)
         .setDefault(Flags.DEFAULT_EVALUATE_MODEL)
         .help("Pass the model to evaluate as a parameter.\n");
-    this.evalParser.addArgument("-t", "--testset").required(true)
+    this.seqevalParser.addArgument("-t", "--testset").required(true)
         .help("The test or reference corpus.\n");
-    this.evalParser.addArgument("--clearFeatures").required(false)
+    this.seqevalParser.addArgument("--clearFeatures").required(false)
         .choices("yes", "no", "docstart").setDefault(Flags.DEFAULT_FEATURE_FLAG)
         .help("Reset the adaptive features; defaults to 'no'.\n");
-    this.evalParser.addArgument("-f", "--corpusFormat").required(false)
+    this.seqevalParser.addArgument("-f", "--corpusFormat").required(false)
         .choices("conll02", "conll03", "lemmatizer", "tabulated")
         .setDefault(Flags.DEFAULT_EVAL_FORMAT).help(
             "Choose format of reference corpus; it defaults to conll02 format.\n");
-    this.evalParser.addArgument("--evalReport").required(false)
+    this.seqevalParser.addArgument("--evalReport").required(false)
         .choices("brief", "detailed", "error").help(
             "Choose level of detail of evaluation report; it defaults to detailed evaluation.\n");
-    this.evalParser.addArgument("--types").required(false)
+    this.seqevalParser.addArgument("--types").required(false)
         .setDefault(Flags.DEFAULT_SEQUENCE_TYPES).help(
             "Choose which Sequence types used for evaluation; the argument must be a comma separated"
                 + " string; e.g., 'person,organization'.\n");
-    this.evalParser.addArgument("-u", "--unknownAccuracy").required(false)
+    this.seqevalParser.addArgument("-u", "--unknownAccuracy").required(false)
         .setDefault(Flags.DEFAULT_FEATURE_FLAG).help(
             "Pass the model training set to evaluate unknown and known word accuracy.\n");
   }
@@ -504,13 +522,15 @@ public class CLI {
         .help("The test or reference corpus.\n");
   }
 
-  /**
-   * Create the main parameters available for training NERC models.
-   */
-  private void loadCrossValidateParameters() {
-    this.crossValidateParser.addArgument("-p", "--params").required(true)
+  private void loadSequenceCrossValidateParameters() {
+    this.crosseqParser.addArgument("-p", "--params").required(true)
         .help("Load the Cross validation parameters file\n");
   }
+  
+  private void loadDocumentCrossValidateParameters() {
+    this.crossdocParser.addArgument("-p","--params").required(true).help("Load the Cross Validation parameters file for the Document Classifier\n.");
+  }
+  
 
   /**
    * Set a Properties object with the CLI parameters for evaluation.

@@ -41,13 +41,11 @@ import opennlp.tools.util.TrainingParameters;
 import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
- * Abstract class for common training functionalities. Every other trainer class
- * needs to extend this class.
  * 
  * @author ragerri
  * @version 2014-04-17
  */
-public class CrossValidator {
+public class SequenceCrossValidator {
 
   /**
    * The language.
@@ -87,7 +85,7 @@ public class CrossValidator {
   private final List<EvaluationMonitor<SequenceLabelSample>> listeners = new LinkedList<EvaluationMonitor<SequenceLabelSample>>();
   SequenceLabelerDetailedFMeasureListener detailedFListener;
 
-  public CrossValidator(final TrainingParameters params) throws IOException {
+  public SequenceCrossValidator(final TrainingParameters params) throws IOException {
 
     this.lang = Flags.getLanguage(params);
     final String clearFeatures = Flags.getClearTrainingFeatures(params);

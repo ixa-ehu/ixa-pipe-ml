@@ -378,7 +378,17 @@ public class CLI {
         clearFeatures);
     final DocumentClassifierEvaluate docEvaluator = new DocumentClassifierEvaluate(
         props);
-    docEvaluator.evaluate();
+    if (this.parsedArguments.getString("evalReport") != null) {
+      if (this.parsedArguments.getString("evalReport")
+          .equalsIgnoreCase("brief")) {
+        docEvaluator.evaluate();
+      } else if (this.parsedArguments.getString("evalReport")
+          .equalsIgnoreCase("detailed")) {
+        docEvaluator.detailEvaluate();
+      }
+    } else {
+      docEvaluator.detailEvaluate();
+    }
   }
 
   /**
@@ -509,6 +519,9 @@ public class CLI {
     this.docevalParser.addArgument("--clearFeatures").required(false)
         .choices("yes", "no", "docstart").setDefault(Flags.DEFAULT_FEATURE_FLAG)
         .help("Reset the adaptive features; defaults to 'no'.\n");
+    this.docevalParser.addArgument("--evalReport").required(false)
+    .choices("brief", "detailed").help(
+        "Choose level of detail of evaluation report; it defaults to detailed evaluation.\n");
   }
 
   /**

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package eus.ixa.ixa.pipe.ml.sequence;
+package eus.ixa.ixa.pipe.ml.eval;
 
 import java.util.Arrays;
 import java.util.Comparator;

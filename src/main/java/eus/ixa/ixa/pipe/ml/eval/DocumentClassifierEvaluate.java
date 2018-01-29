@@ -17,15 +17,22 @@ package eus.ixa.ixa.pipe.ml.eval;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 import eus.ixa.ixa.pipe.ml.DocumentClassifierTrainer;
 import eus.ixa.ixa.pipe.ml.document.DocSample;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifier;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierDetailedEvaluationListener;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluator;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierME;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierModel;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelSample;
+import opennlp.tools.doccat.DoccatEvaluationMonitor;
 import opennlp.tools.util.ObjectStream;
+import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
  * Evaluation class mostly using {@link DocumentClassifierEvaluator}.
@@ -72,6 +79,16 @@ public class DocumentClassifierEvaluate {
     evaluator.evaluate(this.testSamples);
     System.out.println();
     System.out.println("Word Accuracy: " + evaluator.getAccuracy());
+  }
+  
+  public final void detailEvaluate() throws IOException {
+    final List<EvaluationMonitor<DocSample>> listeners = new LinkedList<EvaluationMonitor<DocSample>>();
+    final DocumentClassifierDetailedEvaluationListener listener = new DocumentClassifierDetailedEvaluationListener();
+    listeners.add(listener);
+    final DocumentClassifierEvaluator evaluator = new DocumentClassifierEvaluator(this.docClassifier,  listeners.toArray(new DocumentClassifierEvaluationMonitor[listeners.size()]));
+    evaluator.evaluate(testSamples);
+    System.out.println();
+    listener.writeReport();
   }
 
 }

@@ -17,6 +17,7 @@
 
 package eus.ixa.ixa.pipe.ml.sequence;
 
+import eus.ixa.ixa.pipe.ml.eval.DetailedFMeasureListener;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 
 public class SequenceLabelerDetailedFMeasureListener

@@ -18,17 +18,24 @@ package eus.ixa.ixa.pipe.ml.eval;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import eus.ixa.ixa.pipe.ml.DocumentClassifierTrainer;
 import eus.ixa.ixa.pipe.ml.document.DocClassifierCrossValidator;
 import eus.ixa.ixa.pipe.ml.document.DocSample;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierDetailedEvaluationListener;
+import eus.ixa.ixa.pipe.ml.document.DocumentClassifierEvaluationMonitor;
 import eus.ixa.ixa.pipe.ml.document.DocumentClassifierFactory;
 import eus.ixa.ixa.pipe.ml.document.features.DocumentFeatureDescriptor;
 import eus.ixa.ixa.pipe.ml.document.features.DocumentModelResources;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerDetailedFMeasureListener;
+import eus.ixa.ixa.pipe.ml.sequence.SequenceLabelerEvaluationErrorListener;
 import eus.ixa.ixa.pipe.ml.utils.Flags;
 import opennlp.tools.util.ObjectStream;
 import opennlp.tools.util.TrainingParameters;
+import opennlp.tools.util.eval.EvaluationMonitor;
 
 /**
  * Document Cross Validator.
@@ -57,6 +64,11 @@ public class DocumentCrossValidator {
    * The number of folds for cross validation.
    */
   private int folds;
+  /**
+   * The evaluation listeners.
+   */
+  final List<EvaluationMonitor<DocSample>> listeners = new LinkedList<EvaluationMonitor<DocSample>>();
+  DocumentClassifierDetailedEvaluationListener listener;
 
   public DocumentCrossValidator(final TrainingParameters params) throws IOException {
 
@@ -67,6 +79,7 @@ public class DocumentCrossValidator {
         clearFeatures);
     this.folds = Flags.getFolds(params);
     createDocumentClassificationFactory(params);
+    getEvalListeners(params);
   }
 
   /**
@@ -92,6 +105,15 @@ public class DocumentCrossValidator {
             featureGeneratorBytes, resources));
   }
   
+  private void getEvalListeners(final TrainingParameters params) {
+    if (params.getSettings().get("EvaluationType")
+        .equalsIgnoreCase("detailed")) {
+      this.listener = new DocumentClassifierDetailedEvaluationListener();
+      this.listeners.add(this.listener);
+      
+    }
+  }
+  
   public final void crossValidate(final TrainingParameters params) {
     if (getDocumentClassificationFactory() == null) {
       throw new IllegalStateException(
@@ -100,7 +122,7 @@ public class DocumentCrossValidator {
     DocClassifierCrossValidator validator = null;
     try {
       validator = new DocClassifierCrossValidator(this.lang, params,
-          this.docClassFactory);
+          this.docClassFactory, listeners.toArray(new DocumentClassifierEvaluationMonitor[listeners.size()]));
       validator.evaluate(this.trainSamples, this.folds);
     } catch (final IOException e) {
       System.err.println("IO error while loading training set!");
@@ -113,7 +135,11 @@ public class DocumentCrossValidator {
         System.err.println("IO error with the train samples!");
       }
     }
-    System.out.println(validator.getDocumentAccuracy());
+    if (this.listener == null) {
+      System.out.println(validator.getDocumentAccuracy());
+    } else {
+      this.listener.writeReport();
+    }
   }
   
   /**

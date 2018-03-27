@@ -1,5 +1,9 @@
 #Anything in this file, followed by a period (and an upper-case word), does NOT indicate an end-of-sentence marker
 
+# geminate Ls
+[Ll].[l]
+[Ll]\u2022[l]
+
 #any single upper case letter  followed by a period is not a sentence ender
 #usually upper case letters are initials in a name
 A

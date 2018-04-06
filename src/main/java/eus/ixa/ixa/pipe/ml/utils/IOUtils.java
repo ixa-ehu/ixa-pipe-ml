@@ -63,6 +63,7 @@ public final class IOUtils {
   public static final int BUFFER_SIZE = 65536;
   public static final String SPACE_DELIMITER = " ";
   public static final String TAB_DELIMITER = "\t";
+  private static final String DEFAULT_RESOURCES_PATH = "src/main/resources";
 
   /**
    * Private constructor. This class should only be used statically.
@@ -77,7 +78,7 @@ public final class IOUtils {
    *          the dictionary path
    * @return the dictionary path without punctuation
    */
-  public static final String normalizeLexiconName(String resource) {
+  public static String normalizeLexiconName(String resource) {
     resource = resource.replaceAll("\\p{P}", "");
     return resource;
   }
@@ -91,7 +92,7 @@ public final class IOUtils {
    *          the name of the resource (absolute path with no starting /)
    * @return the inputstream of the dictionary
    */
-  public static final InputStream getDictionaryResource(final String resource) {
+  public static InputStream getDictionaryResource(final String resource) {
 
     InputStream dictInputStream;
     final Path resourcePath = Paths.get(resource);
@@ -117,7 +118,7 @@ public final class IOUtils {
   private static InputStream getStreamFromClassPath(
       final String normalizedPath) {
     InputStream dictInputStream = null;
-    final String[] dictPaths = normalizedPath.split("src/main/resources");
+    final String[] dictPaths = normalizedPath.split(DEFAULT_RESOURCES_PATH);
     if (dictPaths.length == 2) {
       dictInputStream = IOUtils.class.getClassLoader()
           .getResourceAsStream(dictPaths[1]);

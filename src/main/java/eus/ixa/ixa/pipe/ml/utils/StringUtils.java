@@ -38,7 +38,7 @@ public final class StringUtils {
   /**
    * Pattern to remove double bars from disjunct regex.
    */
-  public static Pattern doubleBar = Pattern.compile("\\|\\|");
+  public static final Pattern doubleBar = Pattern.compile("\\|\\|");
 
   /**
    * Private constructor.
@@ -67,7 +67,6 @@ public final class StringUtils {
     for (j = 0; j <= sentenceLength - patternLength; ++j) {
       for (i = 0; i < patternLength
           && patternTokens[i].equalsIgnoreCase(tokens[i + j]); ++i) {
-        ;
       }
       if (i >= patternLength) {
         neTokens.add(j);
@@ -97,7 +96,6 @@ public final class StringUtils {
     for (j = 0; j <= sentenceLength - patternLength; ++j) {
       for (i = 0; i < patternLength
           && patternTokens[i].equals(tokens[i + j]); ++i) {
-        ;
       }
       if (i >= patternLength) {
         neTokens.add(j);
@@ -130,7 +128,6 @@ public final class StringUtils {
     for (j = 0; j <= sentenceLength - patternLength; ++j) {
       for (i = 0; i < patternLength
           && patternArray[i] == sentenceArray[i + j]; ++i) {
-        ;
       }
       if (i >= patternLength) {
         neChars.add(j);
@@ -326,7 +323,6 @@ public final class StringUtils {
       if (lemmaLength > 0 && distance[wordFormLength][lemmaLength
           - 1] == distance[wordFormLength][lemmaLength]) {
         lemmaLength--;
-        continue;
       }
     }
   }

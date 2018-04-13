@@ -935,6 +935,19 @@ Univ
 [Aa]za
 [Aa]be
 
+# dates - months (English)
+Jan
+Feb
+Mar
+Apr
+Jun
+Jul
+Aug
+Sept
+Oct
+Nov
+Dec
+
 # dates - days
 al
 ar
@@ -943,6 +956,13 @@ og
 ol
 lr
 ig
+# dates - days (English)
+Mon
+Tue
+Wed
+Thur
+Fri
+Sat
 
 #states
 # This are US State name abbreviations. It makes no sense to have the in Basque. Maybe Spanish/European region/country abbreviations should be added?

@@ -355,6 +355,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    *          the sentence
    * @return the tokenized paragraphs
    */
+  //TODO apostrophe treatment needs to be language dependent
   private String treatContractions(String line) {
 
     line = noAlphaAposNoAlpha.matcher(line).replaceAll("$1 $2 $3");

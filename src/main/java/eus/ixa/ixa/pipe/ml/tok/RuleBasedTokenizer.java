@@ -57,7 +57,14 @@ public class RuleBasedTokenizer implements Tokenizer {
    * Tokenize everything but these characters.
    */
   public static Pattern specials = Pattern.compile(
-      "([^\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7])",
+      "([^\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7\uD83C\uDF00-\uD83D\uDDFF\uD83D\uDE00-\uD83D\uDE4F\uD83D\uDE80-\uD83D\uDEFF\u2600-\u26FF\u2700-\u27BF])",
+      Pattern.UNICODE_CHARACTER_CLASS);
+//  "([^\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7]|[^\\uD83C\\uDF00-\\uD83D\\uDDFF]|[^\\uD83D\\uDE00-\\uD83D\\uDE4F]|[^\\uD83D\\uDE80-\\uD83D\\uDEFF]|[^\\u2600-\\u26FF]|[^\\u2700-\\u27BF])",
+  /**
+   * Emojis and other symbols, each symbol is given a single token, this may not be always adequate.
+   */
+  public static Pattern emojis = Pattern.compile(
+      "([\uD83C\uDF00-\uD83D\uDDFF]|[\uD83D\uDE00-\uD83D\uDE4F]|[\uD83D\uDE80-\uD83D\uDEFF]|[\u2600-\u26FF]|[\u2700-\u27BF])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Question and exclamation marks (do not separate if multiple).
@@ -274,6 +281,7 @@ public class RuleBasedTokenizer implements Tokenizer {
     line = spaceDashSpace.matcher(line).replaceAll(" $1 ");
     // tokenize everything but these characters [^\p{Alnum}s.'`,-?!/]
     line = specials.matcher(line).replaceAll(" $1 ");
+    line = emojis.matcher(line).replaceAll(" $1 ");
 
     // do not separate multidots
     line = generateMultidots(line);

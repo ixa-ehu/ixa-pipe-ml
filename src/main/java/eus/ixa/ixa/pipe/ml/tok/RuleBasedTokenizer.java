@@ -22,6 +22,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.vdurmont.emoji.EmojiParser;
+
 /**
  * This class provides a multilingual rule based tokenizer. The input of the
  * tokenizer must be a list of already segmented sentences. Additionally, the
@@ -42,7 +44,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    * Non printable control characters.
    */
   public static Pattern asciiHex = Pattern
-      .compile("[\u0000-\u0020\u007F-\u00A0]", Pattern.UNICODE_CHARACTER_CLASS);
+      .compile("[\u0000-\u0020\u007F-\u00A0]", Pattern.UNICODE_CHARACTER_CLASS);  
   /**
    * Non printable punctuation characters.
    */
@@ -54,10 +56,16 @@ public class RuleBasedTokenizer implements Tokenizer {
    */
   public static Pattern doubleSpaces = Pattern.compile("[\\  ]+");
   /**
+   * Range U+1D400 to U+1FFFF.
+   */
+  public static Pattern iso10646characters = Pattern.compile(
+      "([\uD835\uDC00-\uD83F\uDFFF])",Pattern.UNICODE_CHARACTER_CLASS);
+  /**
    * Tokenize everything but these characters.
    */
+  //TODO ud385udc0d needs to be clarified
   public static Pattern specials = Pattern.compile(
-      "([^\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7])",
+      "([^\ud835\udc0d\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Question and exclamation marks (do not separate if multiple).
@@ -267,6 +275,7 @@ public class RuleBasedTokenizer implements Tokenizer {
     // remove non printable stuff
     line = asciiHex.matcher(line).replaceAll(" ");
     line = generalBlankPunctuation.matcher(line).replaceAll(" ");
+    //line = iso10646characters.matcher(line).replaceAll(" ");
 
     // separate question and exclamation marks
     line = qexc.matcher(line).replaceAll(" $1 ");
@@ -274,7 +283,6 @@ public class RuleBasedTokenizer implements Tokenizer {
     line = spaceDashSpace.matcher(line).replaceAll(" $1 ");
     // tokenize everything but these characters [^\p{Alnum}s.'`,-?!/]
     line = specials.matcher(line).replaceAll(" $1 ");
-
     // do not separate multidots
     line = generateMultidots(line);
 

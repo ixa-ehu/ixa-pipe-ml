@@ -63,6 +63,11 @@
 			<version>19.0</version>
 		</dependency>
 		<dependency>
+			<groupId>com.vdurmont</groupId>
+			<artifactId>emoji-java</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.opennlp</groupId>
 			<artifactId>opennlp-tools</artifactId>
 			<version>1.6.0</version>
@@ -219,5 +224,5 @@
 		<connection>scm:git:git@github.com:ixa-ehu/ixa-pipe-ml.git</connection>
 		<developerConnection>scm:git:git@github.com:ixa-ehu/ixa-pipe-ml.git</developerConnection>
 	</scm>
-	<version>0.0.7</version>
+	<version>0.0.8</version>
 </project>

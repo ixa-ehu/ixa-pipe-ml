@@ -22,7 +22,7 @@ import java.io.OutputStream;
 import eus.ixa.ixa.pipe.ml.eval.DetailedEvaluationListener;
 
 /**
- * Generates a detailed report for the POS Tagger.
+ * Generates a detailed report for the Document Classifier.
  * <p>
  * It is possible to use it from an API and access the statistics using the
  * provided getters
@@ -39,6 +39,7 @@ public class DocumentClassifierDetailedEvaluationListener
 
   /**
    * Creates a listener that prints to a given {@link OutputStream}
+   * @param outputStream the output stream
    */
   public DocumentClassifierDetailedEvaluationListener(OutputStream outputStream) {
     super(outputStream);

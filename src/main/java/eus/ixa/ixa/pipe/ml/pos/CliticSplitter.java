@@ -54,11 +54,10 @@ public class CliticSplitter {
    * @param lemmatizer
    *          the lemmatizer
    * @return the new pos and lemma after clitic splitting
-   * @throws IOException if io problems
    */
   public List<String> tagClitics(String word, String posTag, String lemma,
-      MorfologikLemmatizer lemmatizer) throws IOException {
-    List<String> newCliticElems = new ArrayList<String>();
+      MorfologikLemmatizer lemmatizer) {
+    List<String> newCliticElems = new ArrayList<>();
     Clitic match = cliticMatcher(word, posTag);
     if (match != null) {
       addCliticComponents(word, posTag, lemmatizer, match, newCliticElems);
@@ -87,17 +86,17 @@ public class CliticSplitter {
 
   private void addCliticComponents(String word, String posTag,
       MorfologikLemmatizer lemmatizer, Clitic clitic,
-      List<String> newCliticComponents) throws IOException {
+      List<String> newCliticComponents) {
     String[] origWordComponents = clitic.getOrigWordPatternComponents();
-    for (int i = 0; i < origWordComponents.length; i++) {
-      if (origWordComponents[i].equals("$$")) {
+    for (String origWordComponent : origWordComponents) {
+      if (origWordComponent.equals("$$")) {
         String newWord = rebuildRoot(word, clitic);
         String newLemma = lemmatizer.apply(newWord, posTag);
         newCliticComponents.add(posTag);
         newCliticComponents.add(newLemma);
       } else {
-        String newTag = pronounsDict.get(origWordComponents[i]);
-        newCliticComponents.add(origWordComponents[i]);
+        String newTag = pronounsDict.get(origWordComponent);
+        newCliticComponents.add(origWordComponent);
         newCliticComponents.add(newTag);
       }
     }

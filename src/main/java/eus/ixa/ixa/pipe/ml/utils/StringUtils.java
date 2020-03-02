@@ -31,7 +31,7 @@ import eus.ixa.ixa.pipe.ml.tok.Token;
  * Pattern matching and other utility string functions.
  *
  * @author ragerri
- * @version 2013-03-19
+ * @version 2020-03-02
  */
 public final class StringUtils {
 
@@ -45,6 +45,21 @@ public final class StringUtils {
    */
   private StringUtils() {
     throw new AssertionError("This class is not meant to be instantiated!");
+  }
+
+  /**
+   * This method will check for the last dot occurrence in the given filename.
+   *
+   * If it exists, it will return the characters after last dot
+   * known as the file extension. If it does not exist, it will return
+   * an empty string.
+   * @param filename the filename
+   * @return the extension or empty string if no extension exists
+   */
+  public static Optional<String> getFileExtensionByString(String filename) {
+    return Optional.ofNullable(filename)
+        .filter(f -> f.contains("."))
+        .map(f -> f.substring(filename.lastIndexOf(".") + 1));
   }
 
   /**

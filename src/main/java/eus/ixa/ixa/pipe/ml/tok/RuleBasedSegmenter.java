@@ -54,22 +54,22 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
   /**
    * Initial punctuation in unicode.
    */
-  public static String INITIAL_PUNCT = "[\u0023\'\"\\¿\\¡\u00AB\u003C\u0091\u0093\u201B\u201C\u201F\u2018\u2039]";
+  public static String INITIAL_PUNCT = "[\u0023'\"¿¡\u00AB\u003C\u0091\u0093\u201B\u201C\u201F\u2018\u2039]";
   /**
    * Final punctuation in unicode.
    */
-  public static String FINAL_PUNCT = "[\'\"\\)\\]\\%\u00BB\u003D\u0092\u0094\u201D\u203A\u2019]";
+  public static String FINAL_PUNCT = "['\")\\]%\u00BB\u003D\u0092\u0094\u201D\u203A\u2019]";
   /**
    * End of sentence markers, paragraph mark and link.
    */
   public static Pattern endPunctLinkPara = Pattern
-      .compile("([?!\\.])[\\ ]*(\u00B6\u00B6)+[\\ ]*(http|www|ftp)");
+      .compile("([?!.])[ ]*(\u00B6\u00B6)+[ ]*(http|www|ftp)");
   /**
    * End of sentence marker, one or more paragraph marks, maybe some starting
    * punctuation, uppercase.
    */
   public static Pattern conventionalPara = Pattern.compile(
-      "([?!\\.])[\\ ]*(\u00B6\u00B6)+[\\ ]*(" + INITIAL_PUNCT + "*[\\p{Lu}])",
+      "([?!.])[ ]*(\u00B6\u00B6)+[ ]*(" + INITIAL_PUNCT + "*[\\p{Lu}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * End of sentence marker, maybe one or more paragraph marks, final
@@ -78,21 +78,21 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
    */
   public static Pattern endInsideQuotesPara = Pattern
       .compile(
-          "([?!\\.](\u00B6)*" + FINAL_PUNCT + "+)(\u00B6\u00B6)+("
+          "([?!.](\u00B6)*" + FINAL_PUNCT + "+)(\u00B6\u00B6)+("
               + INITIAL_PUNCT + "*(\u00B6\u00B6)*[\\p{Lu}])",
           Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Multi-dots, paragraph mark, sentence starters and uppercase.
    */
   public static Pattern multiDotsParaStarters = Pattern.compile(
-      "(\\.[\\.]+)(\u00B6\u00B6)+(" + INITIAL_PUNCT + "*[\\p{Lu}])",
+      "(\\.[.]+)(\u00B6\u00B6)+(" + INITIAL_PUNCT + "*[\\p{Lu}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * If paragraph mark, maybe some space and lowercase or punctuation (not start
    * of sentence markers) then it is a spurious paragraph.
    */
   public static Pattern spuriousParagraph = Pattern.compile(
-      "(\u00B6\u00B6)+\\s*([\\p{Lower}\\!#\\$%&\\(\\)\\*\\+,-\\/:;=>\\?@\\[\\\\\\]\\^\\{\\|\\}~])",
+      "(\u00B6\u00B6)+\\s*([\\p{Lower}!#$%&()*+,-/:;=>?@\\[\\\\\\]^{|}~])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Alphanumeric, maybe a space, paragraph mark, maybe a space, and lowercase
@@ -106,39 +106,39 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
    * starters.
    */
   public static Pattern noPeriodSpaceEnd = Pattern.compile(
-      "([?!])[\\ ]+(" + INITIAL_PUNCT + "*[\\p{Lu}])",
+      "([?!])[ ]+(" + INITIAL_PUNCT + "*[\\p{Lu}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Multi-dots, space, sentence starters and uppercase.
    */
   public static Pattern multiDotsSpaceStarters = Pattern.compile(
-      "(\\.[\\.]+)[\\ ]+(" + INITIAL_PUNCT + "*[\\p{Lu}])",
+      "(\\.[.]+)[ ]+(" + INITIAL_PUNCT + "*[\\p{Lu}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * End of sentence marker, maybe a space, punctuation (quotes, brackets),
    * space, maybe some more punctuation, maybe some space and uppercase.
    */
-  public static Pattern endInsideQuotesSpace = Pattern.compile("([?!\\.][\\ ]*"
-      + FINAL_PUNCT + "+)[\\ ]+(" + INITIAL_PUNCT + "*[\\ ]*[\\p{Lu}])",
+  public static Pattern endInsideQuotesSpace = Pattern.compile("([?!.][ ]*"
+      + FINAL_PUNCT + "+)[ ]+(" + INITIAL_PUNCT + "*[ ]*[\\p{Lu}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * End of sentence marker, sentence starter punctuation and upper case.
    */
   public static Pattern punctSpaceUpper = Pattern.compile(
-      "([?!\\.])[\\ ]+(" + INITIAL_PUNCT + "+[\\ ]*[\\p{Lu}])",
+      "([?!.])[ ]+(" + INITIAL_PUNCT + "+[ ]*[\\p{Lu}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * - ( C
    */
   public static Pattern punctSpaceMultiPunct = Pattern.compile(
-      "([?!\\.])[\\ ]+([\\-]+[\\ ]*[\\(]*\\p{Lu})",
+      "([?!.])[ ]+([\\-]+[ ]*[(]*\\p{Lu})",
       Pattern.UNICODE_CHARACTER_CLASS);
 
   /**
    * End of sentence punctuation, maybe spaces and link.
    */
   public static Pattern endPunctLinkSpace = Pattern
-      .compile("([?!\\.])[\\ ]*(http|www|ftp)");
+      .compile("([?!.])[ ]*(http|www|ftp)");
 
   private static Boolean DEBUG = false;
 
@@ -164,9 +164,7 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
     if (hardParagraph.equalsIgnoreCase("yes")) {
       this.isHardParagraph = true;
     }
-    if (this.nonBreaker == null) {
-      this.nonBreaker = new NonPeriodBreaker(properties);
-    }
+    this.nonBreaker = new NonPeriodBreaker(properties);
     // TODO improve this, when should we load the text?
     this.text = originalText;
   }
@@ -188,7 +186,7 @@ public class RuleBasedSegmenter implements SentenceSegmenter {
   /**
    * Segments sentences and calls the NonPeriodBreaker for exceptions.
    *
-   * @param text
+   * @param builtText
    *          the text be segmented
    * @return the sentences
    */

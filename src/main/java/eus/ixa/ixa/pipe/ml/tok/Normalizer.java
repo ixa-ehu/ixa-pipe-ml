@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * conventions such as Penn TreeBank, Ancora, Tutpenn, Tiger and CTAG.
  * 
  * @author ragerri
- * @version 2015-04-13
+ * @version 2020-04-13
  */
 public class Normalizer {
 

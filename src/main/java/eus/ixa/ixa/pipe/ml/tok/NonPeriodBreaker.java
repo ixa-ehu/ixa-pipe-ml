@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -42,13 +43,13 @@ public class NonPeriodBreaker {
    * Non segmented words, candidates for sentence breaking.
    */
   public static Pattern nonSegmentedWords = Pattern.compile(
-      "([\\p{Alnum}\\.\\-]*)(" + RuleBasedSegmenter.FINAL_PUNCT + "*)(\\.+)$",
+      "([\\p{Alnum}.\\-]*)(" + RuleBasedSegmenter.FINAL_PUNCT + "*)(\\.+)$",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Next word wrt to the candidate to indicate sentence breaker.
    */
-  public static Pattern nextCandidateWord = Pattern.compile("([\\ ]*"
-      + RuleBasedSegmenter.INITIAL_PUNCT + "*[\\ ]*[\\p{Lu}\\p{Digit}])",
+  public static Pattern nextCandidateWord = Pattern.compile("([ ]*"
+      + RuleBasedSegmenter.INITIAL_PUNCT + "*[ ]*[\\p{Lu}\\p{Digit}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Do not split dot after these words if followed by number.
@@ -57,13 +58,13 @@ public class NonPeriodBreaker {
   /**
    * General acronyms.
    */
-  public static Pattern acronym = Pattern.compile("(\\.)[\\p{Lu}\\-]+([\\.]+)$",
+  public static Pattern acronym = Pattern.compile("(\\.)[\\p{Lu}\\-]+([.]+)$",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Do not segment numbers like 11.1.
    */
   public static Pattern numbers = Pattern.compile(
-      "(\\p{Digit}+[\\.])[\\ ]*(\\p{Digit}+)", Pattern.UNICODE_CHARACTER_CLASS);
+      "(\\p{Digit}+[.])[ ]*(\\p{Digit}+)", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Any non white space followed by a period.
    */
@@ -82,7 +83,7 @@ public class NonPeriodBreaker {
    * Starts with punctuation that is not beginning of sentence marker.
    */
   public static Pattern startPunct = Pattern
-      .compile("^[\\!#\\$%&\\(\\)\\*\\+,-\\/:;=>\\?@\\[\\\\\\]\\^\\{\\|\\}~]");
+      .compile("^[!#$%&()*+,-/:;=>?@\\[\\\\\\]^{|}~]");
   /**
    * Starts with a digit.
    */
@@ -113,7 +114,7 @@ public class NonPeriodBreaker {
   }
 
   private void createNonBreaker(final String lang) {
-    final List<String> nonBreakerList = new ArrayList<String>();
+    final List<String> nonBreakerList = new ArrayList<>();
 
     final InputStream nonBreakerInputStream = getNonBreakerInputStream(lang);
     if (nonBreakerInputStream == null) {
@@ -137,7 +138,7 @@ public class NonPeriodBreaker {
     this.NON_BREAKER = StringUtils.createDisjunctRegexFromList(nonBreakerList);
   }
 
-  private final InputStream getNonBreakerInputStream(final String lang) {
+  private InputStream getNonBreakerInputStream(final String lang) {
     InputStream nonBreakerInputStream = null;
     if (lang.equalsIgnoreCase("ca")) {
       nonBreakerInputStream = getClass()
@@ -190,11 +191,9 @@ public class NonPeriodBreaker {
     for (final String line : lines) {
       final String segmentedLine = segmenterNonBreaker(line);
       final String[] lineSentences = segmentedLine.split("\n");
-      for (final String lineSentence : lineSentences) {
-        sentences.add(lineSentence);
-      }
+      Collections.addAll(sentences, lineSentences);
     }
-    return sentences.toArray(new String[sentences.size()]);
+    return sentences.toArray(new String[0]);
   }
 
   /**

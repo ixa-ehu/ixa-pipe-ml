@@ -22,8 +22,6 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.vdurmont.emoji.EmojiParser;
-
 /**
  * This class provides a multilingual rule based tokenizer. The input of the
  * tokenizer must be a list of already segmented sentences. Additionally, the
@@ -54,7 +52,7 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * One or more spaces.
    */
-  public static Pattern doubleSpaces = Pattern.compile("[\\  ]+");
+  public static Pattern doubleSpaces = Pattern.compile("[  ]+");
   /**
    * Range U+1D400 to U+1FFFF.
    */
@@ -65,21 +63,21 @@ public class RuleBasedTokenizer implements Tokenizer {
    */
   //TODO ud385udc0d needs to be clarified
   public static Pattern specials = Pattern.compile(
-      "([^\ud835\udc0d\u0040\u0023\\p{Alnum}\\p{Space}\\.\u2014\u8212–\\-\\¿\\?\\¡\\!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7])",
+      "([^\ud835\udc0d\u0040\u0023\\p{Alnum}\\p{Space}.\u2014\u8212–\\-¿?¡!'`,:/\u0027\u0091\u0092\u2019\u201A\u201B\u203A\u2018\u2039\u00B7])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Question and exclamation marks (do not separate if multiple).
    */
-  public static Pattern qexc = Pattern.compile("([\\¿\\?\\¡\\!]+)");
+  public static Pattern qexc = Pattern.compile("([¿?¡!]+)");
   /**
    * Dashes or slashes preceded or followed by space.
    */
   public static Pattern spaceDashSpace = Pattern
-      .compile("([\\ ]+[\u2014\u8212–\\-/]+|[\u2014\u8212–\\-/]+[\\ ]+)");
+      .compile("([ ]+[\u2014\u8212–\\-/]+|[\u2014\u8212–\\-/]+[ ]+)");
   /**
    * Multidots.
    */
-  public static Pattern multiDots = Pattern.compile("\\.([\\.]+)");
+  public static Pattern multiDots = Pattern.compile("\\.([.]+)");
   /**
    * Multi dot pattern and extra dot.
    */
@@ -87,27 +85,27 @@ public class RuleBasedTokenizer implements Tokenizer {
   /**
    * Dot multi pattern followed by anything.
    */
-  public static Pattern dotmultiDotAny = Pattern.compile("DOTMULTI\\.([^\\.])");
+  public static Pattern dotmultiDotAny = Pattern.compile("DOTMULTI\\.([^.])");
   /**
    * No digit comma.
    */
-  public static Pattern noDigitComma = Pattern.compile("([^\\p{Digit}])(,|:)",
+  public static Pattern noDigitComma = Pattern.compile("([^\\p{Digit}])([,:])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Comma and no digit.
    */
-  public static Pattern commaNoDigit = Pattern.compile("(,|:)([^\\p{Digit}])",
+  public static Pattern commaNoDigit = Pattern.compile("([,:])([^\\p{Digit}])",
       Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Digit comma and non digit.
    */
   public static Pattern digitCommaNoDigit = Pattern.compile(
-      "([\\p{Digit}])(,|:)([^\\p{Digit}])", Pattern.UNICODE_CHARACTER_CLASS);
+      "([\\p{Digit}])([,:])([^\\p{Digit}])", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Non digit comma and digit.
    */
   public static Pattern noDigitCommaDigit = Pattern.compile(
-      "([^\\p{Digit}])(,|:)(\\p{Digit})", Pattern.UNICODE_CHARACTER_CLASS);
+      "([^\\p{Digit}])([,:])(\\p{Digit})", Pattern.UNICODE_CHARACTER_CLASS);
   /**
    * Top level domains for stopping the wrongLink pattern below.
    */
@@ -184,7 +182,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    * De-tokenize paragraph marks.
    */
   public static Pattern detokenParagraphs = Pattern
-      .compile("(\u00B6)[\\ ]*(\u00B6)", Pattern.UNICODE_CHARACTER_CLASS);
+      .compile("(\u00B6)[ ]*(\u00B6)", Pattern.UNICODE_CHARACTER_CLASS);
 
   private static boolean DEBUG = false;
 
@@ -221,19 +219,17 @@ public class RuleBasedTokenizer implements Tokenizer {
     final long start = System.nanoTime();
     int noTokens = 0;
     int prevIndex = 0;
-    int curIndex = 0;
-    final String language = this.lang;
-    final List<List<Token>> result = new ArrayList<List<Token>>();
+    int curIndex;
+    final List<List<Token>> result = new ArrayList<>();
     // TODO improve this
-    final String offsetText = this.originalText;
     for (final String sentence : sentences) {
       if (DEBUG) {
         System.err.println("-> Segmented:" + sentence);
       }
-      final List<Token> tokens = new ArrayList<Token>();
+      final List<Token> tokens = new ArrayList<>();
       final String[] curTokens = getTokens(sentence);
       for (final String arrayToken : curTokens) {
-        curIndex = offsetText.indexOf(arrayToken, prevIndex);
+        curIndex = this.originalText.indexOf(arrayToken, prevIndex);
         // crap rule for corrected URLs
         if (curIndex == -1) {
           curIndex = prevIndex + 1;
@@ -251,7 +247,7 @@ public class RuleBasedTokenizer implements Tokenizer {
       result.add(tokens);
       noTokens = noTokens + curTokens.length;
     }
-    normalizeTokens(result, language);
+    normalizeTokens(result, this.lang);
     final long duration = System.nanoTime() - start;
     final double toksPerSecond = noTokens / (duration / 1000000000.0);
     if (DEBUG) {
@@ -324,7 +320,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    * This function normalizes multi-period expressions (...) to make
    * tokenization easier.
    *
-   * @param line
+   * @param line current line being tokenized
    * @return string
    */
   private String generateMultidots(String line) {
@@ -410,11 +406,7 @@ public class RuleBasedTokenizer implements Tokenizer {
    */
   private void printUntokenizable(final Properties properties) {
     final String untokenizable = properties.getProperty("untokenizable");
-    if (untokenizable.equalsIgnoreCase("yes")) {
-      this.unTokenizable = true;
-    } else {
-      this.unTokenizable = false;
-    }
+    this.unTokenizable = untokenizable.equalsIgnoreCase("yes");
   }
 
   /**
@@ -429,7 +421,7 @@ public class RuleBasedTokenizer implements Tokenizer {
     if (curToken.tokenLength() != 0) {
       if (this.unTokenizable) {
         tokens.add(curToken);
-      } else if (!this.unTokenizable) {
+      } else {
         if (!replacement.matcher(curToken.getTokenValue()).matches()) {
           tokens.add(curToken);
         }

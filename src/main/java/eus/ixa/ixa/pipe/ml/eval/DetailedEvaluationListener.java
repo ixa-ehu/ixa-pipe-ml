@@ -54,6 +54,7 @@ public abstract class DetailedEvaluationListener {
   /**
    * Writes the report to the {@link OutputStream}. Should be called only after
    * the evaluation process
+   * @param outputStream the output stream
    */
   public DetailedEvaluationListener(OutputStream outputStream) {
     this.printStream = new PrintStream(outputStream);

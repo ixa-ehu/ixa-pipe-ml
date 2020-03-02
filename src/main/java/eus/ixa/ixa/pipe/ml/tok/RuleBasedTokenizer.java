@@ -254,9 +254,11 @@ public class RuleBasedTokenizer implements Tokenizer {
     normalizeTokens(result, language);
     final long duration = System.nanoTime() - start;
     final double toksPerSecond = noTokens / (duration / 1000000000.0);
-    System.err.printf(
-        "ixa-pipe-tok tokenized %d tokens at %.2f tokens per second.%n",
-        noTokens, toksPerSecond);
+    if (DEBUG) {
+      System.err.printf(
+          "ixa-pipe-tok tokenized %d tokens at %.2f tokens per second.%n",
+          noTokens, toksPerSecond);
+    }
     return result;
   }
 

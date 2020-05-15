@@ -455,8 +455,8 @@ public class Span implements Comparable<Span> {
    * @param postList
    *          the list of spans to do the post-processing
    */
-  public static final void postProcessDuplicatedSpans(final List<Span> preList,
-      final Span[] postList) {
+  public static void postProcessDuplicatedSpans(final List<Span> preList,
+                                                final Span[] postList) {
     final List<Span> duplicatedSpans = new ArrayList<Span>();
     for (final Span span1 : preList) {
       for (final Span span2 : postList) {
@@ -479,8 +479,8 @@ public class Span implements Comparable<Span> {
    * @param neSpans
    *          the spans to be added to allSpans
    */
-  public static final void concatenateSpans(final List<Span> allSpans,
-      final Span[] neSpans) {
+  public static void concatenateSpans(final List<Span> allSpans,
+                                      final Span[] neSpans) {
     for (final Span span : neSpans) {
       allSpans.add(span);
     }

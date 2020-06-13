@@ -67,9 +67,9 @@ public class MorfologikLemmatizer {
    */
   private HashMap<List<String>, String> getLemmaTagsDict(final String word) {
     final List<WordData> wdList = this.dictLookup.lookup(word);
-    final HashMap<List<String>, String> dictMap = new HashMap<List<String>, String>();
+    final HashMap<List<String>, String> dictMap = new HashMap<>();
     for (final WordData wd : wdList) {
-      final List<String> wordLemmaTags = new ArrayList<String>();
+      final List<String> wordLemmaTags = new ArrayList<>();
       wordLemmaTags.add(word);
       wordLemmaTags.add(wd.getTag().toString());
       dictMap.put(wordLemmaTags, wd.getStem().toString());
@@ -96,7 +96,7 @@ public class MorfologikLemmatizer {
    * @return a list of keys consisting of the word and its postag
    */
   private List<String> getDictKeys(final String word, final String postag) {
-    final List<String> keys = new ArrayList<String>();
+    final List<String> keys = new ArrayList<>();
     keys.addAll(Arrays.asList(word.toLowerCase(), postag));
     return keys;
   }
@@ -112,7 +112,7 @@ public class MorfologikLemmatizer {
    */
   private HashMap<List<String>, String> getDictMap(final String word,
       final String postag) {
-    HashMap<List<String>, String> dictMap = new HashMap<List<String>, String>();
+    HashMap<List<String>, String> dictMap;
     dictMap = this.getLemmaTagsDict(word.toLowerCase());
     return dictMap;
   }
@@ -124,7 +124,7 @@ public class MorfologikLemmatizer {
    * java.lang.String[])
    */
   public String[] lemmatize(final String[] tokens, final String[] postags) {
-    final List<String> lemmas = new ArrayList<String>();
+    final List<String> lemmas = new ArrayList<>();
     for (int i = 0; i < tokens.length; i++) {
       lemmas.add(this.apply(tokens[i], postags[i]));
     }

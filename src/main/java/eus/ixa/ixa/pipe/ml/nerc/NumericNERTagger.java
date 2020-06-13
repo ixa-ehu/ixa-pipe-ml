@@ -39,12 +39,11 @@ public class NumericNERTagger {
   public List<SequenceLabel> getNames(final String[] tokens) {
     final Span[] origSpans = nercToSpans(tokens);
     final Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    final List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
-    return names;
+    return getNamesFromSpans(neSpans, tokens);
   }
 
   public Span[] nercToSpans(final String[] tokens) {
-    final List<Span> neSpans = new ArrayList<Span>();
+    final List<Span> neSpans = new ArrayList<>();
     final List<SequenceLabel> flexNameList = this.numericLexer
         .getNumericNames();
     for (final SequenceLabel name : flexNameList) {
@@ -62,7 +61,7 @@ public class NumericNERTagger {
 
   public List<SequenceLabel> getNamesFromSpans(final Span[] neSpans,
       final String[] tokens) {
-    final List<SequenceLabel> names = new ArrayList<SequenceLabel>();
+    final List<SequenceLabel> names = new ArrayList<>();
     for (final Span neSpan : neSpans) {
       final String nameString = neSpan.getCoveredText(tokens);
       final String neType = neSpan.getType();

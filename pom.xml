@@ -211,5 +211,5 @@
 		<connection>scm:git:git@github.com:ixa-ehu/ixa-pipe-ml.git</connection>
 		<developerConnection>scm:git:git@github.com:ixa-ehu/ixa-pipe-ml.git</developerConnection>
 	</scm>
-	<version>0.0.8</version>
+	<version>0.0.9</version>
 </project>

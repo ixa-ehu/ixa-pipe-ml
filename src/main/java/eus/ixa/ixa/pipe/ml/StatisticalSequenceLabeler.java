@@ -168,7 +168,7 @@ public class StatisticalSequenceLabeler {
     for (final Span seqSpan : seqSpans) {
       final String seqString = seqSpan.getCoveredText(tokens);
       final String decodedLemma = StringUtils
-          .decodeShortestEditScript(seqString.toLowerCase(), seqSpan.getType());
+          .decodeShortestEditScript(seqString, seqSpan.getType());
       seqSpan.setType(decodedLemma);
       final SequenceLabel sequence = this.sequenceFactory
           .createSequence(seqString, decodedLemma, seqSpan);

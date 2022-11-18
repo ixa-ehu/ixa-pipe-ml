@@ -344,7 +344,7 @@ public final class StringUtils {
   public static String decodeShortestEditScript(final String wordForm,
       final String permutations) {
 
-    final StringBuffer lemma = new StringBuffer(wordForm).reverse();
+    final StringBuffer lemma = new StringBuffer(wordForm.toLowerCase()).reverse();
 
     int permIndex = 0;
     while (true) {
@@ -425,14 +425,18 @@ public final class StringUtils {
         .toString();
     final String reversedLemma = new StringBuffer(lemma.toLowerCase()).reverse()
         .toString();
+    final String reversedOrigLemma = new StringBuffer(lemma).reverse().toString();
     final StringBuffer permutations = new StringBuffer();
     String ses;
     if (!reversedWF.equals(reversedLemma)) {
-      final int[][] levenDistance = StringUtils.levenshteinDistance(reversedWF,
+      int[][] levenDistance = StringUtils.levenshteinDistance(reversedWF,
           reversedLemma);
       StringUtils.computeShortestEditScript(reversedWF, reversedLemma,
           levenDistance, permutations);
       ses = permutations.toString();
+    } else if (Character.isUpperCase(wordForm.charAt(0))
+        && reversedWF.equals(reversedOrigLemma)) {
+      ses = "1";
     } else {
       ses = "O";
     }
@@ -451,14 +455,20 @@ public final class StringUtils {
   public static String[] decodeLemmas(final String[] tokens,
       final Span[] preds) {
     final List<String> lemmas = new ArrayList<>();
+    String lemma = null;
     for (final Span span : preds) {
-      String lemma = decodeShortestEditScript(
-          span.getCoveredText(tokens).toLowerCase(), span.getType());
+      if (span.getType().equals("1")) {
+        lemma = span.getCoveredText(tokens).toLowerCase();
+      } else if (span.getType().equals("O")) {
+        lemma = span.getCoveredText(tokens);
+      } else {
+        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens), span.getType());
+        if (lemma.length() == 0) {
+          lemma = "_";
+        }
+      }
       // System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " +
       // preds[i] + " " + lemma);
-      if (lemma.length() == 0) {
-        lemma = "_";
-      }
       lemmas.add(lemma);
     }
     return lemmas.toArray(new String[lemmas.size()]);
@@ -475,13 +485,17 @@ public final class StringUtils {
    */
   public static void decodeLemmasToSpans(final String[] tokens,
       final Span[] preds) {
+    String lemma = null;
     for (final Span span : preds) {
-      String lemma = decodeShortestEditScript(
-          span.getCoveredText(tokens).toLowerCase(), span.getType());
-      // System.err.println("-> DEBUG: " + toks[i].toLowerCase() + " " +
-      // preds[i] + " " + lemma);
-      if (lemma.length() == 0) {
-        lemma = "_";
+      if (span.getType().equals("1")) {
+        lemma = span.getCoveredText(tokens).toLowerCase();
+      } else if (span.getType().equals("O")) {
+        lemma = span.getCoveredText(tokens);
+      } else {
+        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens), span.getType());
+        if (lemma.length() == 0) {
+          lemma = "_";
+        }
       }
       span.setType(lemma);
     }

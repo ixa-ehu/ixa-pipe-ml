@@ -344,7 +344,7 @@ public final class StringUtils {
   public static String decodeShortestEditScript(final String wordForm,
       final String permutations) {
 
-    final StringBuffer lemma = new StringBuffer(wordForm.toLowerCase()).reverse();
+    final StringBuffer lemma = new StringBuffer(wordForm).reverse();
 
     int permIndex = 0;
     while (true) {
@@ -421,23 +421,36 @@ public final class StringUtils {
    */
   public static String getShortestEditScript(final String wordForm,
       final String lemma) {
+
     final String reversedWF = new StringBuffer(wordForm.toLowerCase()).reverse()
         .toString();
     final String reversedLemma = new StringBuffer(lemma.toLowerCase()).reverse()
         .toString();
     final String reversedOrigLemma = new StringBuffer(lemma).reverse().toString();
+    final String reversedOrigWF = new StringBuffer(wordForm).reverse().toString();
     final StringBuffer permutations = new StringBuffer();
     String ses;
-    if (!reversedWF.equals(reversedLemma)) {
+
+    // Además además
+    if (Character.isUpperCase(wordForm.charAt(0)) && reversedWF.equals(reversedOrigLemma)) {
+      ses = "1";
+    }
+    // Donostiara Donostia
+    else if (Character.isUpperCase(wordForm.charAt(0)) && Character.isUpperCase(lemma.charAt(0)) && !reversedWF.equals(reversedLemma)) {
+      int[][] levenDistance = StringUtils.levenshteinDistance(reversedOrigWF,
+          reversedOrigLemma);
+      StringUtils.computeShortestEditScript(reversedOrigWF, reversedOrigLemma,
+          levenDistance, permutations);
+      StringBuilder sb = new StringBuilder();
+      ses = sb.append("↑").append(permutations).toString();
+    }
+    else if (!reversedWF.equals(reversedLemma)) {
       int[][] levenDistance = StringUtils.levenshteinDistance(reversedWF,
           reversedLemma);
       StringUtils.computeShortestEditScript(reversedWF, reversedLemma,
           levenDistance, permutations);
       ses = permutations.toString();
-    } else if (Character.isUpperCase(wordForm.charAt(0))
-        && reversedWF.equals(reversedOrigLemma)) {
-      ses = "1";
-    } else {
+    }  else {
       ses = "O";
     }
     return ses;
@@ -457,12 +470,14 @@ public final class StringUtils {
     final List<String> lemmas = new ArrayList<>();
     String lemma = null;
     for (final Span span : preds) {
-      if (span.getType().equals("1")) {
-        lemma = span.getCoveredText(tokens).toLowerCase();
-      } else if (span.getType().equals("O")) {
+       if (span.getType().equals("O")) {
         lemma = span.getCoveredText(tokens);
+      } else if (span.getType().equals("1")) {
+        lemma = span.getCoveredText(tokens).toLowerCase();
+      } else if (span.getType().startsWith("↑")){
+        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens), span.getType().substring(1));
       } else {
-        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens), span.getType());
+        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
         if (lemma.length() == 0) {
           lemma = "_";
         }
@@ -487,12 +502,14 @@ public final class StringUtils {
       final Span[] preds) {
     String lemma = null;
     for (final Span span : preds) {
-      if (span.getType().equals("1")) {
-        lemma = span.getCoveredText(tokens).toLowerCase();
-      } else if (span.getType().equals("O")) {
+      if (span.getType().equals("O")) {
         lemma = span.getCoveredText(tokens);
+      } else if (span.getType().equals("1")) {
+        lemma = span.getCoveredText(tokens).toLowerCase();
+      } else if (span.getType().startsWith("↑")) {
+        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens), span.getType().substring(1));
       } else {
-        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens), span.getType());
+        lemma = StringUtils.decodeShortestEditScript(span.getCoveredText(tokens).toLowerCase(), span.getType());
         if (lemma.length() == 0) {
           lemma = "_";
         }

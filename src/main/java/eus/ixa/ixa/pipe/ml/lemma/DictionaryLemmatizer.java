@@ -34,7 +34,6 @@ import java.util.Map;
 import eus.ixa.ixa.pipe.ml.utils.IOUtils;
 import eus.ixa.ixa.pipe.ml.utils.Span;
 import eus.ixa.ixa.pipe.ml.utils.StringUtils;
-import opennlp.tools.util.InvalidFormatException;
 import opennlp.tools.util.model.ArtifactSerializer;
 import opennlp.tools.util.model.SerializableArtifact;
 
@@ -47,14 +46,14 @@ import opennlp.tools.util.model.SerializableArtifact;
  */
 public class DictionaryLemmatizer implements SerializableArtifact {
 
-  private final static char tabDelimiter = '\t';
+  private static final char TAB_DELIMITER = '\t';
 
   public static class DictionaryLemmatizerSerializer
       implements ArtifactSerializer<DictionaryLemmatizer> {
 
     @Override
     public DictionaryLemmatizer create(final InputStream in)
-        throws IOException, InvalidFormatException {
+        throws IOException {
       return new DictionaryLemmatizer(in);
     }
 
@@ -68,8 +67,8 @@ public class DictionaryLemmatizer implements SerializableArtifact {
   /**
    * The hashmap containing the dictionary.
    */
-  private final Map<List<String>, String> dictMap = new HashMap<List<String>, String>();
-  String[] splitted = new String[64];
+  private final Map<List<String>, String> dictMap = new HashMap<>();
+  private final String[] splitted = new String[64];
 
   /**
    * Construct a hashmap from the input tab separated dictionary.
@@ -87,7 +86,7 @@ public class DictionaryLemmatizer implements SerializableArtifact {
         new BufferedInputStream(in), Charset.forName("UTF-8")));
     String line;
     while ((line = breader.readLine()) != null) {
-      StringUtils.splitLine(line, tabDelimiter, this.splitted);
+      StringUtils.splitLine(line, TAB_DELIMITER, this.splitted);
       this.dictMap.put(Arrays.asList(this.splitted[0], this.splitted[2]),
           this.splitted[1]);
     }
@@ -111,14 +110,14 @@ public class DictionaryLemmatizer implements SerializableArtifact {
    *          the assigned postag
    * @return returns the dictionary keys
    */
-  private List<String> getDictKeys(final String word, final String postag) {
-    final List<String> keys = new ArrayList<String>();
+  public List<String> getDictKeys(final String word, final String postag) {
+    final List<String> keys = new ArrayList<>();
     keys.addAll(Arrays.asList(word.toLowerCase(), postag));
     return keys;
   }
 
   public List<String> lemmatize(final String[] tokens, final Span[] postags) {
-    final List<String> lemmas = new ArrayList<String>();
+    final List<String> lemmas = new ArrayList<>();
     for (int i = 0; i < tokens.length; i++) {
       lemmas.add(this.apply(tokens[i], postags[i].getType()));
     }
@@ -134,8 +133,8 @@ public class DictionaryLemmatizer implements SerializableArtifact {
    *          the postag
    * @return the lemma
    */
-  public String apply(final String word, final String postag) {
-    String lemma = null;
+  private String apply(final String word, final String postag) {
+    String lemma;
     final List<String> keys = this.getDictKeys(word, postag);
     // lookup lemma as value of the map
     final String keyValue = this.dictMap.get(keys);
@@ -163,5 +162,4 @@ public class DictionaryLemmatizer implements SerializableArtifact {
   public Class<?> getArtifactSerializerClass() {
     return DictionaryLemmatizerSerializer.class;
   }
-
 }

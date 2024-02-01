@@ -52,7 +52,7 @@ public class DictionariesNERTagger {
   /**
    * The name factory to create Name objects.
    */
-  private SequenceLabelFactory nameFactory;
+  private final SequenceLabelFactory nameFactory;
   /**
    * The dictionary to find the names.
    */
@@ -85,8 +85,7 @@ public class DictionariesNERTagger {
 
     final Span[] origSpans = nercToSpans(tokens);
     final Span[] neSpans = SequenceLabelerME.dropOverlappingSpans(origSpans);
-    final List<SequenceLabel> names = getNamesFromSpans(neSpans, tokens);
-    return names;
+    return getNamesFromSpans(neSpans, tokens);
   }
 
   /**
@@ -97,7 +96,7 @@ public class DictionariesNERTagger {
    * @return spans of the Named Entities
    */
   public final Span[] nercToSpans(final String[] tokens) {
-    final List<Span> neSpans = new ArrayList<Span>();
+    final List<Span> neSpans = new ArrayList<>();
     for (final Map<String, String> neDict : this.dictionaries
         .getIgnoreCaseDictionaries()) {
       for (final Map.Entry<String, String> neEntry : neDict.entrySet()) {
@@ -129,7 +128,7 @@ public class DictionariesNERTagger {
    * @return spans of the Named Entities all
    */
   public final Span[] nercToSpansExact(final String[] tokens) {
-    final List<Span> neSpans = new ArrayList<Span>();
+    final List<Span> neSpans = new ArrayList<>();
     for (final Map<String, String> neDict : this.dictionaries
         .getDictionaries()) {
       for (final Map.Entry<String, String> neEntry : neDict.entrySet()) {
@@ -163,7 +162,7 @@ public class DictionariesNERTagger {
    */
   public final List<SequenceLabel> getNamesFromSpans(final Span[] neSpans,
       final String[] tokens) {
-    final List<SequenceLabel> names = new ArrayList<SequenceLabel>();
+    final List<SequenceLabel> names = new ArrayList<>();
     for (final Span neSpan : neSpans) {
       final String nameString = neSpan.getCoveredText(tokens);
       final String neType = neSpan.getType();
